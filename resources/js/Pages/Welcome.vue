@@ -72,6 +72,11 @@ const features = [
                             <li><Link :href="route('booking.create')">จองคิว</Link></li>
                         </ul>
                     </div>
+                    <Link href="/" class="btn btn-ghost btn-circle text-slate-500 hover:text-blue-600 hover:bg-blue-50 mr-2 group" title="กลับไปหน้ารวมร้าน">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 transition-transform group-hover:-translate-x-1">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                        </svg>
+                    </Link>
                     <Link href="/nava-clinic" class="btn btn-ghost text-2xl text-blue-700 font-bold flex gap-2 items-center hover:bg-transparent">
                         <img src="/images/logo.png" alt="Nava Clinic Logo" class="h-10 w-auto" />
                         <span class="font-serif tracking-wide">NAVA CLINIC</span>
@@ -82,8 +87,7 @@ const features = [
                      <ul class="menu menu-horizontal px-1 font-medium text-lg text-slate-600 gap-4">
                         <li><Link href="/nava-clinic" class="hover:text-blue-600 active:text-blue-700 active:bg-transparent">หน้าแรก</Link></li>
                         <li><Link href="/services" class="hover:text-blue-600 active:text-blue-700 active:bg-transparent">บริการและราคา</Link></li>
-                        <li><Link href="#" class="hover:text-blue-600 active:text-blue-700 active:bg-transparent">เกี่ยวกับเรา</Link></li>
-                        <li><Link href="#" class="hover:text-blue-600 active:text-blue-700 active:bg-transparent">ติดต่อเรา</Link></li>
+                        <li><Link :href="route('booking.create')" class="hover:text-blue-600 active:text-blue-700 active:bg-transparent">จองคิว</Link></li>
                     </ul>
                 </div>
 

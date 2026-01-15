@@ -28,6 +28,9 @@ const shops = [
         category: 'treatment',
         isMain: true,
         status: 'active',
+        openDays: 'อังคาร - อาทิตย์',
+        openTime: '09:00 - 20:00',
+        closedDay: 'หยุดทุกวันจันทร์',
         theme: {
             shadow: 'hover:shadow-blue-500/20',
             title: 'group-hover:text-blue-900',
@@ -44,6 +47,8 @@ const shops = [
         link: '#',
         category: 'experience',
         status: 'coming_soon',
+        openDays: 'ทุกวัน',
+        openTime: '10:00 - 22:00',
         theme: {
             shadow: 'hover:shadow-amber-500/20',
             title: 'group-hover:text-amber-900',
@@ -60,6 +65,9 @@ const shops = [
         link: '#',
         category: 'treatment',
         status: 'coming_soon',
+        openDays: 'จันทร์ - เสาร์',
+        openTime: '09:00 - 18:00',
+        closedDay: 'หยุดวันอาทิตย์',
         theme: {
             shadow: 'hover:shadow-emerald-500/20',
             title: 'group-hover:text-emerald-900',
@@ -76,6 +84,8 @@ const shops = [
         link: '#',
         category: 'treatment',
         status: 'coming_soon',
+        openDays: 'ทุกวัน',
+        openTime: '10:00 - 21:00',
         theme: {
             shadow: 'hover:shadow-purple-500/20',
             title: 'group-hover:text-purple-900',
@@ -92,6 +102,8 @@ const shops = [
         link: '#',
         category: 'relaxation',
         status: 'coming_soon',
+        openDays: 'ทุกวัน',
+        openTime: '09:00 - 23:00',
         theme: {
             shadow: 'hover:shadow-teal-500/20',
             title: 'group-hover:text-teal-900',
@@ -108,6 +120,9 @@ const shops = [
         link: '#',
         category: 'relaxation',
         status: 'coming_soon',
+        openDays: 'ศุกร์ - อาทิตย์',
+        openTime: '10:00 - 22:00',
+        closedDay: 'เปิดเฉพาะสุดสัปดาห์',
         theme: {
             shadow: 'hover:shadow-rose-500/20',
             title: 'group-hover:text-rose-900',
@@ -205,6 +220,19 @@ const filteredShops = computed(() => {
                             {{ shop.nameEn }}
                         </h3>
                         
+                        <!-- Operating Info -->
+                        <div class="mb-5 flex flex-col gap-1 items-center text-sm">
+                             <div class="flex items-center gap-2 text-white/80 group-hover:text-slate-500 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                                <span>{{ shop.openDays }} {{ shop.openTime }}</span>
+                            </div>
+                            <div v-if="shop.closedDay" class="text-red-300 group-hover:text-red-500 text-xs font-medium transition-colors">
+                                {{ shop.closedDay }}
+                            </div>
+                        </div>
+
                         <p class="text-blue-100/80 group-hover:text-slate-600 text-sm font-light transition-colors duration-300 leading-relaxed mb-6" v-html="shop.desc">
                         </p>
                         
