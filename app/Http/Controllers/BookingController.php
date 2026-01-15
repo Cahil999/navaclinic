@@ -77,4 +77,75 @@ class BookingController extends Controller
 
         return response()->json($availability);
     }
+
+    public function getAvailableTimeSlots(Request $request)
+    {
+        $request->validate([
+            'date' => 'required|date|after_or_equal:today',
+            'duration' => 'required|integer|in:30,60,90',
+        ]);
+
+        $date = $request->date;
+        $duration = (int) $request->duration;
+
+        \Illuminate\Support\Facades\Log::info("Checking slots for Date: $date, Duration: $duration");
+
+        $doctors = Doctor::all();
+        \Illuminate\Support\Facades\Log::info("Doctors found: " . $doctors->count());
+
+        $bookings = Booking::where('appointment_date', $date)
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->get();
+        \Illuminate\Support\Facades\Log::info("Bookings found: " . $bookings->count());
+
+        $startOfDay = \Carbon\Carbon::parse($date . ' 09:00:00');
+        $endOfDay = \Carbon\Carbon::parse($date . ' 17:00:00');
+
+        $slots = [];
+        $current = $startOfDay->copy();
+
+        $now = \Carbon\Carbon::now();
+        $isToday = $now->format('Y-m-d') === $date;
+
+        while ($current->copy()->addMinutes($duration) <= $endOfDay) {
+            $slotStart = $current->copy();
+            $slotEnd = $current->copy()->addMinutes($duration);
+
+            // Skip past times if today
+            if ($isToday && $slotStart->lt($now)) {
+                $current->addMinutes(30);
+                continue;
+            }
+
+            $timeStr = $slotStart->format('H:i');
+
+            // Find available doctors for this specific slot
+            $availableDoctors = $doctors->filter(function ($doctor) use ($bookings, $slotStart, $slotEnd) {
+                // Check if doctor has any overlapping booking
+                $hasConflict = $bookings->where('doctor_id', $doctor->id)->contains(function ($booking) use ($slotStart, $slotEnd) {
+                    $bookingStart = \Carbon\Carbon::parse($booking->appointment_date . ' ' . $booking->start_time);
+                    $bookingEnd = $bookingStart->copy()->addMinutes($booking->duration_minutes);
+
+                    // Check overlap: (StartA < EndB) and (EndA > StartB)
+                    return $slotStart < $bookingEnd && $slotEnd > $bookingStart;
+                });
+
+                return !$hasConflict;
+            });
+
+            if ($availableDoctors->isNotEmpty()) {
+                $slots[] = [
+                    'time' => $timeStr,
+                    'available_doctors' => $availableDoctors->values()
+                ];
+            }
+
+            // Move to next 30 min slot
+            $current->addMinutes(30);
+        }
+
+        \Illuminate\Support\Facades\Log::info("Slots generated: " . count($slots));
+
+        return response()->json($slots);
+    }
 }

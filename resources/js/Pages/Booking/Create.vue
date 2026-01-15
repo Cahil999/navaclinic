@@ -1,173 +1,280 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import axios from 'axios';
 import Calendar from '@/Components/Calendar.vue';
 
 const props = defineProps({
-    doctors: Array,
+    doctors: Array, // We might not need this immediately if we fetch dynamically, but good to have for signatures/info if needed later
 });
 
+const currentStep = ref(1);
 const form = useForm({
-    doctor_id: '',
+    duration_minutes: '',
     appointment_date: '',
-    duration_minutes: '60',
     start_time: '',
+    doctor_id: '',
     symptoms: '',
 });
 
-const availability = ref({});
-const currentMonth = ref(new Date().getMonth() + 1);
-const currentYear = ref(new Date().getFullYear());
+const availableSlots = ref([]);
+const availableDoctors = ref([]);
+const loadingEx = ref(false);
 
-const fetchAvailability = async () => {
-    if (!form.doctor_id) return;
-    
+const steps = [
+    { number: 1, title: 'เลือกเวลา (Duration)' },
+    { number: 2, title: 'เลือกวันที่ (Date)' },
+    { number: 3, title: 'เลือกรอบเวลา (Time)' },
+    { number: 4, title: 'เลือกหมอ (Doctor)' },
+    { number: 5, title: 'ระบุอาการ (Symptoms)' },
+];
+
+// --- Step 1: Duration ---
+const selectDuration = (minutes) => {
+    form.duration_minutes = minutes;
+    nextStep();
+};
+
+// --- Step 2: Date ---
+const onDateSelected = async (date) => {
+    form.appointment_date = date;
+    await fetchSlots();
+    nextStep();
+};
+
+// --- Step 3: Time (Fetch Slots) ---
+const fetchSlots = async () => {
+    if (!form.appointment_date || !form.duration_minutes) return;
+
+    loadingEx.value = true;
+    availableSlots.value = []; // Reset
     try {
-        const response = await axios.get(route('api.availability'), {
-            params: {
-                doctor_id: form.doctor_id,
-                month: currentMonth.value,
-                year: currentYear.value
+        const res = await axios.get(route('api.available-slots'), {
+            params: { 
+                date: form.appointment_date, 
+                duration: form.duration_minutes 
             }
         });
-        availability.value = response.data;
-    } catch (error) {
-        console.error('Failed to fetch availability', error);
+        availableSlots.value = res.data;
+    } catch (e) {
+        console.error("Error fetching slots:", e);
+    } finally {
+        loadingEx.value = false;
     }
 };
 
-const onMonthChanged = (data) => {
-    currentMonth.value = data.month;
-    currentYear.value = data.year;
-    fetchAvailability();
+const selectTime = (slot) => {
+    form.start_time = slot.time;
+    availableDoctors.value = slot.available_doctors; // Store doctors for next step
+    nextStep();
 };
 
-const onDateSelected = (date) => {
-    form.appointment_date = date;
+// --- Step 4: Doctor ---
+const selectDoctor = (doctor) => {
+    form.doctor_id = doctor.id;
+    nextStep();
 };
 
-watch(() => form.doctor_id, () => {
-    fetchAvailability();
-    form.appointment_date = ''; // Reset date when doctor changes
-});
+// --- Navigation ---
+const nextStep = () => {
+    if (currentStep.value < 5) currentStep.value++;
+};
 
+const prevStep = () => {
+    if (currentStep.value > 1) currentStep.value--;
+};
 
 const submit = () => {
-    form.post(route('booking.store'));
+    form.post(route('booking.store'), {
+        onSuccess: () => {
+             // Handle success (inertia handles redirect)
+        }
+    });
 };
+
+const formatTime = (time) => {
+    const [hour, minute] = time.split(':');
+    return `${hour}:${minute} น.`;
+};
+
+// Get selected doctor details for review
+const selectedDoctorName = computed(() => {
+    const doc = availableDoctors.value.find(d => d.id === form.doctor_id) 
+                || props.doctors.find(d => d.id === form.doctor_id);
+    return doc ? doc.name : '-';
+});
+
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-        <div class="sm:mx-auto sm:w-full sm:max-w-md">
-            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                จองคิวการรักษาแพทย์แผนไทย
-            </h2>
+    <div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
+        
+        <!-- Progress Bar -->
+        <div class="max-w-3xl mx-auto mb-8">
+            <div class="flex items-center justify-between relative">
+                <div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-1 bg-gray-200 -z-10"></div>
+                <div 
+                    v-for="step in steps" 
+                    :key="step.number" 
+                    class="flex flex-col items-center cursor-default bg-gray-50 px-2"
+                >
+                    <div 
+                        :class="[
+                            'w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors duration-300',
+                            currentStep >= step.number ? 'bg-indigo-600 text-white' : 'bg-gray-300 text-gray-500'
+                        ]"
+                    >
+                        {{ step.number }}
+                    </div>
+                    <span class="text-xs mt-1 text-gray-600 hidden sm:block">{{ step.title }}</span>
+                </div>
+            </div>
         </div>
 
-        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-            <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                <form @submit.prevent="submit" class="space-y-6">
-                    
-                    <!-- Doctor Selection -->
-                    <div>
-                        <label for="doctor" class="block text-sm font-medium text-gray-700">เลือกหมอ (Select Doctor)</label>
-                        <div class="mt-1">
-                            <select id="doctor" v-model="form.doctor_id" required
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                <option value="" disabled>เลือกหมอ</option>
-                                <option v-for="doctor in props.doctors" :key="doctor.id" :value="doctor.id">
-                                    {{ doctor.name }} <span v-if="doctor.specialty">({{ doctor.specialty }})</span>
-                                </option>
-                            </select>
-                        </div>
-                        <div v-if="form.errors.doctor_id" class="text-red-500 text-sm mt-1">{{ form.errors.doctor_id }}</div>
-                    </div>
+        <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden min-h-[500px] flex flex-col">
+            
+            <!-- Header -->
+            <div class="bg-indigo-600 px-6 py-6 text-white text-center">
+                <h2 class="text-2xl font-bold">{{ steps[currentStep - 1].title }}</h2>
+                <p class="text-indigo-100 text-sm mt-1">ขั้นตอนที่ {{ currentStep }} จาก 5</p>
+            </div>
 
-                    <!-- Calendar Selection -->
-                    <div v-if="form.doctor_id">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">เลือกวันที่ (Select Date)</label>
-                        <Calendar 
-                            :availability="availability"
-                            @monthChanged="onMonthChanged"
-                            @dateSelected="onDateSelected"
-                        />
-                        <input type="hidden" v-model="form.appointment_date" required>
-                        <div v-if="form.appointment_date" class="mt-2 text-sm text-indigo-600 font-medium">
-                            วันที่เลือก: {{ form.appointment_date }}
-                        </div>
-                        <div v-if="form.errors.appointment_date" class="text-red-500 text-sm mt-1">{{ form.errors.appointment_date }}</div>
-                    </div>
-                    <div v-else class="text-center py-4 text-gray-500 bg-gray-50 rounded-md">
-                        กรุณาเลือกหมอก่อนเพื่อดูตารางงาน
-                    </div>
-
-                    <!-- Duration Selection -->
-                     <div v-if="form.appointment_date">
-                        <label class="block text-sm font-medium text-gray-700">ระยะเวลา (Duration)</label>
-                        <div class="mt-2 flex space-x-4">
-                            <div class="flex items-center">
-                                <input id="duration_30" name="duration" type="radio" value="30" v-model="form.duration_minutes" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
-                                <label for="duration_30" class="ml-2 block text-sm text-gray-900">30 นาที</label>
-                            </div>
-                            <div class="flex items-center">
-                                <input id="duration_60" name="duration" type="radio" value="60" v-model="form.duration_minutes" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
-                                <label for="duration_60" class="ml-2 block text-sm text-gray-900">60 นาที</label>
-                            </div>
-                            <div class="flex items-center">
-                                <input id="duration_90" name="duration" type="radio" value="90" v-model="form.duration_minutes" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
-                                <label for="duration_90" class="ml-2 block text-sm text-gray-900">90 นาที</label>
-                            </div>
-                        </div>
-                         <div v-if="form.errors.duration_minutes" class="text-red-500 text-sm mt-1">{{ form.errors.duration_minutes }}</div>
-                    </div>
-
-                    <!-- Time Selection (Simplified) -->
-                    <div v-if="form.appointment_date">
-                         <label for="time" class="block text-sm font-medium text-gray-700">เวลา (Time)</label>
-                         <div class="mt-1">
-                            <select id="time" v-model="form.start_time" required
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                <option value="" disabled>เลือกเวลา</option>
-                                <option value="09:00">09:00</option>
-                                <option value="09:30">09:30</option>
-                                <option value="10:00">10:00</option>
-                                <option value="10:30">10:30</option>
-                                <option value="11:00">11:00</option>
-                                <option value="11:30">11:30</option>
-                                <option value="13:00">13:00</option>
-                                <option value="13:30">13:30</option>
-                                <option value="14:00">14:00</option>
-                                <option value="14:30">14:30</option>
-                                <option value="15:00">15:00</option>
-                                <option value="15:30">15:30</option>
-                                <option value="16:00">16:00</option>
-                                <option value="16:30">16:30</option>
-                                <option value="17:00">17:00</option>
-                            </select>
-                         </div>
-                          <div v-if="form.errors.start_time" class="text-red-500 text-sm mt-1">{{ form.errors.start_time }}</div>
-                    </div>
-
-                    <!-- Symptoms -->
-                    <div>
-                        <label for="symptoms" class="block text-sm font-medium text-gray-700">อาการที่ต้องการรักษา (Symptoms)</label>
-                        <div class="mt-1">
-                            <textarea id="symptoms" v-model="form.symptoms" rows="3" required
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
-                        </div>
-                         <div v-if="form.errors.symptoms" class="text-red-500 text-sm mt-1">{{ form.errors.symptoms }}</div>
-                    </div>
-
-                    <div>
-                        <button type="submit" :disabled="form.processing"
-                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50">
-                            ยืนยันการจอง (Confirm Booking)
+            <!-- Body -->
+            <div class="p-8 flex-1 flex flex-col items-center justify-center w-full">
+                
+                <!-- Step 1: Duration -->
+                <div v-if="currentStep === 1" class="w-full">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                        <button @click="selectDuration(30)" class="group relative p-6 border-2 border-gray-200 rounded-xl hover:border-indigo-500 hover:shadow-lg transition-all text-center">
+                            <div class="text-4xl font-bold text-gray-700 group-hover:text-indigo-600 mb-2">30</div>
+                            <div class="text-gray-500">นาที (Minutes)</div>
+                        </button>
+                        <button @click="selectDuration(60)" class="group relative p-6 border-2 border-gray-200 rounded-xl hover:border-indigo-500 hover:shadow-lg transition-all text-center">
+                            <div class="text-4xl font-bold text-gray-700 group-hover:text-indigo-600 mb-2">60</div>
+                            <div class="text-gray-500">นาที (Minutes)</div>
+                        </button>
+                        <button @click="selectDuration(90)" class="group relative p-6 border-2 border-gray-200 rounded-xl hover:border-indigo-500 hover:shadow-lg transition-all text-center">
+                            <div class="text-4xl font-bold text-gray-700 group-hover:text-indigo-600 mb-2">90</div>
+                            <div class="text-gray-500">นาที (Minutes)</div>
                         </button>
                     </div>
-                </form>
+                </div>
+
+                <!-- Step 2: Date -->
+                <div v-if="currentStep === 2" class="w-full flex justify-center">
+                    <div class="w-full max-w-md">
+                        <Calendar 
+                            @dateSelected="onDateSelected"
+                        />
+                         <div v-if="form.appointment_date" class="mt-4 text-center">
+                             <span class="text-indigo-600 font-medium">เลือกวันที่: {{ form.appointment_date }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Time -->
+                <div v-if="currentStep === 3" class="w-full">
+                    <div v-if="loadingEx" class="flex justify-center py-12">
+                         <svg class="animate-spin h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
+                    <div v-else-if="availableSlots.length === 0" class="text-center py-12 text-gray-500">
+                        ไม่มีคิวว่างในวันที่เลือก (No available slots)
+                    </div>
+                    <div v-else class="grid grid-cols-3 sm:grid-cols-4 gap-4">
+                        <button 
+                            v-for="slot in availableSlots" 
+                            :key="slot.time" 
+                            @click="selectTime(slot)"
+                            class="py-3 px-4 rounded-lg bg-indigo-50 text-indigo-700 font-medium hover:bg-indigo-600 hover:text-white transition-colors"
+                        >
+                            {{ formatTime(slot.time) }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 4: Doctor -->
+                <div v-if="currentStep === 4" class="w-full">
+                     <h3 class="text-lg font-medium text-gray-900 mb-4 text-center">แพทย์ที่ว่าง (Available Doctors)</h3>
+                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div 
+                            v-for="doctor in availableDoctors" 
+                            :key="doctor.id" 
+                            @click="selectDoctor(doctor)"
+                            class="flex items-center p-4 border rounded-xl cursor-pointer hover:border-indigo-500 hover:bg-indigo-50 transition-all"
+                        >
+                            <div class="h-12 w-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xl mr-4">
+                                {{ doctor.name.charAt(0) }}
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">{{ doctor.name }}</div>
+                                <div class="text-sm text-gray-500">{{ doctor.specialty || 'แพทย์แผนไทย' }}</div>
+                            </div>
+                        </div>
+                     </div>
+                </div>
+
+                <!-- Step 5: Symptoms & Review -->
+                <div v-if="currentStep === 5" class="w-full max-w-lg">
+                    <div class="bg-gray-50 p-6 rounded-lg mb-6 text-sm">
+                        <h4 class="font-semibold text-gray-900 mb-2">สรุปการจอง (Summary)</h4>
+                        <div class="flex justify-between py-1 border-b border-gray-200">
+                            <span class="text-gray-500">วันที่:</span>
+                            <span class="font-medium">{{ form.appointment_date }}</span>
+                        </div>
+                         <div class="flex justify-between py-1 border-b border-gray-200">
+                            <span class="text-gray-500">เวลา:</span>
+                            <span class="font-medium">{{ form.start_time }}</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-gray-200">
+                            <span class="text-gray-500">ระยะเวลา:</span>
+                            <span class="font-medium">{{ form.duration_minutes }} นาที</span>
+                        </div>
+                         <div class="flex justify-between py-1">
+                            <span class="text-gray-500">แพทย์:</span>
+                            <span class="font-medium">{{ selectedDoctorName }}</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">อาการเบื้องต้น (Symptoms)</label>
+                        <textarea 
+                            v-model="form.symptoms" 
+                            rows="4" 
+                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            placeholder="ระบุอาการของคุณ..."
+                            required
+                        ></textarea>
+                        <div v-if="form.errors.symptoms" class="text-red-500 text-sm mt-1">{{ form.errors.symptoms }}</div>
+                    </div>
+
+                    <button 
+                        @click="submit" 
+                        :disabled="form.processing"
+                        class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-lg transform hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        ยืนยันการจอง (Confirm Booking)
+                    </button>
+                </div>
+
             </div>
+
+            <!-- Footer Navigation -->
+            <div class="bg-gray-50 px-6 py-4 border-t border-gray-100 flex justify-between">
+                <button 
+                    v-if="currentStep > 1" 
+                    @click="prevStep" 
+                    class="text-gray-600 font-medium hover:text-indigo-600 px-4 py-2"
+                >
+                    &larr; ย้อนกลับ (Back)
+                </button>
+                <div v-else></div> <!-- Spacer -->
+
+                <!-- Optional: Next button for manual navigation if needed, keeping mostly auto for now -->
+            </div>
+
         </div>
     </div>
 </template>
