@@ -22,6 +22,10 @@ Route::get('/services', function () {
     return Inertia::render('Services');
 })->name('services');
 
+Route::get('/siam-retreat', function () {
+    return Inertia::render('SiamRetreat');
+})->name('siam.retreat');
+
 Route::get('/dashboard', function () {
     $bookings = auth()->user()->bookings()->with('doctor')->latest()->get();
     return Inertia::render('Dashboard', [

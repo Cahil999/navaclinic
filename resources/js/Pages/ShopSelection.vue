@@ -73,9 +73,9 @@ const shops = [
         nameEn: 'Siam Retreat',
         desc: 'สปาหรูใจกลางเมือง<br/>พร้อมห้องส่วนตัวระดับพรีเมียม',
         image: 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        link: '#',
+        link: '/siam-retreat',
         category: 'experience',
-        status: 'coming_soon',
+        status: 'active',
         openDays: 'ทุกวัน',
         openTime: '10:00 - 22:00',
         theme: {
