@@ -1,14 +1,43 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, reactive } from 'vue';
 
 const selectedCategory = ref('all');
 
-const stats = [
-    { label: 'ร้านนวดคุณภาพ', value: '50+' },
-    { label: 'ผู้ใช้งาน', value: '10k+' },
-    { label: 'รีวิว 5 ดาว', value: '98%' },
-];
+const stats = reactive([
+    { label: 'ร้านนวดคุณภาพ', value: '0', target: 50, suffix: '+' },
+    { label: 'ผู้ใช้งาน', value: '0', target: 10, suffix: 'k+' },
+    { label: 'รีวิว 5 ดาว', value: '0', target: 98, suffix: '%' },
+]);
+
+const animateStats = () => {
+    stats.forEach(stat => {
+        let start = 0;
+        const end = stat.target;
+        const duration = 2000;
+        const startTime = performance.now();
+
+        const update = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            // Ease out quart
+            const ease = 1 - Math.pow(1 - progress, 4);
+            
+            const currentValue = Math.floor(start + (end - start) * ease);
+            stat.value = currentValue + stat.suffix;
+
+            if (progress < 1) {
+                requestAnimationFrame(update);
+            }
+        };
+        requestAnimationFrame(update);
+    });
+};
+
+onMounted(() => {
+    animateStats();
+});
 
 const categories = [
     { id: 'all', label: 'ทั้งหมด' },
@@ -32,7 +61,7 @@ const shops = [
         openTime: '09:00 - 20:00',
         closedDay: 'หยุดทุกวันจันทร์',
         theme: {
-            shadow: 'hover:shadow-blue-500/20',
+            shadow: 'hover:shadow-blue-500/30',
             title: 'group-hover:text-blue-900',
             subtitle: 'group-hover:text-blue-600',
             overlay: 'bg-blue-600/0 group-hover:bg-blue-600/5'
@@ -50,7 +79,7 @@ const shops = [
         openDays: 'ทุกวัน',
         openTime: '10:00 - 22:00',
         theme: {
-            shadow: 'hover:shadow-amber-500/20',
+            shadow: 'hover:shadow-amber-500/30',
             title: 'group-hover:text-amber-900',
             subtitle: 'group-hover:text-amber-600',
             overlay: 'bg-amber-600/0 group-hover:bg-amber-600/5'
@@ -69,7 +98,7 @@ const shops = [
         openTime: '09:00 - 18:00',
         closedDay: 'หยุดวันอาทิตย์',
         theme: {
-            shadow: 'hover:shadow-emerald-500/20',
+            shadow: 'hover:shadow-emerald-500/30',
             title: 'group-hover:text-emerald-900',
             subtitle: 'group-hover:text-emerald-600',
             overlay: 'bg-emerald-600/0 group-hover:bg-emerald-600/5'
@@ -87,7 +116,7 @@ const shops = [
         openDays: 'ทุกวัน',
         openTime: '10:00 - 21:00',
         theme: {
-            shadow: 'hover:shadow-purple-500/20',
+            shadow: 'hover:shadow-purple-500/30',
             title: 'group-hover:text-purple-900',
             subtitle: 'group-hover:text-purple-600',
             overlay: 'bg-purple-600/0 group-hover:bg-purple-600/5'
@@ -105,7 +134,7 @@ const shops = [
         openDays: 'ทุกวัน',
         openTime: '09:00 - 23:00',
         theme: {
-            shadow: 'hover:shadow-teal-500/20',
+            shadow: 'hover:shadow-teal-500/30',
             title: 'group-hover:text-teal-900',
             subtitle: 'group-hover:text-teal-600',
             overlay: 'bg-teal-600/0 group-hover:bg-teal-600/5'
@@ -124,7 +153,7 @@ const shops = [
         openTime: '10:00 - 22:00',
         closedDay: 'เปิดเฉพาะสุดสัปดาห์',
         theme: {
-            shadow: 'hover:shadow-rose-500/20',
+            shadow: 'hover:shadow-rose-500/30',
             title: 'group-hover:text-rose-900',
             subtitle: 'group-hover:text-rose-600',
             overlay: 'bg-rose-600/0 group-hover:bg-rose-600/5'
@@ -142,34 +171,50 @@ const filteredShops = computed(() => {
 
 <template>
     <Head title="เลือกร้านนวด - Thai Massage Hub" />
-    <div class="min-h-screen bg-slate-900 font-sans text-slate-800 flex flex-col items-center relative overflow-hidden">
+    <div class="min-h-screen bg-slate-900 font-sans text-slate-800 flex flex-col items-center relative overflow-hidden selection:bg-blue-500 selection:text-white">
         
         <!-- Background Image with Overlay -->
         <div class="fixed inset-0 z-0">
-             <img src="/images/storefront.png" alt="Clinic Atmosphere" class="w-full h-full object-cover blur-sm opacity-40" />
+             <img src="/images/storefront.png" alt="Clinic Atmosphere" class="w-full h-full object-cover blur-sm opacity-40 scale-105 animate-slow-zoom" />
              <div class="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-blue-900/90 to-slate-900/95"></div>
+
+             <!-- Floating Particles -->
+             <div class="absolute inset-0 overflow-hidden pointer-events-none">
+                 <div v-for="n in 5" :key="n" class="absolute rounded-full bg-blue-400/10 blur-xl animate-float" 
+                      :style="`
+                        width: ${Math.random() * 300 + 100}px; 
+                        height: ${Math.random() * 300 + 100}px; 
+                        left: ${Math.random() * 100}%; 
+                        top: ${Math.random() * 100}%; 
+                        animation-delay: ${Math.random() * 5}s;
+                        animation-duration: ${Math.random() * 10 + 10}s;
+                      `">
+                 </div>
+             </div>
         </div>
 
         <div class="relative z-10 w-full max-w-7xl px-4 py-16 flex flex-col min-h-screen">
             <!-- Header -->
-            <div class="text-center mb-12">
-                <h1 class="text-4xl md:text-6xl font-bold text-white mb-6 drop-shadow-xl font-serif tracking-wide">
+            <div class="text-center mb-12 relative">
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-blue-500/20 blur-3xl rounded-full z-0 opacity-20"></div>
+
+                <h1 class="relative z-10 text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-200 via-white to-blue-200 mb-6 drop-shadow-xl font-serif tracking-wide animate-fade-in-down">
                     Thai Massage Hub
                 </h1>
-                <p class="text-xl text-blue-100 font-light tracking-wider max-w-2xl mx-auto mb-8">
+                <p class="relative z-10 text-xl text-blue-100 font-light tracking-wider max-w-2xl mx-auto mb-8 animate-fade-in-up">
                     ศูนย์รวมร้านนวดและสปาชั้นนำ คัดสรรสุดยอดประสบการณ์ผ่อนคลายที่คุณวางใจ
                 </p>
                 
                 <!-- Filters -->
-                <div class="flex flex-wrap justify-center gap-3 mb-8">
+                <div class="relative z-10 flex flex-wrap justify-center gap-3 mb-8 animate-fade-in-up" style="animation-delay: 0.2s;">
                     <button 
                         v-for="cat in categories" 
                         :key="cat.id"
                         @click="selectedCategory = cat.id"
-                        class="px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 border"
+                        class="px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 border backdrop-blur-sm"
                         :class="selectedCategory === cat.id 
-                            ? 'bg-white text-blue-900 border-white shadow-lg scale-105' 
-                            : 'bg-transparent text-white/70 border-white/20 hover:bg-white/10 hover:border-white/50'"
+                            ? 'bg-white text-blue-900 border-white shadow-[0_0_20px_rgba(255,255,255,0.3)] scale-105' 
+                            : 'bg-white/5 text-white/70 border-white/20 hover:bg-white/10 hover:border-white/50 hover:scale-105'"
                     >
                         {{ cat.label }}
                     </button>
@@ -177,14 +222,19 @@ const filteredShops = computed(() => {
             </div>
 
             <!-- Shop Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center mb-auto">
+            <TransitionGroup 
+                tag="div" 
+                name="staggered-fade"
+                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center mb-auto"
+            >
                 <component 
                     :is="shop.status === 'active' ? Link : 'div'"
-                    v-for="shop in filteredShops"
+                    v-for="(shop, index) in filteredShops"
                     :key="shop.id"
                     :href="shop.status === 'active' ? shop.link : null"
-                    class="group relative w-full max-w-sm bg-white/10 backdrop-blur-md rounded-3xl overflow-hidden hover:bg-white/95 transition-all duration-500 border border-white/20 hover:border-white shadow-2xl transform hover:-translate-y-2 cursor-pointer"
+                    class="group relative w-full max-w-sm bg-white/10 backdrop-blur-md rounded-3xl overflow-hidden hover:bg-white/95 transition-all duration-500 border border-white/20 hover:border-white shadow-2xl transform hover:-translate-y-3 cursor-pointer"
                     :class="shop.theme.shadow"
+                    :style="{ transitionDelay: `${index * 50}ms` }"
                 >
                     <!-- Recommended Badge for Main Shop -->
                     <div v-if="shop.isMain" class="absolute top-4 right-4 z-20">
@@ -206,6 +256,8 @@ const filteredShops = computed(() => {
                             class="w-full h-full object-cover transition-transform duration-500 transform group-hover:scale-110"
                             :class="[shop.isMain ? 'object-contain p-8' : 'opacity-80 group-hover:opacity-100']"
                         />
+                         <!-- Shine Effect -->
+                         <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-[200%] group-hover:animate-shine z-30 pointer-events-none"></div>
                     </div>
                     
                     <!-- Content -->
@@ -247,13 +299,13 @@ const filteredShops = computed(() => {
                         </div>
                     </div>
                 </component>
-            </div>
+            </TransitionGroup>
             
             <!-- Footer Stats -->
-             <div class="mt-16 pt-8 border-t border-white/10 w-full">
+             <div class="mt-16 pt-8 border-t border-white/10 w-full animate-fade-in-up" style="animation-delay: 0.6s;">
                 <div class="flex flex-wrap justify-center gap-12 md:gap-24 text-center">
-                    <div v-for="(stat, index) in stats" :key="index">
-                        <div class="text-2xl md:text-3xl font-bold text-white mb-1">{{ stat.value }}</div>
+                    <div v-for="(stat, index) in stats" :key="index" class="space-y-2">
+                         <div class="text-3xl md:text-5xl font-bold text-white mb-1 drop-shadow-lg tabular-nums">{{ stat.value }}</div>
                         <div class="text-blue-200/60 text-sm font-light uppercase tracking-wider">{{ stat.label }}</div>
                     </div>
                 </div>
@@ -265,3 +317,61 @@ const filteredShops = computed(() => {
         </div>
     </div>
 </template>
+
+<style scoped>
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(5deg); }
+}
+.animate-float {
+  animation: float infinite ease-in-out;
+}
+
+@keyframes slow-zoom {
+  0%, 100% { transform: scale(1.05); }
+  50% { transform: scale(1.15); }
+}
+.animate-slow-zoom {
+  animation: slow-zoom 20s infinite ease-in-out alternate;
+}
+
+@keyframes shine {
+  0% { transform: translateX(-200%) skewX(-15deg); }
+  100% { transform: translateX(200%) skewX(-15deg); }
+}
+.animate-shine {
+  animation: shine 0.7s;
+}
+
+.staggered-fade-enter-active,
+.staggered-fade-leave-active {
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.staggered-fade-enter-from,
+.staggered-fade-leave-to {
+  opacity: 0;
+  transform: translateY(30px) scale(0.95);
+}
+.staggered-fade-leave-active {
+  position: absolute; 
+}
+.staggered-fade-move {
+  transition: transform 0.5s;
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-down {
+    animation: fadeInDown 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out backwards;
+}
+</style>
