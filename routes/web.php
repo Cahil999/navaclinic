@@ -56,6 +56,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
             'stats' => $stats
         ]);
     })->name('admin.dashboard');
+
+    // Booking Management
+    Route::get('/bookings/{booking}', [\App\Http\Controllers\Admin\BookingController::class, 'show'])->name('admin.bookings.show');
+    Route::patch('/bookings/{booking}/status', [\App\Http\Controllers\Admin\BookingController::class, 'updateStatus'])->name('admin.bookings.update-status');
+
+    // Patient Management
+    Route::get('/patients', [\App\Http\Controllers\Admin\PatientController::class, 'index'])->name('admin.patients.index');
+    Route::get('/patients/{user}', [\App\Http\Controllers\Admin\PatientController::class, 'show'])->name('admin.patients.show');
 });
 
 require __DIR__ . '/auth.php';

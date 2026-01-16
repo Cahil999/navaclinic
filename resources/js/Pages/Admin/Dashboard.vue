@@ -95,8 +95,7 @@ const getStatusClass = (status) => {
                                             </span>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <!-- Placeholder for future actions -->
-                                            <button class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 font-medium">View</button>
+                                            <Link :href="route('admin.bookings.show', booking.id)" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 font-medium">View</Link>
                                         </td>
                                     </tr>
                                     <tr v-if="bookings.length === 0">

@@ -22,8 +22,13 @@ const isMobileMenuOpen = ref(false);
                 <div class="navbar-end hidden lg:flex gap-6 items-center">
                     <ul class="menu menu-horizontal px-1 font-medium text-lg text-slate-600 gap-2">
                         <li><Link :href="route('welcome')" :class="{'text-blue-600 font-bold': $page.component === 'Welcome'}">หน้าหลัก</Link></li>
-                        <li v-if="$page.props.auth.user.is_admin"><Link :href="route('admin.dashboard')" :class="{'text-blue-600 font-bold': route().current('admin.dashboard')}">แดชบอร์ดแอดมิน</Link></li>
-                        <li v-else><Link :href="route('dashboard')" :class="{'text-blue-600 font-bold': route().current('dashboard')}">ประวัติการจองคิว</Link></li>
+                        <li v-if="$page.props.auth.user.is_admin">
+                            <Link :href="route('admin.dashboard')" :class="{'text-blue-600 font-bold': route().current('admin.dashboard')}">แดชบอร์ดแอดมิน</Link>
+                        </li>
+                        <li v-if="$page.props.auth.user.is_admin">
+                             <Link :href="route('admin.patients.index')" :class="{'text-blue-600 font-bold': route().current('admin.patients.index')}">รายชื่อคนไข้</Link>
+                        </li>
+                        <li v-if="!$page.props.auth.user.is_admin"><Link :href="route('dashboard')" :class="{'text-blue-600 font-bold': route().current('dashboard')}">ประวัติการจองคิว</Link></li>
                         <!-- Add other menu items here if needed in the future -->
                     </ul>
                     
