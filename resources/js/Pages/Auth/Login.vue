@@ -106,6 +106,17 @@ const submit = () => {
             </div>
 
 
+            <div class="text-center pt-6">
+                <Link
+                    :href="route('welcome')"
+                    class="text-sm text-slate-500 hover:text-blue-600 transition-colors flex items-center justify-center gap-1 group"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 transform group-hover:-translate-x-1 transition-transform">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                    </svg>
+                    กลับไปหน้าแรก
+                </Link>
+            </div>
         </form>
     </GuestLayout>
 </template>
