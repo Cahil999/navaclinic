@@ -53,11 +53,15 @@ const getStatusClass = (status) => {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <p class="text-gray-500 text-sm">Name</p>
-                                <p class="font-medium text-lg">{{ patient.name }}</p>
+                                <p class="font-medium text-lg">{{ patient.name }} <span class="text-sm text-blue-600 font-bold">({{ patient.patient_id }})</span></p>
                             </div>
                             <div>
                                 <p class="text-gray-500 text-sm">Email</p>
                                 <p class="font-medium text-lg">{{ patient.email }}</p>
+                            </div>
+                            <div v-if="patient.phone_number">
+                                <p class="text-gray-500 text-sm">Phone</p>
+                                <p class="font-medium text-lg">{{ patient.phone_number }}</p>
                             </div>
                             <div>
                                 <p class="text-gray-500 text-sm">Member Since</p>

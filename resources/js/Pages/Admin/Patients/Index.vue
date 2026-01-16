@@ -62,8 +62,14 @@ watch(search, debounce((value) => {
                                 </thead>
                                 <tbody>
                                     <tr v-for="patient in patients.data" :key="patient.id" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                        <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ patient.name }}</td>
-                                        <td class="px-6 py-4">{{ patient.email }}</td>
+                                        <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                                            {{ patient.name }}<br>
+                                            <span class="text-xs text-blue-600 font-bold">{{ patient.patient_id }}</span>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            {{ patient.email }}<br>
+                                            <span v-if="patient.phone_number" class="text-xs text-gray-500">{{ patient.phone_number }}</span>
+                                        </td>
                                         <td class="px-6 py-4">{{ new Date(patient.created_at).toLocaleDateString() }}</td>
                                         <td class="px-6 py-4">
                                             <Link :href="route('admin.patients.show', patient.id)" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
