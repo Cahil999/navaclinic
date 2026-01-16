@@ -22,7 +22,8 @@ const isMobileMenuOpen = ref(false);
                 <div class="navbar-end hidden lg:flex gap-6 items-center">
                     <ul class="menu menu-horizontal px-1 font-medium text-lg text-slate-600 gap-2">
                         <li><Link :href="route('welcome')" :class="{'text-blue-600 font-bold': $page.component === 'Welcome'}">หน้าหลัก</Link></li>
-                        <li><Link :href="route('dashboard')" :class="{'text-blue-600 font-bold': route().current('dashboard')}">ประวัติการจองคิว</Link></li>
+                        <li v-if="$page.props.auth.user.is_admin"><Link :href="route('admin.dashboard')" :class="{'text-blue-600 font-bold': route().current('admin.dashboard')}">แดชบอร์ดแอดมิน</Link></li>
+                        <li v-else><Link :href="route('dashboard')" :class="{'text-blue-600 font-bold': route().current('dashboard')}">ประวัติการจองคิว</Link></li>
                         <!-- Add other menu items here if needed in the future -->
                     </ul>
                     
@@ -80,7 +81,8 @@ const isMobileMenuOpen = ref(false);
                     </div>
 
                     <Link :href="route('welcome')" class="btn btn-ghost justify-start text-lg font-normal" @click="isMobileMenuOpen = false">หน้าหลัก</Link>
-                    <Link :href="route('dashboard')" class="btn btn-ghost justify-start text-lg font-normal" :class="{'bg-blue-50 text-blue-600 font-bold': route().current('dashboard')}" @click="isMobileMenuOpen = false">ประวัติการจองคิว</Link>
+                    <Link v-if="$page.props.auth.user.is_admin" :href="route('admin.dashboard')" class="btn btn-ghost justify-start text-lg font-normal" :class="{'bg-blue-50 text-blue-600 font-bold': route().current('admin.dashboard')}" @click="isMobileMenuOpen = false">แดชบอร์ดแอดมิน</Link>
+                    <Link v-else :href="route('dashboard')" class="btn btn-ghost justify-start text-lg font-normal" :class="{'bg-blue-50 text-blue-600 font-bold': route().current('dashboard')}" @click="isMobileMenuOpen = false">ประวัติการจองคิว</Link>
 
                     
                     <div class="divider"></div>

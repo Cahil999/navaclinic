@@ -112,7 +112,8 @@ const features = [
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                             </div>
                             <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
-                                <li><Link :href="route('dashboard')">ประวัติการจองคิว</Link></li>
+                                <li v-if="$page.props.auth.user.is_admin"><Link :href="route('admin.dashboard')">แดชบอร์ดแอดมิน</Link></li>
+                                <li v-else><Link :href="route('dashboard')">ประวัติการจองคิว</Link></li>
                                 <li><Link :href="route('logout')" method="post" as="button" class="text-red-600">ออกจากระบบ</Link></li>
                             </ul>
                         </div>
