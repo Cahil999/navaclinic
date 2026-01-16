@@ -6,16 +6,31 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Inertia\Inertia;
 
+use Illuminate\Http\Request;
+
 class PatientController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $patients = User::where('is_admin', false)
-            ->latest()
-            ->paginate(10);
+        $query = User::where('is_admin', false);
+
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                    ->orWhere('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone_number', 'like', "%{$search}%");
+            });
+        }
+
+        $patients = $query->latest()
+            ->paginate(10)
+            ->withQueryString();
 
         return Inertia::render('Admin/Patients/Index', [
-            'patients' => $patients
+            'patients' => $patients,
+            'filters' => $request->only(['search']),
         ]);
     }
 

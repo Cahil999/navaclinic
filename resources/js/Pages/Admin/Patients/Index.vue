@@ -1,13 +1,29 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
+import { debounce } from 'lodash';
 
-defineProps({
+const props = defineProps({
     patients: {
         type: Object,
         required: true,
     },
+    filters: {
+        type: Object,
+        default: () => ({ search: '' }),
+    },
 });
+
+const search = ref(props.filters.search);
+
+watch(search, debounce((value) => {
+    router.get(
+        route('admin.patients.index'),
+        { search: value },
+        { preserveState: true, replace: true }
+    );
+}, 300));
 </script>
 
 <template>
@@ -25,6 +41,15 @@ defineProps({
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900 dark:text-gray-100">
                         
+                        <div class="mb-4">
+                            <input
+                                v-model="search"
+                                type="text"
+                                placeholder="Search by ID, Name, Email or Phone..."
+                                class="w-full md:w-1/3 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            />
+                        </div>
+
                         <div class="overflow-x-auto">
                             <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                                 <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
