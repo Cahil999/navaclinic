@@ -15,41 +15,41 @@ const props = defineProps({
 
 const form = useForm({
     // Patient Information
-    id_card_number: '',
-    date_of_birth: '',
-    age: '',
-    gender: '',
-    race: '',
-    nationality: '',
-    religion: '',
-    occupation: '',
-    address: '',
-    emergency_contact_name: '',
-    emergency_contact_phone: '',
+    id_card_number: props.previousRecord?.id_card_number || '',
+    date_of_birth: props.previousRecord?.date_of_birth || '',
+    age: props.previousRecord?.age || '',
+    gender: props.previousRecord?.gender || '',
+    race: props.previousRecord?.race || '',
+    nationality: props.previousRecord?.nationality || '',
+    religion: props.previousRecord?.religion || '',
+    occupation: props.previousRecord?.occupation || '',
+    address: props.previousRecord?.address || '',
+    emergency_contact_name: props.previousRecord?.emergency_contact_name || '',
+    emergency_contact_phone: props.previousRecord?.emergency_contact_phone || '',
 
     // Patient History
-    underlying_disease: '',
-    surgery_history: '',
-    drug_allergy: '',
-    accident_history: '',
+    underlying_disease: props.previousRecord?.underlying_disease || '',
+    surgery_history: props.previousRecord?.surgery_history || '',
+    drug_allergy: props.previousRecord?.drug_allergy || '',
+    accident_history: props.previousRecord?.accident_history || '',
     
     // Vital Signs
-    weight: '',
-    height: '',
-    temperature: '',
-    pulse_rate: '',
-    respiratory_rate: '',
-    blood_pressure: '',
+    weight: props.previousRecord?.weight || '',
+    height: props.previousRecord?.height || '',
+    temperature: props.previousRecord?.temperature || '',
+    pulse_rate: props.previousRecord?.pulse_rate || '',
+    respiratory_rate: props.previousRecord?.respiratory_rate || '',
+    blood_pressure: props.previousRecord?.blood_pressure || '',
     
     // Examination
-    chief_complaint: '',
-    physical_exam: '',
+    chief_complaint: props.previousRecord?.chief_complaint || '',
+    physical_exam: props.previousRecord?.physical_exam || '',
     
     // Treatment
-    massage_weight: '',
-    diagnosis: '',
-    treatment_details: '',
-    notes: '',
+    massage_weight: props.previousRecord?.massage_weight || '',
+    diagnosis: props.previousRecord?.diagnosis || '',
+    treatment_details: props.previousRecord?.treatment_details || '',
+    notes: props.previousRecord?.notes || '',
 });
 
 const submit = () => {
@@ -101,14 +101,17 @@ const submit = () => {
                                 <div class="md:col-span-2">
                                     <label class="block text-sm font-medium text-slate-700 mb-1">ID Card No. (เลขบัตรประชาชน)</label>
                                     <input type="text" v-model="form.id_card_number" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <InputError class="mt-2" :message="form.errors.id_card_number" />
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 mb-1">Date of Birth (วันเกิด)</label>
                                     <input type="date" v-model="form.date_of_birth" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <InputError class="mt-2" :message="form.errors.date_of_birth" />
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 mb-1">Age (อายุ)</label>
                                     <input type="number" v-model="form.age" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <InputError class="mt-2" :message="form.errors.age" />
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 mb-1">Gender (เพศ)</label>
@@ -118,34 +121,42 @@ const submit = () => {
                                         <option value="female">Female (หญิง)</option>
                                         <option value="other">Other (อื่นๆ)</option>
                                     </select>
+                                    <InputError class="mt-2" :message="form.errors.gender" />
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 mb-1">Race (เชื้อชาติ)</label>
                                     <input type="text" v-model="form.race" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <InputError class="mt-2" :message="form.errors.race" />
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 mb-1">Nationality (สัญชาติ)</label>
                                     <input type="text" v-model="form.nationality" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <InputError class="mt-2" :message="form.errors.nationality" />
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 mb-1">Religion (ศาสนา)</label>
                                     <input type="text" v-model="form.religion" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <InputError class="mt-2" :message="form.errors.religion" />
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 mb-1">Occupation (อาชีพ)</label>
                                     <input type="text" v-model="form.occupation" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <InputError class="mt-2" :message="form.errors.occupation" />
                                 </div>
                                 <div class="md:col-span-3">
                                     <label class="block text-sm font-medium text-slate-700 mb-1">Address (ที่อยู่ปัจจุบัน)</label>
                                     <input type="text" v-model="form.address" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <InputError class="mt-2" :message="form.errors.address" />
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-sm font-medium text-slate-700 mb-1">Emergency Contact (ญาติที่ติดต่อได้)</label>
                                     <input type="text" v-model="form.emergency_contact_name" placeholder="Name (ชื่อ-นามสกุล)" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <InputError class="mt-2" :message="form.errors.emergency_contact_name" />
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-sm font-medium text-slate-700 mb-1">Emergency Phone (เบอร์โทรญาติ)</label>
                                     <input type="text" v-model="form.emergency_contact_phone" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <InputError class="mt-2" :message="form.errors.emergency_contact_phone" />
                                 </div>
                             </div>
                          </div>
@@ -162,18 +173,22 @@ const submit = () => {
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 mb-1">Underlying Disease (โรคประจำตัว)</label>
                                     <input type="text" v-model="form.underlying_disease" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <InputError class="mt-2" :message="form.errors.underlying_disease" />
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 mb-1">Surgery History (ประวัติการผ่าตัด)</label>
                                     <input type="text" v-model="form.surgery_history" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <InputError class="mt-2" :message="form.errors.surgery_history" />
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 mb-1">Allergies (ประวัติแพ้ยา/อาหาร)</label>
                                     <input type="text" v-model="form.drug_allergy" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <InputError class="mt-2" :message="form.errors.drug_allergy" />
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 mb-1">Accident (อุบัติเหตุ)</label>
                                     <input type="text" v-model="form.accident_history" placeholder="" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <InputError class="mt-2" :message="form.errors.accident_history" />
                                 </div>
                             </div>
                          </div>
@@ -190,26 +205,32 @@ const submit = () => {
                                 <div>
                                     <label class="block text-xs font-medium text-slate-600 mb-1">Weight (kg)</label>
                                     <input type="number" step="0.1" v-model="form.weight" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <InputError class="mt-2" :message="form.errors.weight" />
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-slate-600 mb-1">Height (cm)</label>
                                     <input type="number" step="0.1" v-model="form.height" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <InputError class="mt-2" :message="form.errors.height" />
                                 </div>
                                 <div class="col-span-2 md:col-span-1">
                                     <label class="block text-xs font-medium text-slate-600 mb-1">BP (mmHg)</label>
                                     <input type="text" v-model="form.blood_pressure" placeholder="120/80" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <InputError class="mt-2" :message="form.errors.blood_pressure" />
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-slate-600 mb-1">Temp (°C)</label>
-                                    <input type="number" step="0.1" v-model="form.temperature" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <input type="number" step="0.01" v-model="form.temperature" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <InputError class="mt-2" :message="form.errors.temperature" />
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-slate-600 mb-1">Pulse (bpm)</label>
                                     <input type="number" v-model="form.pulse_rate" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <InputError class="mt-2" :message="form.errors.pulse_rate" />
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-slate-600 mb-1">Resp (bpm)</label>
                                     <input type="number" v-model="form.respiratory_rate" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <InputError class="mt-2" :message="form.errors.respiratory_rate" />
                                 </div>
                             </div>
                         </div>
@@ -220,10 +241,12 @@ const submit = () => {
                                 <div>
                                     <label class="block text-sm font-bold text-slate-900 mb-1">Chief Complaint (CC) - อาการสำคัญ</label>
                                     <textarea v-model="form.chief_complaint" rows="2" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Patient's primary symptom..."></textarea>
+                                    <InputError class="mt-2" :message="form.errors.chief_complaint" />
                                 </div>
                                 <div>
                                     <label class="block text-sm font-bold text-slate-900 mb-1">Physical Examination (PE) - ผลการตรวจร่างกาย</label>
                                     <textarea v-model="form.physical_exam" rows="3" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Physical exam findings..."></textarea>
+                                    <InputError class="mt-2" :message="form.errors.physical_exam" />
                                 </div>
                             </div>
                         </div>
@@ -233,13 +256,14 @@ const submit = () => {
                              <div>
                                 <label class="block text-sm font-bold text-slate-900 mb-1">Diagnosis (การวินิจฉัยโรค)</label>
                                 <textarea v-model="form.diagnosis" rows="2" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-indigo-50/50" required placeholder="Medical diagnosis..."></textarea>
-                                <div v-if="form.errors.diagnosis" class="text-red-500 text-xs mt-1">{{ form.errors.diagnosis }}</div>
+                                <InputError class="mt-2" :message="form.errors.diagnosis" />
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div class="md:col-span-2">
                                     <label class="block text-sm font-bold text-slate-900 mb-1">Treatment Procedures (รายละเอียดการรักษา)</label>
                                     <textarea v-model="form.treatment_details" rows="4" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required placeholder="Treatment steps performed..."></textarea>
+                                    <InputError class="mt-2" :message="form.errors.treatment_details" />
                                 </div>
                                 <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 h-fit">
                                     <label class="block text-sm font-bold text-indigo-900 mb-3">Massage Weight (น้ำหนักมือ)</label>
@@ -257,6 +281,7 @@ const submit = () => {
                                             <span class="ml-2 text-sm text-slate-700">Heavy (หนัก)</span>
                                         </label>
                                     </div>
+                                    <InputError class="mt-2" :message="form.errors.massage_weight" />
                                 </div>
                             </div>
                         </div>
@@ -266,6 +291,7 @@ const submit = () => {
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Doctor's Notes (บันทึกเพิ่มเติม)</label>
                                 <textarea v-model="form.notes" rows="2" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
+                                <InputError class="mt-2" :message="form.errors.notes" />
                             </div>
                         </div>
 

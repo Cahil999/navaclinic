@@ -38,7 +38,7 @@ class TreatmentController extends Controller
             'accident_history' => 'nullable|string',
             'weight' => 'nullable|numeric|between:0,500',
             'height' => 'nullable|numeric|between:0,300',
-            'temperature' => 'nullable|numeric|between:30,45',
+            'temperature' => 'nullable|numeric|between:0,100',
             'pulse_rate' => 'nullable|integer|between:0,300',
             'respiratory_rate' => 'nullable|integer|between:0,100',
             'blood_pressure' => 'nullable|string|max:20',
@@ -48,7 +48,6 @@ class TreatmentController extends Controller
             'diagnosis' => 'required|string',
             'treatment_details' => 'required|string',
             'notes' => 'nullable|string',
-            'next_appointment' => 'nullable|date',
         ]);
 
         $booking->treatmentRecord()->updateOrCreate(
