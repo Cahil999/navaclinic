@@ -42,7 +42,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', function () {
         $stats = [
-            'total_patients' => \App\Models\User::where('is_admin', false)->count(),
+            'total_patients' => \App\Models\User::where('is_admin', false)->count() + \App\Models\Booking::whereNull('user_id')->whereNotNull('customer_phone')->distinct()->count('customer_phone'),
             'total_doctors' => \App\Models\Doctor::count(),
             'total_bookings' => \App\Models\Booking::count(),
             'today_bookings' => \App\Models\Booking::whereDate('appointment_date', now()->today())->count(),
@@ -73,7 +73,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     // Doctor Management
     // Doctor Management
     Route::get('/doctors', [\App\Http\Controllers\Admin\DoctorController::class, 'index'])->name('admin.doctors.index');
+    Route::post('/doctors', [\App\Http\Controllers\Admin\DoctorController::class, 'store'])->name('admin.doctors.store');
     Route::get('/doctors/{doctor}', [\App\Http\Controllers\Admin\DoctorController::class, 'show'])->name('admin.doctors.show');
+    Route::patch('/doctors/{doctor}', [\App\Http\Controllers\Admin\DoctorController::class, 'update'])->name('admin.doctors.update');
+    Route::delete('/doctors/{doctor}', [\App\Http\Controllers\Admin\DoctorController::class, 'destroy'])->name('admin.doctors.destroy');
 
     // Shop Settings
     Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('admin.settings.index');

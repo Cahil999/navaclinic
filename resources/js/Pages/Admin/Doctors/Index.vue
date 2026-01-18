@@ -1,6 +1,14 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import Modal from '@/Components/Modal.vue';
+import InputError from '@/Components/InputError.vue';
+import InputLabel from '@/Components/InputLabel.vue';
+import TextInput from '@/Components/TextInput.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import SecondaryButton from '@/Components/SecondaryButton.vue';
+import DangerButton from '@/Components/DangerButton.vue';
 
 defineProps({
     doctors: {
@@ -8,6 +16,61 @@ defineProps({
         required: true,
     },
 });
+
+const form = useForm({
+    name: '',
+    specialty: '',
+});
+
+const showModal = ref(false);
+const editingDoctor = ref(null);
+const showDeleteModal = ref(false);
+const doctorToDelete = ref(null);
+
+const openModal = (doctor = null) => {
+    editingDoctor.value = doctor;
+    if (doctor) {
+        form.name = doctor.name;
+        form.specialty = doctor.specialty;
+    } else {
+        form.reset();
+    }
+    showModal.value = true;
+};
+
+const closeModal = () => {
+    showModal.value = false;
+    form.reset();
+    editingDoctor.value = null;
+};
+
+const saveDoctor = () => {
+    if (editingDoctor.value) {
+        form.patch(route('admin.doctors.update', editingDoctor.value.id), {
+            onSuccess: () => closeModal(),
+        });
+    } else {
+        form.post(route('admin.doctors.store'), {
+            onSuccess: () => closeModal(),
+        });
+    }
+};
+
+const confirmDelete = (doctor) => {
+    doctorToDelete.value = doctor;
+    showDeleteModal.value = true;
+};
+
+const closeDeleteModal = () => {
+    showDeleteModal.value = false;
+    doctorToDelete.value = null;
+};
+
+const deleteDoctor = () => {
+    form.delete(route('admin.doctors.destroy', doctorToDelete.value.id), {
+        onSuccess: () => closeDeleteModal(),
+    });
+};
 </script>
 
 <template>
@@ -15,9 +78,14 @@ defineProps({
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                All Doctors
-            </h2>
+            <div class="flex justify-between items-center">
+                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+                    All Doctors
+                </h2>
+                <PrimaryButton @click="openModal()">
+                    Add Doctor
+                </PrimaryButton>
+            </div>
         </template>
 
         <div class="py-12">
@@ -37,10 +105,14 @@ defineProps({
                                     <p class="text-slate-500 text-sm">{{ doctor.specialty || 'General Practitioner' }}</p>
                                 </div>
                             </div>
-                            <div class="flex justify-end pt-4 border-t border-slate-50">
+                            <div class="flex justify-between pt-4 border-t border-slate-50 items-center">
                                 <Link :href="route('admin.doctors.show', doctor.id)" class="text-blue-600 hover:text-blue-800 font-bold transition-colors flex items-center gap-1 group-hover:gap-2 text-sm">
                                     View Profile <span aria-hidden="true">&rarr;</span>
                                 </Link>
+                                <div class="flex gap-2">
+                                    <button @click="openModal(doctor)" class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">Edit</button>
+                                    <button @click="confirmDelete(doctor)" class="text-red-600 hover:text-red-900 text-sm font-medium">Delete</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -51,5 +123,73 @@ defineProps({
                 </div>
             </div>
         </div>
+
+        <!-- Add/Edit Modal -->
+        <Modal :show="showModal" @close="closeModal">
+            <div class="p-6">
+                <h2 class="text-lg font-medium text-gray-900">
+                    {{ editingDoctor ? 'Edit Doctor' : 'Add New Doctor' }}
+                </h2>
+
+                <div class="mt-6">
+                    <div class="mb-4">
+                        <InputLabel for="name" value="Name" />
+                        <TextInput
+                            id="name"
+                            v-model="form.name"
+                            type="text"
+                            class="mt-1 block w-full"
+                            placeholder="Dr. Name Surname"
+                        />
+                        <InputError :message="form.errors.name" class="mt-2" />
+                    </div>
+
+                    <div class="mb-4">
+                        <InputLabel for="specialty" value="Specialty" />
+                        <TextInput
+                            id="specialty"
+                            v-model="form.specialty"
+                            type="text"
+                            class="mt-1 block w-full"
+                            placeholder="e.g. Cardiologist, Dentist"
+                        />
+                        <InputError :message="form.errors.specialty" class="mt-2" />
+                    </div>
+
+                    <div class="flex justify-end mt-6">
+                        <SecondaryButton @click="closeModal"> Cancel </SecondaryButton>
+                        <PrimaryButton class="ml-3" @click="saveDoctor" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                            {{ editingDoctor ? 'Update' : 'Save' }}
+                        </PrimaryButton>
+                    </div>
+                </div>
+            </div>
+        </Modal>
+
+        <!-- Delete Confirmation Modal -->
+        <Modal :show="showDeleteModal" @close="closeDeleteModal">
+            <div class="p-6">
+                <h2 class="text-lg font-medium text-gray-900">
+                    Delete Doctor
+                </h2>
+
+                <p class="mt-1 text-sm text-gray-600">
+                    Are you sure you want to delete {{ doctorToDelete?.name }}? This action cannot be undone.
+                </p>
+
+                <div class="mt-6 flex justify-end">
+                    <SecondaryButton @click="closeDeleteModal"> Cancel </SecondaryButton>
+
+                    <DangerButton
+                        class="ml-3"
+                        :class="{ 'opacity-25': form.processing }"
+                        :disabled="form.processing"
+                        @click="deleteDoctor"
+                    >
+                        Delete Doctor
+                    </DangerButton>
+                </div>
+            </div>
+        </Modal>
     </AuthenticatedLayout>
 </template>

@@ -29,4 +29,34 @@ class DoctorController extends Controller
             'bookings' => $bookings
         ]);
     }
+    public function store(\Illuminate\Http\Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'specialty' => 'required|string|max:255',
+        ]);
+
+        Doctor::create($validated);
+
+        return redirect()->back();
+    }
+
+    public function update(\Illuminate\Http\Request $request, Doctor $doctor)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'specialty' => 'required|string|max:255',
+        ]);
+
+        $doctor->update($validated);
+
+        return redirect()->back();
+    }
+
+    public function destroy(Doctor $doctor)
+    {
+        $doctor->delete();
+
+        return redirect()->back();
+    }
 }
