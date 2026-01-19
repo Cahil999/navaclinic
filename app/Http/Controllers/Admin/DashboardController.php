@@ -23,7 +23,15 @@ class DashboardController extends Controller
             'pending_bookings' => Booking::where('status', 'pending')->count(),
         ];
 
-        // 2. Chart Data Logic
+        // 1.1 Treatment Effectiveness (Avg Pain Reduction)
+        $painStats = \App\Models\TreatmentRecord::selectRaw('AVG(pain_level_before - pain_level_after) as avg_reduction')
+            ->whereNotNull('pain_level_before')
+            ->whereNotNull('pain_level_after')
+            ->first();
+
+        $stats['avg_pain_reduction'] = $painStats ? round($painStats->avg_reduction, 1) : 0;
+
+        // 2. Chart Data Logic (Main Bar Chart)
         $year = $request->input('year', Carbon::now()->year);
         $month = $request->input('month', null); // If null, show yearly view (All months)
 
@@ -39,7 +47,7 @@ class DashboardController extends Controller
             $endDate = $startDate->copy()->endOfMonth();
             $chartData['title'] = "Bookings in " . $startDate->format('F Y');
 
-            // Fetch all bookings for the range and group by day (PHP-side grouping for SQLite compatibility)
+            // Fetch all bookings for the range and group by day
             $bookings = Booking::whereBetween('appointment_date', [$startDate, $endDate])
                 ->get()
                 ->groupBy(function ($date) {
@@ -59,7 +67,7 @@ class DashboardController extends Controller
             // Yearly View: Show all 12 months
             $chartData['title'] = "Bookings in $year";
 
-            // Fetch all bookings for the year and group by month (PHP-side grouping for SQLite compatibility)
+            // Fetch all bookings for the year and group by month
             $bookings = Booking::whereYear('appointment_date', $year)
                 ->get()
                 ->groupBy(function ($date) {
@@ -73,16 +81,44 @@ class DashboardController extends Controller
             }
         }
 
-        // 3. Latest Bookings
-        $bookings = Booking::with(['user', 'doctor'])
+        // 3. Status Distribution (Pie Chart)
+        $statusCounts = Booking::selectRaw('status, count(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status')
+            ->toArray();
+
+        $pieChartData = [
+            'labels' => array_keys($statusCounts),
+            'data' => array_values($statusCounts),
+        ];
+
+        // 4. Top Doctors
+        $topDoctors = Doctor::withCount('bookings')
+            ->orderByDesc('bookings_count')
+            ->limit(5)
+            ->get();
+
+        // 5. Upcoming Allocations (Next bookings for today)
+        $upcomingBookings = Booking::with(['user', 'doctor'])
+            ->whereDate('appointment_date', Carbon::today())
+            ->whereTime('start_time', '>', Carbon::now()->format('H:i'))
+            ->orderBy('start_time')
+            ->limit(5)
+            ->get();
+
+        // 6. Latest Bookings (General)
+        $latestBookings = Booking::with(['user', 'doctor'])
             ->latest()
             ->limit(10)
             ->get();
 
         return Inertia::render('Admin/Dashboard', [
-            'bookings' => $bookings,
+            'bookings' => $latestBookings,
+            'upcomingBookings' => $upcomingBookings,
             'stats' => $stats,
             'chartData' => $chartData,
+            'pieChartData' => $pieChartData,
+            'topDoctors' => $topDoctors,
             'filters' => [
                 'year' => (int) $year,
                 'month' => $month ? (int) $month : null
