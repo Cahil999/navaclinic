@@ -1,8 +1,21 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale
+} from 'chart.js'
+import { Bar } from 'vue-chartjs'
+import { computed, ref, watch } from 'vue';
 
-defineProps({
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
+
+const props = defineProps({
     bookings: {
         type: Array,
         required: true,
@@ -11,7 +24,90 @@ defineProps({
         type: Object,
         required: true,
     },
+    chartData: {
+        type: Object,
+        required: false,
+        default: () => ({ labels: [], data: [], title: '' })
+    },
+    filters: {
+        type: Object,
+        required: false,
+        default: () => ({ year: new Date().getFullYear(), month: null })
+    }
 });
+
+const selectedYear = ref(props.filters.year);
+const selectedMonth = ref(props.filters.month);
+
+const years = computed(() => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    // Add next 2 years
+    for (let i = 2; i >= 1; i--) {
+        years.push(currentYear + i);
+    }
+    // Add current year and past 5 years
+    for (let i = 0; i < 5; i++) {
+        years.push(currentYear - i);
+    }
+    return years;
+});
+
+const months = [
+    { value: null, label: 'All Months (Yearly View)' },
+    { value: 1, label: 'January' },
+    { value: 2, label: 'February' },
+    { value: 3, label: 'March' },
+    { value: 4, label: 'April' },
+    { value: 5, label: 'May' },
+    { value: 6, label: 'June' },
+    { value: 7, label: 'July' },
+    { value: 8, label: 'August' },
+    { value: 9, label: 'September' },
+    { value: 10, label: 'October' },
+    { value: 11, label: 'November' },
+    { value: 12, label: 'December' },
+];
+
+const updateChart = () => {
+    router.get(route('admin.dashboard'), {
+        year: selectedYear.value,
+        month: selectedMonth.value
+    }, {
+        preserveState: true,
+        preserveScroll: true,
+        only: ['chartData', 'filters']
+    });
+};
+
+const chartDataConfig = computed(() => ({
+  labels: props.chartData.labels,
+  datasets: [
+    {
+      label: 'Bookings',
+      backgroundColor: '#3b82f6',
+      data: props.chartData.data
+    }
+  ]
+}))
+
+const chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+      legend: {
+          display: false
+      }
+  },
+  scales: {
+      y: {
+          beginAtZero: true,
+          ticks: {
+              stepSize: 1
+          }
+      }
+  }
+}
 
 const getStatusClass = (status) => {
     switch (status) {
@@ -57,6 +153,28 @@ const getStatusClass = (status) => {
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border border-slate-100 hover:shadow-lg transition-all duration-300 group">
                         <div class="text-slate-500 text-sm font-medium uppercase tracking-wider group-hover:text-blue-600 transition-colors">Pending Requests</div>
                         <div class="text-3xl font-bold text-slate-900 mt-2">{{ stats.pending_bookings }}</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6">
+                    <!-- Chart Section -->
+                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-slate-100">
+                        <div class="p-6">
+                             <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-bold text-slate-800">{{ chartData.title || 'Bookings Overview' }}</h3>
+                                <div class="flex gap-2">
+                                    <select v-model="selectedYear" @change="updateChart" class="text-sm border-slate-200 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                        <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
+                                    </select>
+                                    <select v-model="selectedMonth" @change="updateChart" class="text-sm border-slate-200 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                        <option v-for="m in months" :key="m.value" :value="m.value">{{ m.label }}</option>
+                                    </select>
+                                </div>
+                             </div>
+                             <div class="h-64">
+                                <Bar :data="chartDataConfig" :options="chartOptions" />
+                             </div>
+                        </div>
                     </div>
                 </div>
 

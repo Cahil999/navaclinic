@@ -40,22 +40,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', function () {
-        $stats = [
-            'total_patients' => \App\Models\User::where('is_admin', false)->count() + \App\Models\Booking::whereNull('user_id')->whereNotNull('customer_phone')->distinct()->count('customer_phone'),
-            'total_doctors' => \App\Models\Doctor::count(),
-            'total_bookings' => \App\Models\Booking::count(),
-            'today_bookings' => \App\Models\Booking::whereDate('appointment_date', now()->today())->count(),
-            'pending_bookings' => \App\Models\Booking::where('status', 'pending')->count(),
-        ];
-
-        $bookings = \App\Models\Booking::with(['user', 'doctor'])->latest()->get();
-
-        return Inertia::render('Admin/Dashboard', [
-            'bookings' => $bookings,
-            'stats' => $stats
-        ]);
-    })->name('admin.dashboard');
+    Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('admin.dashboard');
 
     // Booking Management
     Route::get('/bookings/{booking}', [\App\Http\Controllers\Admin\BookingController::class, 'show'])->name('admin.bookings.show');
