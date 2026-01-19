@@ -108,10 +108,31 @@ const prevStep = () => {
 };
 
 const submit = () => {
-    form.post(route('booking.store'), {
-        onSuccess: () => {
-             // Handle success (inertia handles redirect)
-        }
+    // Show confirmation dialog before submitting
+    import('sweetalert2').then((module) => {
+        const Swal = module.default;
+        Swal.fire({
+            title: 'ยืนยันการจองคิวของท่าน',
+            text: "คุณต้องการยืนยันการจองคิวใช่หรือไม่?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#4F46E5', // Indigo-600
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'ยืนยัน (Confirm)',
+            cancelButtonText: 'ยกเลิก (Cancel)'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.post(route('booking.store'), {
+                    onSuccess: () => {
+                        Swal.fire(
+                            'สำเร็จ!',
+                            'การจองคิวของคุณเสร็จสมบูรณ์',
+                            'success'
+                        );
+                    }
+                });
+            }
+        });
     });
 };
 
