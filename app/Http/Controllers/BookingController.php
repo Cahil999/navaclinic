@@ -62,7 +62,18 @@ class BookingController extends Controller
         if (auth()->check()) {
             $bookingData['user_id'] = auth()->id();
         } else {
-            $bookingData['user_id'] = null;
+            // Check if there is an existing user with this name and phone
+            $existingUser = \App\Models\User::where('name', $validated['customer_name'])
+                ->where('phone_number', $validated['customer_phone'])
+                ->where('is_admin', false)
+                ->first();
+
+            if ($existingUser) {
+                $bookingData['user_id'] = $existingUser->id;
+            } else {
+                $bookingData['user_id'] = null;
+            }
+
             $bookingData['customer_name'] = $validated['customer_name'];
             $bookingData['customer_phone'] = $validated['customer_phone'];
         }
