@@ -21,6 +21,7 @@ class TreatmentController extends Controller
     public function store(Request $request, Booking $booking)
     {
         $validated = $request->validate([
+            'patient_name' => 'nullable|string|max:255',
             'id_card_number' => 'nullable|string',
             'date_of_birth' => 'nullable|date',
             'age' => 'nullable|integer',

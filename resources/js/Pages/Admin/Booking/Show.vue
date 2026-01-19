@@ -138,6 +138,186 @@ const getStatusClass = (status) => {
                         </div>
 
                     </div>
+                    </div>
+
+                <!-- Medical Record Section -->
+                <div v-if="booking.treatment_record" class="mt-8 bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-indigo-100">
+                    <div class="bg-gradient-to-r from-indigo-50 to-white px-8 py-6 border-b border-indigo-100 flex justify-between items-center">
+                        <h3 class="font-bold text-indigo-900 text-xl flex items-center gap-3">
+                            <div class="p-2 bg-indigo-100 rounded-lg text-indigo-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                                </svg>
+                            </div>
+                            Medical Record
+                            <span class="text-xs font-normal text-indigo-400 border border-indigo-200 px-2 py-0.5 rounded-full">บันทึกเวชระเบียน</span>
+                        </h3>
+                        <Link :href="route('admin.treatment.create', booking.id)" class="group flex items-center gap-2 text-sm font-bold text-indigo-600 hover:text-indigo-700 bg-white px-4 py-2 rounded-xl border border-indigo-100 hover:border-indigo-300 transition-all shadow-sm hover:shadow-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 group-hover:scale-110 transition-transform">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                            </svg>
+                            Edit Record
+                        </Link>
+                    </div>
+                    
+                    <div class="p-8">
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                            <!-- Left Details: Patient & Vital Signs -->
+                            <div class="lg:col-span-4 space-y-8 border-r border-slate-100 pr-0 lg:pr-8">
+                                <section>
+                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                        Patient Profile
+                                    </h4>
+                                    <div class="space-y-4">
+                                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                            <div class="text-xs text-slate-500 mb-1">Full Name</div>
+                                            <div class="font-bold text-slate-900 text-lg">{{ booking.treatment_record.patient_name || '-' }}</div>
+                                            <div class="mt-2 text-xs text-slate-500 font-mono bg-white inline-block px-2 py-1 rounded border border-slate-200">
+                                                ID: {{ booking.treatment_record.id_card_number || '-' }}
+                                            </div>
+                                        </div>
+
+                                        <dl class="grid grid-cols-2 gap-4 text-sm">
+                                            <div><dt class="text-xs text-slate-500">Gender</dt> <dd class="font-medium text-slate-800 capitalize">{{ booking.treatment_record.gender || '-' }}</dd></div>
+                                            <div><dt class="text-xs text-slate-500">Age</dt> <dd class="font-medium text-slate-800">{{ booking.treatment_record.age || '-' }} Years</dd></div>
+                                            <div><dt class="text-xs text-slate-500">DOB</dt> <dd class="font-medium text-slate-800">{{ booking.treatment_record.date_of_birth || '-' }}</dd></div>
+                                            <div><dt class="text-xs text-slate-500">Nationality</dt> <dd class="font-medium text-slate-800">{{ booking.treatment_record.nationality || '-' }}</dd></div>
+                                            <div><dt class="text-xs text-slate-500">Religion</dt> <dd class="font-medium text-slate-800">{{ booking.treatment_record.religion || '-' }}</dd></div>
+                                            <div><dt class="text-xs text-slate-500">Occupation</dt> <dd class="font-medium text-slate-800">{{ booking.treatment_record.occupation || '-' }}</dd></div>
+                                        </dl>
+
+                                        <div class="pt-4 border-t border-slate-100">
+                                            <div class="mb-3">
+                                                 <dt class="text-xs text-slate-500 mb-1">Address</dt> 
+                                                 <dd class="text-sm font-medium text-slate-700 leading-snug">{{ booking.treatment_record.address || '-' }}</dd>
+                                            </div>
+                                            <div class="bg-rose-50 p-3 rounded-lg border border-rose-100">
+                                                <dt class="text-[10px] uppercase font-bold text-rose-400 mb-1">Emergency Contact</dt>
+                                                <dd class="text-sm font-bold text-rose-900">{{ booking.treatment_record.emergency_contact_name || '-' }}</dd>
+                                                <dd class="text-xs text-rose-700 font-mono mt-0.5">{{ booking.treatment_record.emergency_contact_phone || '-' }}</dd>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section>
+                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Vital Signs</h4>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100 text-center">
+                                            <span class="text-[10px] font-bold text-blue-400 uppercase block mb-1">Weight</span>
+                                            <span class="text-lg font-bold text-slate-700">{{ booking.treatment_record.weight || '-' }}</span>
+                                            <span class="text-xs text-slate-400">kg</span>
+                                        </div>
+                                        <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100 text-center">
+                                            <span class="text-[10px] font-bold text-blue-400 uppercase block mb-1">Height</span>
+                                            <span class="text-lg font-bold text-slate-700">{{ booking.treatment_record.height || '-' }}</span>
+                                            <span class="text-xs text-slate-400">cm</span>
+                                        </div>
+                                        <div class="bg-indigo-50/50 p-3 rounded-xl border border-indigo-100 text-center col-span-2 flex justify-between items-center px-6">
+                                            <div class="text-left">
+                                                <span class="text-[10px] font-bold text-indigo-400 uppercase block">BP</span>
+                                                <span class="font-bold text-slate-700">{{ booking.treatment_record.blood_pressure || '-' }}</span> <span class="text-xs text-slate-400">mmHg</span>
+                                            </div>
+                                            <div class="h-8 w-px bg-indigo-100"></div>
+                                             <div class="text-right">
+                                                <span class="text-[10px] font-bold text-indigo-400 uppercase block">Temp</span>
+                                                <span class="font-bold text-slate-700">{{ booking.treatment_record.temperature || '-' }}</span> <span class="text-xs text-slate-400">°C</span>
+                                            </div>
+                                        </div>
+                                         <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-center">
+                                            <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Pulse</span>
+                                            <span class="text-lg font-bold text-slate-700">{{ booking.treatment_record.pulse_rate || '-' }}</span>
+                                            <span class="text-xs text-slate-400">bpm</span>
+                                        </div>
+                                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-center">
+                                            <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Resp</span>
+                                            <span class="text-lg font-bold text-slate-700">{{ booking.treatment_record.respiratory_rate || '-' }}</span>
+                                            <span class="text-xs text-slate-400">bpm</span>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+
+                            <!-- Right Details: Medical history & Exam & Treatment -->
+                            <div class="lg:col-span-8 space-y-8">
+                                <!-- Top Row: History & Complaint -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                     <div class="space-y-6">
+                                        <section>
+                                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Medical History</h4>
+                                            <div class="space-y-3">
+                                                <div class="relative pl-4 border-l-2 border-slate-200">
+                                                    <dt class="text-xs font-bold text-slate-500">Underlying Disease</dt>
+                                                    <dd class="text-sm text-slate-800">{{ booking.treatment_record.underlying_disease || '-' }}</dd>
+                                                </div>
+                                                <div class="relative pl-4 border-l-2 border-rose-200">
+                                                    <dt class="text-xs font-bold text-rose-500">Allergies</dt>
+                                                    <dd class="text-sm font-bold text-rose-600">{{ booking.treatment_record.drug_allergy || '-' }}</dd>
+                                                </div>
+                                                 <div class="relative pl-4 border-l-2 border-slate-200">
+                                                    <dt class="text-xs font-bold text-slate-500">Surgery</dt>
+                                                    <dd class="text-sm text-slate-800">{{ booking.treatment_record.surgery_history || '-' }}</dd>
+                                                </div>
+                                                 <div class="relative pl-4 border-l-2 border-slate-200">
+                                                    <dt class="text-xs font-bold text-slate-500">Accident</dt>
+                                                    <dd class="text-sm text-slate-800">{{ booking.treatment_record.accident_history || '-' }}</dd>
+                                                </div>
+                                            </div>
+                                        </section>
+                                     </div>
+
+                                     <div class="space-y-6">
+                                         <section class="h-full flex flex-col">
+                                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Clinical Assessment</h4>
+                                            <div class="flex-1 space-y-4">
+                                                <div class="bg-amber-50 p-4 rounded-xl border border-amber-100">
+                                                    <dt class="text-xs font-bold text-amber-600 mb-1 uppercase">Chief Complaint</dt>
+                                                    <dd class="text-sm font-medium text-slate-800">{{ booking.treatment_record.chief_complaint || '-' }}</dd>
+                                                </div>
+                                                 <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                                                    <dt class="text-xs font-bold text-indigo-600 mb-1 uppercase">Diagnosis</dt>
+                                                    <dd class="text-sm font-medium text-indigo-900">{{ booking.treatment_record.diagnosis || '-' }}</dd>
+                                                </div>
+                                            </div>
+                                        </section>
+                                     </div>
+                                </div>
+
+                                <!-- Middle: Physical Exam -->
+                                <section>
+                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Physical Examination</h4>
+                                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 text-sm text-slate-700 leading-relaxed whitespace-pre-line font-medium">
+                                        {{ booking.treatment_record.physical_exam || 'No physical examination details recorded.' }}
+                                    </div>
+                                </section>
+
+                                <!-- Bottom: Treatment & Notes -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                     <section>
+                                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Treatment Plan</h4>
+                                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm h-full">
+                                             <div class="prose prose-sm text-slate-700 mb-4 whitespace-pre-wrap">{{ booking.treatment_record.treatment_details || 'No details recorded.' }}</div>
+                                             <div class="flex items-center gap-2 pt-4 border-t border-slate-100">
+                                                 <span class="text-xs font-bold text-slate-500 uppercase">Massage Weight:</span>
+                                                 <span class="bg-slate-100 text-slate-700 px-2 py-1 rounded text-xs font-bold border border-slate-200 capitalize">{{ booking.treatment_record.massage_weight || '-' }}</span>
+                                             </div>
+                                        </div>
+                                    </section>
+
+                                    <section v-if="booking.treatment_record.notes">
+                                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Doctor's Note</h4>
+                                        <div class="bg-yellow-50 p-5 rounded-2xl border border-yellow-100 text-yellow-900 text-sm relative shadow-sm h-full"> 
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="absolute top-4 right-4 text-yellow-200 size-6" viewBox="0 0 20 20" fill="currentColor">
+                                              <path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clip-rule="evenodd" />
+                                            </svg>
+                                            {{ booking.treatment_record.notes }}
+                                        </div>
+                                    </section>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

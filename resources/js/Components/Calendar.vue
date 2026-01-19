@@ -113,13 +113,13 @@ onMounted(() => {
                         'w-full h-full flex flex-col items-center justify-center rounded-lg cursor-pointer transition-colors relative',
                         formatDate(day) === formatDate(selectedDate) ? 'bg-indigo-600 text-white' : 'hover:bg-gray-100',
                         getStatus(day) === 'full' ? 'opacity-50 cursor-not-allowed bg-gray-100' : '',
-                        getStatus(day) === 'closed' ? 'bg-red-500 text-white cursor-pointer hover:bg-red-600' : ''
+                        getStatus(day) === 'closed' ? 'bg-red-50 text-red-500 cursor-not-allowed' : ''
                     ]"
                 >
                     <span class="text-sm">{{ day.getDate() }}</span>
                     <!-- Removed green dot -->
                     <span v-if="getStatus(day) === 'full'" class="text-[10px] text-red-500 font-bold">เต็ม</span>
-                    <span v-if="getStatus(day) === 'closed'" class="text-[10px] text-white font-bold">ปิด</span>
+                    <span v-if="getStatus(day) === 'closed'" class="text-[10px] text-red-500 font-bold">ปิด</span>
                 </div>
             </div>
         </div>
@@ -127,7 +127,7 @@ onMounted(() => {
         <!-- Legend -->
         <div class="mt-4 border-t pt-3 flex flex-col sm:flex-row items-center justify-center text-xs text-gray-500">
             <div class="flex items-center">
-                <span class="w-3 h-3 bg-red-500 rounded-sm mr-1"></span>
+                <span class="w-3 h-3 bg-red-50 rounded-sm mr-1 border border-red-200"></span>
                 <span>ร้านปิด (Closed)</span>
             </div>
         </div>

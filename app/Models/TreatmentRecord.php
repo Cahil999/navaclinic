@@ -11,6 +11,7 @@ class TreatmentRecord extends Model
 
     protected $fillable = [
         'booking_id',
+        'patient_name',
         'id_card_number',
         'date_of_birth',
         'age',

@@ -15,6 +15,7 @@ const props = defineProps({
 
 const form = useForm({
     // Patient Information
+    patient_name: props.previousRecord?.patient_name || (props.booking.user ? props.booking.user.name : props.booking.customer_name) || '',
     id_card_number: props.previousRecord?.id_card_number || '',
     date_of_birth: props.previousRecord?.date_of_birth || '',
     age: props.previousRecord?.age || '',
@@ -98,6 +99,11 @@ const submit = () => {
                                 Patient Information (ข้อมูลทั่วไปของผู้ป่วย)
                             </h4>
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div class="md:col-span-4">
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Name (ชื่อ-นามสกุล)</label>
+                                    <input type="text" v-model="form.patient_name" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <InputError class="mt-2" :message="form.errors.patient_name" />
+                                </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-sm font-medium text-slate-700 mb-1">ID Card No. (เลขบัตรประชาชน)</label>
                                     <input type="text" v-model="form.id_card_number" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
