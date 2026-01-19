@@ -1,6 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import BodyPartSelector from '@/Components/BodyPartSelector.vue';
 
 const props = defineProps({
     booking: {
@@ -314,6 +315,12 @@ const getStatusLabel = (status) => {
                                     <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">การตรวจร่างกาย</h4>
                                     <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 text-sm text-slate-700 leading-relaxed whitespace-pre-line font-medium">
                                         {{ booking.treatment_record.physical_exam || 'ไม่มีข้อมูลการตรวจร่างกาย' }}
+                                    </div>
+                                    <div v-if="booking.treatment_record.pain_areas && booking.treatment_record.pain_areas.length > 0" class="mt-4 pt-4 border-t border-slate-100">
+                                        <h5 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">ตำแหน่งที่ปวด</h5>
+                                        <div class="bg-white p-4 rounded-xl border border-slate-200 flex justify-center">
+                                            <BodyPartSelector :model-value="booking.treatment_record.pain_areas" :readonly="true" />
+                                        </div>
                                     </div>
                                 </section>
 

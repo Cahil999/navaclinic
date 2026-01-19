@@ -48,6 +48,7 @@ class TreatmentController extends Controller
             'massage_weight' => 'nullable|string|in:light,medium,heavy',
             'pain_level_before' => 'nullable|integer|between:0,10',
             'pain_level_after' => 'nullable|integer|between:0,10',
+            'pain_areas' => 'nullable|array',
             'diagnosis' => 'required|string',
             'treatment_details' => 'required|string',
             'notes' => 'nullable|string',

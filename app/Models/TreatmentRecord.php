@@ -38,9 +38,14 @@ class TreatmentRecord extends Model
         'massage_weight',
         'pain_level_before',
         'pain_level_after',
+        'pain_areas',
         'diagnosis',
         'treatment_details',
         'notes',
+    ];
+
+    protected $casts = [
+        'pain_areas' => 'array',
     ];
 
     public function booking()

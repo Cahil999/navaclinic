@@ -2,6 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, useForm, Link } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
+import BodyPartSelector from '@/Components/BodyPartSelector.vue';
 
 const props = defineProps({
     booking: {
@@ -50,6 +51,7 @@ const form = useForm({
     // Treatment
     pain_level_before: props.previousRecord?.pain_level_before || '',
     pain_level_after: props.previousRecord?.pain_level_after || '',
+    pain_areas: props.previousRecord?.pain_areas || [],
     massage_weight: props.previousRecord?.massage_weight || '',
     diagnosis: props.previousRecord?.diagnosis || '',
     treatment_details: props.previousRecord?.treatment_details || '',
@@ -319,6 +321,15 @@ const submit = () => {
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+
+
+                            <div class="pt-6 border-t border-slate-100">
+                                <label class="block text-sm font-bold text-slate-900 mb-4">Pain Areas (บริเวณที่ปวด)</label>
+                                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                                    <BodyPartSelector v-model="form.pain_areas" />
+                                </div>
+                                <InputError class="mt-2" :message="form.errors.pain_areas" />
                             </div>
                         </div>
 
