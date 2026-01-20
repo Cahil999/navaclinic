@@ -19,6 +19,7 @@ class Booking extends Model
         'status',
         'customer_name',
         'customer_phone',
+        'price',
     ];
 
     public function doctor()
@@ -34,5 +35,10 @@ class Booking extends Model
     public function treatmentRecord()
     {
         return $this->hasOne(TreatmentRecord::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
     }
 }

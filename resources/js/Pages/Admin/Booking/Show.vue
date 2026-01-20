@@ -61,6 +61,54 @@ const getStatusLabel = (status) => {
         default: return status;
     }
 };
+import { computed } from 'vue';
+
+// ... (props)
+
+const paymentForm = useForm({
+    amount: '',
+    payment_method: 'cash',
+    notes: '',
+    payment_date: new Date().toISOString().slice(0, 16), // current datetime local formatish
+});
+
+const totalPaid = computed(() => {
+    if (!props.booking.payments) return 0;
+    return props.booking.payments.reduce((sum, payment) => sum + Number(payment.amount), 0);
+});
+
+const remainingAmount = computed(() => {
+    const price = props.booking.price ? Number(props.booking.price) : 0;
+    return Math.max(0, price - totalPaid.value);
+});
+
+const submitPayment = () => {
+    if (!paymentForm.amount) return;
+    paymentForm.post(route('admin.payments.store', props.booking.id), {
+        onSuccess: () => {
+            paymentForm.reset('amount', 'notes');
+            paymentForm.payment_method = 'cash';
+        }
+    });
+};
+
+const deletePayment = (id) => {
+    if (confirm('Are you sure you want to delete this payment?')) {
+        // We can't use form.delete because form is bound to booking update status.
+        // Use router or a separate form. Inertia link is easiest but for post/delete usually use form.
+        // Use a temp form helper
+        useForm({}).delete(route('admin.payments.destroy', id), {
+             preserveScroll: true
+        });
+    }
+}
+
+const printReceipt = () => {
+    window.print();
+};
+
+// ... (existing functions)
+
 </script>
 
 <template>
@@ -161,11 +209,133 @@ const getStatusLabel = (status) => {
                                 >
                                     เพิ่มรายละเอียดการรักษา
                                 </Link>
+                                <Link
+                                    :href="route('admin.bookings.edit', booking.id)"
+                                    class="btn bg-slate-600 hover:bg-slate-700 text-white border-none shadow-md hover:shadow-lg transition-all"
+                                >
+                                    แก้ไขข้อมูลการนัด
+                                </Link>
                             </div>
                         </div>
 
                     </div>
                     </div>
+
+
+
+                <!-- Financial & Payments Section -->
+                <div class="mt-8 bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-emerald-100">
+                    <div class="bg-gradient-to-r from-emerald-50 to-white px-8 py-6 border-b border-emerald-100 flex justify-between items-center">
+                        <h3 class="font-bold text-emerald-900 text-xl flex items-center gap-3">
+                            <div class="p-2 bg-emerald-100 rounded-lg text-emerald-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                            </div>
+                            การเงิน & การชำระเงิน
+                            <span class="text-xs font-normal text-emerald-400 border border-emerald-200 px-2 py-0.5 rounded-full">Financial</span>
+                        </h3>
+                        <div class="flex gap-2">
+                             <a :href="route('admin.bookings.show', booking.id) + '#print-receipt'" @click.prevent="printReceipt" class="group flex items-center gap-2 text-sm font-bold text-emerald-600 hover:text-emerald-700 bg-white px-4 py-2 rounded-xl border border-emerald-100 hover:border-emerald-300 transition-all shadow-sm hover:shadow-md cursor-pointer">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z" />
+                                </svg>
+                                ใบเสร็จรับเงิน
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="p-8">
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            <!-- Payment History -->
+                            <div class="lg:col-span-2 space-y-6">
+                                <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest">ประวัติการชำระเงิน</h4>
+                                
+                                <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                                    <table class="w-full text-sm text-left text-slate-600">
+                                        <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+                                            <tr>
+                                                <th class="px-4 py-3">วันที่</th>
+                                                <th class="px-4 py-3">รายการ/วิธีชำระ</th>
+                                                <th class="px-4 py-3 text-right">ยอดเงิน</th>
+                                                <th class="px-4 py-3 text-center">จัดการ</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-100">
+                                            <tr v-if="booking.payments && booking.payments.length > 0" v-for="payment in booking.payments" :key="payment.id" class="hover:bg-slate-50 transition-colors">
+                                                <td class="px-4 py-3">{{ new Date(payment.payment_date).toLocaleDateString('th-TH') }} <span class="text-xs text-slate-400 block">{{ new Date(payment.payment_date).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'}) }}</span></td>
+                                                <td class="px-4 py-3">
+                                                    <span class="font-medium text-slate-800 capitalize">{{ payment.payment_method }}</span>
+                                                    <div v-if="payment.notes" class="text-xs text-slate-500">{{ payment.notes }}</div>
+                                                </td>
+                                                <td class="px-4 py-3 text-right font-bold text-emerald-600">+{{ Number(payment.amount).toLocaleString() }} ฿</td>
+                                                <td class="px-4 py-3 text-center">
+                                                    <button @click="deletePayment(payment.id)" class="text-slate-400 hover:text-rose-500 transition-colors">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4">
+                                                          <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.1499.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149-.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 0 0 1.5.06l.3-7.5Z" clip-rule="evenodd" />
+                                                        </svg>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr v-else>
+                                                <td colspan="4" class="px-4 py-8 text-center text-slate-400 italic">ยังไม่มีประวัติการชำระเงิน</td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot class="bg-slate-50 border-t border-slate-200">
+                                            <tr>
+                                                <td colspan="2" class="px-4 py-3 text-right font-bold text-slate-600">รวมที่ชำระแล้ว:</td>
+                                                <td class="px-4 py-3 text-right font-bold text-emerald-700 text-lg">{{ totalPaid.toLocaleString() }} ฿</td>
+                                                <td></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Add Payment Form -->
+                            <div class="space-y-6">
+                                <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest">เพิ่มรายการชำระ</h4>
+                                <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100">
+                                    <div class="mb-4 pb-4 border-b border-indigo-100 flex justify-between items-center">
+                                       <span class="text-sm font-bold text-indigo-900">ยอดรวมทั้งสิ้น (Bill Total)</span>
+                                       <span class="text-xl font-bold text-indigo-700">{{ booking.price ? Number(booking.price).toLocaleString() : '0' }} ฿</span>
+                                    </div>
+                                    <div class="mb-4 flex justify-between items-center text-sm">
+                                       <span class="font-bold text-slate-500">คงเหลือที่ต้องชำระ</span>
+                                       <span :class="remainingAmount > 0 ? 'text-rose-600' : 'text-emerald-600'" class="font-bold">
+                                         {{ remainingAmount.toLocaleString() }} ฿
+                                       </span>
+                                    </div>
+
+                                    <form @submit.prevent="submitPayment" class="space-y-4 mt-6">
+                                        <div>
+                                            <label class="block text-xs font-bold text-indigo-700 mb-1">จำนวนเงินที่ชำระ / Amount</label>
+                                            <input type="number" v-model="paymentForm.amount" class="w-full rounded-lg border-indigo-200 focus:border-indigo-500 focus:ring-indigo-500" placeholder="0.00" required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-bold text-indigo-700 mb-1">วิธีชำระ / Method</label>
+                                            <select v-model="paymentForm.payment_method" class="w-full rounded-lg border-indigo-200 focus:border-indigo-500 focus:ring-indigo-500">
+                                                <option value="cash">เงินสด (Cash)</option>
+                                                <option value="transfer">เงินโอน (Transfer)</option>
+                                                <option value="credit_card">บัตรเครดิต (Credit Card)</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-bold text-indigo-700 mb-1">หมายเหตุ / Note</label>
+                                            <input type="text" v-model="paymentForm.notes" class="w-full rounded-lg border-indigo-200 focus:border-indigo-500 focus:ring-indigo-500" placeholder="Optional">
+                                        </div>
+                                        <button type="submit" :disabled="paymentForm.processing" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold shadow-md hover:shadow-lg transition-all flex justify-center items-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+                                              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                            </svg>
+                                            บันทึกรับเงิน
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Medical Record Section -->
                 <div v-if="booking.treatment_record" class="mt-8 bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-indigo-100">

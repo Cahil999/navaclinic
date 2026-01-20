@@ -307,7 +307,12 @@ const getStatusClass = (status) => {
                 <!-- Bookings Table -->
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-slate-100">
                     <div class="p-6 text-slate-900">
-                        <h3 class="text-lg font-bold mb-4 text-slate-800">Latest Bookings</h3>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold text-slate-800">Latest Bookings</h3>
+                            <Link :href="route('admin.bookings.create')" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                + Add Appointment
+                            </Link>
+                        </div>
                         
                         <div class="overflow-x-auto rounded-lg border border-slate-200">
                             <table class="w-full text-sm text-left rtl:text-right text-slate-600">
