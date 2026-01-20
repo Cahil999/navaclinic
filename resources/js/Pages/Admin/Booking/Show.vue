@@ -417,6 +417,10 @@ const printReceipt = () => {
                                         </div>
                                     </section>
                                 </div>
+                                <div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center bg-indigo-50 p-4 rounded-xl">
+                                    <span class="text-sm font-bold text-indigo-900 uppercase">ยอดรวมค่ารักษา (Total Bill)</span>
+                                    <span class="text-2xl font-bold text-indigo-700">{{ booking.price ? Number(booking.price).toLocaleString() : '0' }} ฿</span>
+                                </div>
 
                             </div>
                         </div>
@@ -424,8 +428,26 @@ const printReceipt = () => {
                 </div>
 
                 <!-- Financial & Payments Section -->
-                <div class="mt-8 bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-emerald-100">
-                    <div class="bg-gradient-to-r from-emerald-50 to-white px-8 py-6 border-b border-emerald-100 flex justify-between items-center">
+                <div id="financial-section" class="mt-8 bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-emerald-100 print:shadow-none print:border-none print:m-0 print:p-0 print:w-full">
+                    <!-- Print Only Header -->
+                    <div class="hidden print:block mb-8 text-center">
+                        <h1 class="text-3xl font-bold text-slate-800 mb-2">Nava Clinic</h1>
+                        <p class="text-slate-500 text-sm mb-6">ใบเสร็จรับเงิน / Receipt</p>
+                        
+                        <div class="flex justify-between items-start text-left border-b border-slate-200 pb-6 mb-6">
+                            <div class="space-y-1">
+                                <p><span class="text-slate-500 text-xs uppercase tracking-wide">Patient Name</span></p>
+                                <p class="font-bold text-lg text-slate-800">{{ booking.user ? booking.user.name : (booking.customer_name || 'Guest') }}</p>
+                                <p class="text-xs text-slate-500 mt-1">ID: {{ booking.user ? booking.user.id_number || '-' : '-' }}</p>
+                            </div>
+                            <div class="space-y-1 text-right">
+                                <p><span class="text-slate-500 text-xs uppercase tracking-wide">Receipt No.</span> <span class="font-mono font-bold text-slate-800">#{{ String(booking.id).padStart(6, '0') }}</span></p>
+                                <p><span class="text-slate-500 text-xs uppercase tracking-wide">Date</span> <span class="font-medium text-slate-800">{{ new Date().toLocaleDateString('th-TH') }}</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-emerald-50 to-white px-8 py-6 border-b border-emerald-100 flex justify-between items-center print:hidden">
                         <h3 class="font-bold text-emerald-900 text-xl flex items-center gap-3">
                             <div class="p-2 bg-emerald-100 rounded-lg text-emerald-600">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -435,41 +457,71 @@ const printReceipt = () => {
                             การเงิน & การชำระเงิน
                             <span class="text-xs font-normal text-emerald-400 border border-emerald-200 px-2 py-0.5 rounded-full">Financial</span>
                         </h3>
-                        <div class="flex gap-2">
-                             <a :href="route('admin.bookings.show', booking.id) + '#print-receipt'" @click.prevent="printReceipt" class="group flex items-center gap-2 text-sm font-bold text-emerald-600 hover:text-emerald-700 bg-white px-4 py-2 rounded-xl border border-emerald-100 hover:border-emerald-300 transition-all shadow-sm hover:shadow-md cursor-pointer">
+                        <div class="flex items-center gap-4">
+                            <!-- New: Total Amount Display -->
+                            <div class="text-right hidden sm:block">
+                                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">ยอดค่ารักษา</div>
+                                <div class="text-xl font-bold text-slate-700 leading-none">
+                                    {{ booking.price ? Number(booking.price).toLocaleString() : '0' }} ฿
+                                </div>
+                            </div>
+
+                            
+                            <div class="h-8 w-px bg-slate-200 hidden sm:block"></div>
+
+                            <!-- Amount Due / Status Display -->
+                            <div class="text-right mr-2 hidden sm:block">
+                                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">ยอดที่ต้องชำระ</div>
+                                <div v-if="remainingAmount > 0" class="text-xl font-bold text-rose-600 leading-none">
+                                    {{ remainingAmount.toLocaleString() }} ฿
+                                </div>
+                                <div v-else class="text-base font-bold text-emerald-600 flex items-center justify-end gap-1 leading-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4">
+                                      <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd" />
+                                    </svg>
+                                    ชำระครบแล้ว
+                                </div>
+                            </div>
+                            
+                            <div class="h-8 w-px bg-slate-200 mx-2 hidden sm:block"></div>
+
+                             <button @click="printReceipt" class="group flex items-center gap-2 text-sm font-bold text-emerald-600 hover:text-emerald-700 bg-white px-4 py-2 rounded-xl border border-emerald-100 hover:border-emerald-300 transition-all shadow-sm hover:shadow-md cursor-pointer">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z" />
                                 </svg>
                                 ใบเสร็จรับเงิน
-                            </a>
+                            </button>
                         </div>
                     </div>
                     
-                    <div class="p-8">
-                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="p-8 print:p-0">
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 print:block">
                             <!-- Payment History -->
-                            <div class="lg:col-span-2 space-y-6">
-                                <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest">ประวัติการชำระเงิน</h4>
+                            <div class="lg:col-span-2 space-y-6 print:w-full">
+                                <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest print:hidden">ประวัติการชำระเงิน</h4>
                                 
-                                <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                                <div class="bg-white rounded-xl border border-slate-200 overflow-hidden print:border-none print:shadow-none">
                                     <table class="w-full text-sm text-left text-slate-600">
-                                        <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+                                        <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200 print:bg-transparent print:border-b-2 print:border-slate-800">
                                             <tr>
-                                                <th class="px-4 py-3">วันที่</th>
+                                                <th class="px-4 py-3 print:pl-0">วันที่</th>
                                                 <th class="px-4 py-3">รายการ/วิธีชำระ</th>
                                                 <th class="px-4 py-3 text-right">ยอดเงิน</th>
-                                                <th class="px-4 py-3 text-center">จัดการ</th>
+                                                <th class="px-4 py-3 text-center print:hidden">จัดการ</th>
                                             </tr>
                                         </thead>
-                                        <tbody class="divide-y divide-slate-100">
-                                            <tr v-if="booking.payments && booking.payments.length > 0" v-for="payment in booking.payments" :key="payment.id" class="hover:bg-slate-50 transition-colors">
-                                                <td class="px-4 py-3">{{ new Date(payment.payment_date).toLocaleDateString('th-TH') }} <span class="text-xs text-slate-400 block">{{ new Date(payment.payment_date).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'}) }}</span></td>
+                                        <tbody class="divide-y divide-slate-100 print:divide-slate-200">
+                                            <tr v-if="booking.payments && booking.payments.length > 0" v-for="payment in booking.payments" :key="payment.id" class="hover:bg-slate-50 transition-colors print:hover:bg-transparent">
+                                                <td class="px-4 py-3 print:pl-0">
+                                                    {{ new Date(payment.payment_date).toLocaleDateString('th-TH') }} 
+                                                    <span class="text-xs text-slate-400 block print:inline print:ml-2">{{ new Date(payment.payment_date).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'}) }}</span>
+                                                </td>
                                                 <td class="px-4 py-3">
                                                     <span class="font-medium text-slate-800 capitalize">{{ payment.payment_method }}</span>
                                                     <div v-if="payment.notes" class="text-xs text-slate-500">{{ payment.notes }}</div>
                                                 </td>
-                                                <td class="px-4 py-3 text-right font-bold text-emerald-600">+{{ Number(payment.amount).toLocaleString() }} ฿</td>
-                                                <td class="px-4 py-3 text-center">
+                                                <td class="px-4 py-3 text-right font-bold text-emerald-600 print:text-slate-800">+{{ Number(payment.amount).toLocaleString() }} ฿</td>
+                                                <td class="px-4 py-3 text-center print:hidden">
                                                     <button @click="deletePayment(payment.id)" class="text-slate-400 hover:text-rose-500 transition-colors">
                                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4">
                                                           <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.1499.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149-.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 0 0 1.5.06l.3-7.5Z" clip-rule="evenodd" />
@@ -481,25 +533,39 @@ const printReceipt = () => {
                                                 <td colspan="4" class="px-4 py-8 text-center text-slate-400 italic">ยังไม่มีประวัติการชำระเงิน</td>
                                             </tr>
                                         </tbody>
-                                        <tfoot class="bg-slate-50 border-t border-slate-200">
+                                        <tfoot class="bg-slate-50 border-t border-slate-200 print:bg-transparent print:border-t-2 print:border-slate-800">
                                             <tr>
-                                                <td colspan="2" class="px-4 py-3 text-right font-bold text-slate-600">รวมที่ชำระแล้ว:</td>
-                                                <td class="px-4 py-3 text-right font-bold text-emerald-700 text-lg">{{ totalPaid.toLocaleString() }} ฿</td>
-                                                <td></td>
+                                                <td colspan="2" class="px-4 py-4 text-right font-bold text-slate-600 print:text-slate-800">รวมที่ชำระแล้ว (Total Paid):</td>
+                                                <td class="px-4 py-4 text-right font-bold text-emerald-700 text-lg print:text-slate-900">{{ totalPaid.toLocaleString() }} ฿</td>
+                                                <td class="print:hidden"></td>
+                                            </tr>
+                                            <tr class="print:border-t">
+                                                 <td colspan="2" class="px-4 py-2 text-right font-bold text-slate-500 text-xs print:hidden">คงเหลือที่ต้องชำระ:</td>
+                                                 <td class="px-4 py-2 text-right font-bold text-slate-500 text-xs print:hidden">{{ remainingAmount.toLocaleString() }} ฿</td>
+                                                 <td class="print:hidden"></td>
                                             </tr>
                                         </tfoot>
                                     </table>
                                 </div>
+                                
+                                <!-- Print Footer -->
+                                <div class="hidden print:flex justify-between items-end mt-16 pt-8 border-t border-slate-200">
+                                    <div class="text-xs text-slate-400">
+                                        <p>Thank you for trusting Nava Clinic.</p>
+                                        <p class="mt-1">Bangkok, Thailand | Tel: 02-XXX-XXXX</p>
+                                    </div>
+                                    <div class="text-center">
+                                         <div class="border-b border-slate-300 w-40 mb-2"></div>
+                                         <p class="text-xs text-slate-500">Authorized Signature</p>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Add Payment Form -->
-                            <div class="space-y-6">
+                            <div class="space-y-6 print:hidden">
                                 <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest">เพิ่มรายการชำระ</h4>
                                 <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100">
-                                    <div class="mb-4 pb-4 border-b border-indigo-100 flex justify-between items-center">
-                                       <span class="text-sm font-bold text-indigo-900">ยอดรวมทั้งสิ้น (Bill Total)</span>
-                                       <span class="text-xl font-bold text-indigo-700">{{ booking.price ? Number(booking.price).toLocaleString() : '0' }} ฿</span>
-                                    </div>
+
                                     <div class="mb-4 flex justify-between items-center text-sm">
                                        <span class="font-bold text-slate-500">คงเหลือที่ต้องชำระ</span>
                                        <span :class="remainingAmount > 0 ? 'text-rose-600' : 'text-emerald-600'" class="font-bold">
@@ -540,3 +606,33 @@ const printReceipt = () => {
         </div>
     </AuthenticatedLayout>
 </template>
+
+<style>
+@media print {
+    /* Hide everything by default */
+    body * {
+        visibility: hidden;
+    }
+    
+    /* Unhide the financial section and its children */
+    #financial-section, #financial-section * {
+        visibility: visible;
+    }
+
+    /* Position the financial section at the top */
+    #financial-section {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        box-shadow: none !important;
+        border: none !important;
+    }
+    
+    /* Ensure background graphics are printed (if user enables it) */
+    * {
+        -webkit-print-color-adjust: exact !important;   /* Chrome, Safari */
+        print-color-adjust: exact !important;          /* Firefox */
+    }
+}
+</style>

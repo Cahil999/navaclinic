@@ -52,11 +52,17 @@ class TreatmentController extends Controller
             'diagnosis' => 'required|string',
             'treatment_details' => 'required|string',
             'notes' => 'nullable|string',
+            'price' => 'nullable|numeric|min:0',
         ]);
+
+        // Update the booking price
+        if ($request->has('price')) {
+            $booking->update(['price' => $request->price]);
+        }
 
         $booking->treatmentRecord()->updateOrCreate(
             ['booking_id' => $booking->id],
-            $validated
+            collect($validated)->except('price')->toArray()
         );
 
         return redirect()->route('admin.bookings.show', $booking->id)

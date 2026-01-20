@@ -56,6 +56,7 @@ const form = useForm({
     diagnosis: props.previousRecord?.diagnosis || '',
     treatment_details: props.previousRecord?.treatment_details || '',
     notes: props.previousRecord?.notes || '',
+    price: props.booking.price || '',
 });
 
 const submit = () => {
@@ -335,6 +336,17 @@ const submit = () => {
 
                         <!-- Section 5: Other -->
                         <div class="space-y-6 pt-6 border-t border-slate-100">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Price (Total Bill - ยอดรวมค่ารักษา)</label>
+                                <div class="relative">
+                                    <input type="number" step="0.01" v-model="form.price" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-4 pr-12 font-bold text-slate-700" placeholder="0.00">
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                        <span class="text-slate-500 sm:text-sm">THB</span>
+                                    </div>
+                                </div>
+                                <InputError class="mt-2" :message="form.errors.price" />
+                            </div>
+
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Doctor's Notes (บันทึกเพิ่มเติม)</label>
                                 <textarea v-model="form.notes" rows="2" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
