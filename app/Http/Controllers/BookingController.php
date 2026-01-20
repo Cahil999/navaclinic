@@ -261,7 +261,7 @@ class BookingController extends Controller
             });
 
             // We include the slot even if all doctors are busy? 
-            // The user usually wants to see "Time Slot" -> Then see doctors. 
+            // The user wants to see "Time Slot" -> Then see doctors. 
             // If we filter out slots where EVERYONE is busy, the user can't see "Busy" status.
             // But if we show every 30 min slot, it might be too many.
             // Standard practice: Show slots that have AT LEAST ONE available doctor?
@@ -271,15 +271,17 @@ class BookingController extends Controller
             // THIS IS KEY. 
             // However, usually you don't care about a time if NO ONE is free.
             // I'll stick to: Show slot if at least 1 is free. And in that slot, show busy doctors too.
+            // WAIT, the user said: "If that day, some time doctor is not free, show red box and cannot select".
+            // This implies the slot SHOUDL BE SHOWN but RED if the doctor is busy.
+            // So we should return the slot if it is within opening hours.
 
-            $hasAvailableInfo = $doctorsWithStatus->where('status', 'available')->isNotEmpty();
+            // We want to return ALL slots within opening hours, regardless of availability.
+            // The frontend will decide how to render based on the selected doctor or overall availability.
 
-            if ($hasAvailableInfo) {
-                $slots[] = [
-                    'time' => $timeStr,
-                    'doctors' => $doctorsWithStatus->values() // Renamed to 'doctors' to imply all
-                ];
-            }
+            $slots[] = [
+                'time' => $timeStr,
+                'doctors' => $doctorsWithStatus->values()
+            ];
 
             // Move to next 30 min slot
             $current->addMinutes(30);

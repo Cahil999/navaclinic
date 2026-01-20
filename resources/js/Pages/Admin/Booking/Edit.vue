@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, useForm, Link } from '@inertiajs/vue3';
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import axios from 'axios';
 import Calendar from '@/Components/Calendar.vue';
 
@@ -23,7 +23,6 @@ const monthlyAvailability = ref({});
 const availableSlots = ref([]);
 const loadingEx = ref(false);
 const errorMessage = ref('');
-const availableDoctors = ref([]);
 
 const fetchMonthlyAvailability = async (month, year) => {
     try {
@@ -49,10 +48,6 @@ const fetchSlots = async () => {
             }
         });
         availableSlots.value = res.data;
-        
-        // Check if current current time is in available slots logic?
-        // Actually, if we are editing, we might keep the current time even if "unavailable" (e.g. override)
-        // But let's show availability.
     } catch (e) {
         if (e.response && e.response.status === 422) {
              errorMessage.value = e.response.data.message;
@@ -62,6 +57,70 @@ const fetchSlots = async () => {
     }
 };
 
+const isSlotBusy = (slot) => {
+    // If a doctor is selected, check only that doctor
+    if (form.doctor_id) {
+        const docStatus = slot.doctors.find(d => d.id === form.doctor_id);
+        return docStatus && docStatus.status === 'busy';
+    }
+    // If no doctor selected, slot is busy only if ALL doctors are busy?
+    // Or maybe we treat it as available if at least one is available.
+    // In this UI context, usually we want to see if the slot is "selectable".
+    // If no doctor is picked, maybe we shouldn't show busy unless *everyone* is busy.
+    const allBusy = slot.doctors.every(d => d.status === 'busy');
+    return allBusy;
+};
+
+const unavailableDoctors = computed(() => {
+    if (!availableSlots.value.length) return [];
+    
+    const busyMap = {};
+
+    availableSlots.value.forEach(slot => {
+        slot.doctors.forEach(doc => {
+             if (doc.status === 'busy') {
+                 if (!busyMap[doc.id]) {
+                     busyMap[doc.id] = { name: doc.name, times: [] };
+                 }
+                 // Avoid duplicate start times for cleaner list
+                 // doc.busy_slots contains the actual booked ranges "10:00-11:00"
+                 // but here we are iterating over *potential* slots.
+                 // Actually easier to just use the `busy_slots` array returned from backend for that doctor?
+                 // Wait, backend logic for busy_slots in the pivot was:
+                 // 'busy_slots' => $busySlots (array of strings "HH:mm-HH:mm")
+                 // So we can just take the first occurrence of the doctor in any slot and get their full busy schedule?
+                 // Yes, because `busy_slots` is all bookings for that day.
+             }
+        });
+    });
+
+    // Extract unique doctors and their full day busy slots
+    const results = [];
+    const seenDocs = new Set();
+    
+    // We can just look at the first slot to get the doctors list? 
+    // No, doctors might not be in every slot if logic changed, but currently they are.
+    // Let's iterate.
+    availableSlots.value.forEach(slot => {
+        slot.doctors.forEach(doc => {
+            if (doc.status === 'busy' && !seenDocs.has(doc.id)) {
+                // Determine the unique set of booked times for this doctor from the backend response
+                // The backend sends 'busy_slots' on every slot object for that doctor.
+                // It is the LIST of all bookings for that doctor on that day.
+                if (doc.busy_slots && doc.busy_slots.length > 0) {
+                     results.push({
+                         name: doc.name,
+                         times: doc.busy_slots // This is already ["10:00-11:00", "14:00-15:00"]
+                     });
+                     seenDocs.add(doc.id);
+                }
+            }
+        });
+    });
+    
+    return results;
+});
+
 // Initial fetch if date is set
 onMounted(() => {
     if (form.appointment_date) {
@@ -70,7 +129,8 @@ onMounted(() => {
         fetchMonthlyAvailability(d.getMonth() + 1, d.getFullYear());
         fetchSlots();
     }
-});
+}); 
+
 
 const onDateSelected = async (date) => {
     form.appointment_date = date;
@@ -142,6 +202,20 @@ const selectTime = (slot) => {
                                          </select>
                                          <div v-if="form.errors.doctor_id" class="text-red-500 text-xs mt-1">{{ form.errors.doctor_id }}</div>
                                     </div>
+
+                                    <!-- Unavailable Doctors List (Moved Here) -->
+                                    <div v-if="unavailableDoctors.length > 0" class="mt-4 pt-4 border-t border-gray-100">
+                                        <h5 class="text-[10px] font-bold text-rose-400 uppercase mb-2">Unavailable Doctors</h5>
+                                        <ul class="space-y-1">
+                                            <li v-for="(info, index) in unavailableDoctors" :key="index" class="text-xs text-slate-600 flex items-start gap-1">
+                                                <span class="text-rose-500 font-bold">•</span>
+                                                <span>
+                                                    <strong class="text-slate-700">{{ info.name }}</strong>: 
+                                                    <span class="text-slate-500">{{ info.times.join(', ') }}</span>
+                                                </span>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
 
                                 <!-- Right Column: Schedule -->
@@ -180,16 +254,25 @@ const selectTime = (slot) => {
                                         <h4 class="text-xs font-bold text-indigo-700 uppercase mb-2">Available Slots for {{ form.appointment_date }}</h4>
                                         <div v-if="loadingEx" class="flex justify-center p-2"><span class="loading loading-spinner text-indigo-500"></span></div>
                                         <div v-else-if="availableSlots.length === 0" class="text-xs text-gray-500 italic">No available slots found (or date not selected).</div>
-                                        <div v-else class="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
-                                            <button 
-                                                v-for="slot in availableSlots" 
-                                                :key="slot.time" 
-                                                type="button"
-                                                @click="form.start_time = slot.time"
-                                                class="px-2 py-1 text-xs bg-white border border-indigo-200 rounded hover:bg-indigo-600 hover:text-white transition-colors"
-                                            >
-                                                {{ slot.time.substring(0, 5) }}
-                                            </button>
+                                        <div v-else class="space-y-4">
+                                            <div class="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
+                                                <button 
+                                                    v-for="slot in availableSlots" 
+                                                    :key="slot.time" 
+                                                    type="button"
+                                                    :disabled="isSlotBusy(slot)"
+                                                    @click="form.start_time = slot.time"
+                                                    :class="[
+                                                        isSlotBusy(slot) 
+                                                            ? 'bg-rose-50 text-rose-400 border-rose-100 cursor-not-allowed' 
+                                                            : (form.start_time === slot.time ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white border-indigo-200 hover:bg-indigo-600 hover:text-white')
+                                                    ]"
+                                                    class="px-2 py-1 text-xs border rounded transition-colors"
+                                                >
+                                                    {{ slot.time.substring(0, 5) }}
+                                                </button>
+                                            </div>
+
                                         </div>
                                     </div>
                                 </div>
