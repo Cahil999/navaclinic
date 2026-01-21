@@ -7,13 +7,25 @@ import BodyPartSelector from '@/Components/BodyPartSelector.vue';
 const props = defineProps({
     booking: {
         type: Object,
-        required: true,
+        default: null,
+    },
+    visit: {
+        type: Object,
+        default: null,
     },
     previousRecord: {
         type: Object,
         default: null,
+    },
+    isVisit: {
+        type: Boolean,
+        default: false,
     }
 });
+
+// Get the entity (booking or visit)
+const entity = props.isVisit ? props.visit : props.booking;
+const entityPrice = props.isVisit ? props.visit?.price : props.booking?.price;
 
 const form = useForm({
     // Vital Signs
@@ -36,11 +48,14 @@ const form = useForm({
     diagnosis: props.previousRecord?.diagnosis || '',
     treatment_details: props.previousRecord?.treatment_details || '',
     notes: props.previousRecord?.notes || '',
-    price: props.booking.price || '',
+    price: entityPrice || '',
 });
 
 const submit = () => {
-    form.post(route('admin.treatment.store', props.booking.id), {
+    const routeName = props.isVisit ? 'admin.visits.treatment.store' : 'admin.treatment.store';
+    const routeParam = entity.id;
+    
+    form.post(route(routeName, routeParam), {
         onSuccess: () => {
             Swal.fire({
                 title: 'Data Saved Successfully',
@@ -65,8 +80,8 @@ const submit = () => {
                 <h2 class="font-semibold text-xl text-slate-800 leading-tight">
                     Add Treatment Details
                 </h2>
-                <Link :href="route('admin.bookings.show', booking.id)" class="text-sm text-indigo-600 hover:text-indigo-900 font-medium">
-                    &larr; Back to Booking
+                <Link :href="isVisit ? route('admin.visits.show', entity.id) : route('admin.bookings.show', entity.id)" class="text-sm text-indigo-600 hover:text-indigo-900 font-medium">
+                    &larr; Back to {{ isVisit ? 'Visit' : 'Booking' }}
                 </Link>
             </div>
         </template>
@@ -78,11 +93,11 @@ const submit = () => {
                     <div class="bg-indigo-50 px-8 py-6 border-b border-indigo-100 flex justify-between items-center">
                         <div>
                             <h3 class="font-bold text-indigo-900 text-lg">Medical Record (บันทึกเวชระเบียน)</h3>
-                            <p class="text-sm text-indigo-600 mt-1">Patient: <span class="font-semibold">{{ booking.user ? booking.user.name : booking.customer_name }}</span></p>
+                            <p class="text-sm text-indigo-600 mt-1">Patient: <span class="font-semibold">{{ entity.patient ? entity.patient.name : (entity.user ? entity.user.name : entity.customer_name) }}</span></p>
                         </div>
                         <div class="text-right text-xs text-slate-500">
-                            Booking ID: #{{ booking.id }}<br>
-                            Date: {{ booking.appointment_date }}
+                            {{ isVisit ? 'Visit' : 'Booking' }} ID: #{{ entity.id }}<br>
+                            Date: {{ isVisit ? new Date(entity.visit_date).toLocaleDateString() : entity.appointment_date }}
                         </div>
                     </div>
 
@@ -226,7 +241,7 @@ const submit = () => {
                         </div>
 
                         <div class="pt-8 border-t border-slate-100 flex justify-end gap-3 sticky bottom-0 bg-white p-4 -mx-4 -mb-4 shadow-lg sm:static sm:shadow-none sm:p-0 sm:m-0">
-                            <Link :href="route('admin.bookings.show', booking.id)" class="px-6 py-2.5 bg-white text-slate-700 border border-slate-300 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors">
+                            <Link :href="isVisit ? route('admin.visits.show', entity.id) : route('admin.bookings.show', entity.id)" class="px-6 py-2.5 bg-white text-slate-700 border border-slate-300 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors">
                                 Cancel
                             </Link>
                             <button 

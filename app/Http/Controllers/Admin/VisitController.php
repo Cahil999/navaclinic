@@ -82,7 +82,7 @@ class VisitController extends Controller
     }
     public function show(Visit $visit)
     {
-        $visit->load(['patient', 'doctor', 'booking']);
+        $visit->load(['patient', 'doctor', 'booking', 'treatmentRecord', 'payments']);
 
         return Inertia::render('Admin/Visits/Show', [
             'visit' => $visit,
