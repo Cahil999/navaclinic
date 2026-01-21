@@ -331,7 +331,7 @@ const getStatusClass = (status) => {
                                         <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">
                                             <div v-if="booking.user">
                                                 {{ booking.user.name }}
-                                                <div class="text-xs text-slate-500">{{ booking.user.email }}</div>
+                                                <div class="text-xs text-slate-500">{{ booking.user.phone_number || '-' }}</div>
                                             </div>
                                             <div v-else>
                                                 {{ booking.customer_name || 'Guest' }}
