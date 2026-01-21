@@ -142,7 +142,7 @@ const printReceipt = () => {
                                 </h3>
                                 <div class="space-y-3 text-slate-600">
                                     <p><strong class="text-slate-800">ชื่อ:</strong> {{ booking.user ? booking.user.name : (booking.customer_name || 'Guest') }}</p>
-                                    <p><strong class="text-slate-800">ข้อมูลติดต่อ:</strong> {{ booking.user ? booking.user.email : (booking.customer_phone || '-') }}</p>
+                                    <p><strong class="text-slate-800">ข้อมูลติดต่อ:</strong> {{ booking.user ? booking.user.phone_number : (booking.customer_phone || '-') }}</p>
                                     <div class="mt-4 pt-2">
                                          <Link v-if="booking.user" :href="route('admin.patients.show', booking.user.id)" class="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium hover:underline">
                                             ดูประวัติผู้ป่วย
@@ -248,175 +248,136 @@ const printReceipt = () => {
                     <div class="p-8">
                         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                             <!-- Left Details: Patient & Vital Signs -->
-                            <div class="lg:col-span-4 space-y-8 border-r border-slate-100 pr-0 lg:pr-8">
+                            <div class="lg:col-span-4 space-y-6 border-r border-slate-100 pr-0 lg:pr-8">
+
+
                                 <section>
                                     <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                        ข้อมูลส่วนตัวผู้ป่วย
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4 text-slate-400">
+                                          <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
+                                        </svg>
+                                        สัญญาณชีพ (Vital Signs)
                                     </h4>
-                                    <div class="space-y-4">
-                                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                            <div class="text-xs text-slate-500 mb-1">ชื่อ-นามสกุล</div>
-                                            <div class="font-bold text-slate-900 text-lg">{{ booking.treatment_record.patient_name || '-' }}</div>
-                                            <div class="mt-2 text-xs text-slate-500 font-mono bg-white inline-block px-2 py-1 rounded border border-slate-200">
-                                                เลขบัตร: {{ booking.treatment_record.id_card_number || '-' }}
+                                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-5">
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div class="text-center">
+                                                <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">ความดัน (BP)</div>
+                                                <div class="text-xl font-bold text-indigo-600">{{ booking.treatment_record.blood_pressure || '-' }}</div>
+                                                <div class="text-[10px] text-slate-400">mmHg</div>
+                                            </div>
+                                            <div class="text-center relative">
+                                                <div class="absolute left-0 top-2 bottom-2 w-px bg-slate-100"></div>
+                                                <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">อุณหภูมิ (Temp)</div>
+                                                <div class="text-xl font-bold text-rose-500">{{ booking.treatment_record.temperature || '-' }}</div>
+                                                <div class="text-[10px] text-slate-400">°C</div>
+                                            </div>
+                                            <div class="text-center border-t border-slate-100 pt-4">
+                                                <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">ชีพจร (Pulse)</div>
+                                                <div class="text-xl font-bold text-blue-500">{{ booking.treatment_record.pulse_rate || '-' }}</div>
+                                                <div class="text-[10px] text-slate-400">bpm</div>
+                                            </div>
+                                            <div class="text-center border-t border-slate-100 pt-4 relative">
+                                                <div class="absolute left-0 top-4 bottom-0 w-px bg-slate-100"></div>
+                                                <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">หายใจ (Resp)</div>
+                                                <div class="text-xl font-bold text-emerald-500">{{ booking.treatment_record.respiratory_rate || '-' }}</div>
+                                                <div class="text-[10px] text-slate-400">bpm</div>
                                             </div>
                                         </div>
-
-                                        <dl class="grid grid-cols-2 gap-4 text-sm">
-                                            <div><dt class="text-xs text-slate-500">เพศ</dt> <dd class="font-medium text-slate-800 capitalize">{{ booking.treatment_record.gender || '-' }}</dd></div>
-                                            <div><dt class="text-xs text-slate-500">อายุ</dt> <dd class="font-medium text-slate-800">{{ booking.treatment_record.age || '-' }} ปี</dd></div>
-                                            <div><dt class="text-xs text-slate-500">วันเกิด</dt> <dd class="font-medium text-slate-800">{{ booking.treatment_record.date_of_birth || '-' }}</dd></div>
-                                            <div><dt class="text-xs text-slate-500">สัญชาติ</dt> <dd class="font-medium text-slate-800">{{ booking.treatment_record.nationality || '-' }}</dd></div>
-                                            <div><dt class="text-xs text-slate-500">ศาสนา</dt> <dd class="font-medium text-slate-800">{{ booking.treatment_record.religion || '-' }}</dd></div>
-                                            <div><dt class="text-xs text-slate-500">อาชีพ</dt> <dd class="font-medium text-slate-800">{{ booking.treatment_record.occupation || '-' }}</dd></div>
-                                        </dl>
-
-                                        <div class="pt-4 border-t border-slate-100">
-                                            <div class="mb-3">
-                                                 <dt class="text-xs text-slate-500 mb-1">ที่อยู่</dt> 
-                                                 <dd class="text-sm font-medium text-slate-700 leading-snug">{{ booking.treatment_record.address || '-' }}</dd>
+                                        
+                                        <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+                                            <div class="bg-slate-50 rounded-xl p-3 flex justify-between items-center px-4">
+                                                <span class="text-xs font-bold text-slate-500">BW</span>
+                                                <span class="font-bold text-slate-800">{{ booking.treatment_record.weight || '-' }} <span class="text-[10px] text-slate-400 font-normal">kg</span></span>
                                             </div>
-                                            <div class="bg-rose-50 p-3 rounded-lg border border-rose-100">
-                                                <dt class="text-[10px] uppercase font-bold text-rose-400 mb-1">ติดต่อฉุกเฉิน</dt>
-                                                <dd class="text-sm font-bold text-rose-900">{{ booking.treatment_record.emergency_contact_name || '-' }}</dd>
-                                                <dd class="text-xs text-rose-700 font-mono mt-0.5">{{ booking.treatment_record.emergency_contact_phone || '-' }}</dd>
+                                            <div class="bg-slate-50 rounded-xl p-3 flex justify-between items-center px-4">
+                                                <span class="text-xs font-bold text-slate-500">HT</span>
+                                                <span class="font-bold text-slate-800">{{ booking.treatment_record.height || '-' }} <span class="text-[10px] text-slate-400 font-normal">cm</span></span>
                                             </div>
                                         </div>
                                     </div>
                                 </section>
 
+                                <!-- Clinical Assessment (Moved to Left) -->
                                 <section>
-                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">สัญญาณชีพ</h4>
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100 text-center">
-                                            <span class="text-[10px] font-bold text-blue-400 uppercase block mb-1">น้ำหนัก</span>
-                                            <span class="text-lg font-bold text-slate-700">{{ booking.treatment_record.weight || '-' }}</span>
-                                            <span class="text-xs text-slate-400">กก.</span>
+                                     <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4 text-slate-400">
+                                          <path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clip-rule="evenodd" />
+                                        </svg>
+                                        การตรวจประเมิน (Clinical)
+                                     </h4>
+                                     <div class="space-y-4">
+                                        <div class="bg-amber-50 p-4 rounded-xl border border-amber-100 relative overflow-hidden group hover:shadow-sm transition-shadow">
+                                            <div class="absolute top-0 right-0 w-12 h-12 bg-amber-100 rounded-bl-full -mr-6 -mt-6 opacity-50 group-hover:scale-110 transition-transform"></div>
+                                            <dt class="text-[10px] font-bold text-amber-500 mb-1 uppercase tracking-wide">อาการสำคัญ (CC)</dt>
+                                            <dd class="text-sm font-medium text-slate-800 leading-snug">{{ booking.treatment_record.chief_complaint || '-' }}</dd>
                                         </div>
-                                        <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100 text-center">
-                                            <span class="text-[10px] font-bold text-blue-400 uppercase block mb-1">ส่วนสูง</span>
-                                            <span class="text-lg font-bold text-slate-700">{{ booking.treatment_record.height || '-' }}</span>
-                                            <span class="text-xs text-slate-400">ซม.</span>
+                                         <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 relative overflow-hidden group hover:shadow-sm transition-shadow">
+                                            <div class="absolute top-0 right-0 w-12 h-12 bg-indigo-100 rounded-bl-full -mr-6 -mt-6 opacity-50 group-hover:scale-110 transition-transform"></div>
+                                            <dt class="text-[10px] font-bold text-indigo-500 mb-1 uppercase tracking-wide">การวินิจฉัย (Dx)</dt>
+                                            <dd class="text-sm font-medium text-indigo-900 leading-snug">{{ booking.treatment_record.diagnosis || '-' }}</dd>
                                         </div>
-                                        <div class="bg-indigo-50/50 p-3 rounded-xl border border-indigo-100 text-center col-span-2 flex justify-between items-center px-6">
-                                            <div class="text-left">
-                                                <span class="text-[10px] font-bold text-indigo-400 uppercase block">ความดัน</span>
-                                                <span class="font-bold text-slate-700">{{ booking.treatment_record.blood_pressure || '-' }}</span> <span class="text-xs text-slate-400">mmHg</span>
-                                            </div>
-                                            <div class="h-8 w-px bg-indigo-100"></div>
-                                             <div class="text-right">
-                                                <span class="text-[10px] font-bold text-indigo-400 uppercase block">อุณหภูมิ</span>
-                                                <span class="font-bold text-slate-700">{{ booking.treatment_record.temperature || '-' }}</span> <span class="text-xs text-slate-400">°C</span>
-                                            </div>
-                                        </div>
-                                         <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-center">
-                                            <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">ชีพจร</span>
-                                            <span class="text-lg font-bold text-slate-700">{{ booking.treatment_record.pulse_rate || '-' }}</span>
-                                            <span class="text-xs text-slate-400">bpm</span>
-                                        </div>
-                                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-center">
-                                            <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">การหายใจ</span>
-                                            <span class="text-lg font-bold text-slate-700">{{ booking.treatment_record.respiratory_rate || '-' }}</span>
-                                            <span class="text-xs text-slate-400">bpm</span>
-                                        </div>
-                                    </div>
+                                     </div>
                                 </section>
                             </div>
 
-                            <!-- Right Details: Medical history & Exam & Treatment -->
+                            <!-- Right Details: Assessment & Treatment -->
                             <div class="lg:col-span-8 space-y-8">
-                                <!-- Top Row: History & Complaint -->
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                     <div class="space-y-6">
-                                        <section>
-                                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">ประวัติการเจ็บป่วย</h4>
-                                            <div class="space-y-3">
-                                                <div class="relative pl-4 border-l-2 border-slate-200">
-                                                    <dt class="text-xs font-bold text-slate-500">โรคประจำตัว</dt>
-                                                    <dd class="text-sm text-slate-800">{{ booking.treatment_record.underlying_disease || '-' }}</dd>
-                                                </div>
-                                                <div class="relative pl-4 border-l-2 border-rose-200">
-                                                    <dt class="text-xs font-bold text-rose-500">แพ้ยา/อาหาร</dt>
-                                                    <dd class="text-sm font-bold text-rose-600">{{ booking.treatment_record.drug_allergy || '-' }}</dd>
-                                                </div>
-                                                 <div class="relative pl-4 border-l-2 border-slate-200">
-                                                    <dt class="text-xs font-bold text-slate-500">ประวัติการผ่าตัด</dt>
-                                                    <dd class="text-sm text-slate-800">{{ booking.treatment_record.surgery_history || '-' }}</dd>
-                                                </div>
-                                                 <div class="relative pl-4 border-l-2 border-slate-200">
-                                                    <dt class="text-xs font-bold text-slate-500">ประวัติอุบัติเหตุ</dt>
-                                                    <dd class="text-sm text-slate-800">{{ booking.treatment_record.accident_history || '-' }}</dd>
-                                                </div>
-                                            </div>
-                                        </section>
-                                     </div>
+                                <!-- Clinical Assessment -->
 
-                                     <div class="space-y-6">
-                                         <section class="h-full flex flex-col">
-                                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">การตรวจประเมินทางคลินิก</h4>
-                                            <div class="flex-1 space-y-4">
-                                                <div class="bg-amber-50 p-4 rounded-xl border border-amber-100">
-                                                    <dt class="text-xs font-bold text-amber-600 mb-1 uppercase">อาการสำคัญ</dt>
-                                                    <dd class="text-sm font-medium text-slate-800">{{ booking.treatment_record.chief_complaint || '-' }}</dd>
-                                                </div>
-                                                 <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
-                                                    <dt class="text-xs font-bold text-indigo-600 mb-1 uppercase">การวินิจฉัย</dt>
-                                                    <dd class="text-sm font-medium text-indigo-900">{{ booking.treatment_record.diagnosis || '-' }}</dd>
-                                                </div>
+
+                                <!-- Physical Exam & Pain Areas -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <section>
+                                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">การตรวจร่างกาย (PE)</h4>
+                                        <div class="bg-white p-6 rounded-2xl border border-slate-200 text-sm text-slate-700 leading-relaxed font-medium h-full min-h-[250px]">
+                                            {{ booking.treatment_record.physical_exam || 'ไม่มีข้อมูลการตรวจร่างกาย' }}
+                                        </div>
+                                    </section>
+                                    <section>
+                                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">ตำแหน่งที่ปวด</h4>
+                                         <div class="bg-white p-4 rounded-2xl border border-slate-200 flex justify-center items-center h-full min-h-[250px]">
+                                            <div v-if="booking.treatment_record.pain_areas && booking.treatment_record.pain_areas.length > 0">
+                                                <BodyPartSelector :model-value="booking.treatment_record.pain_areas" :readonly="true" />
                                             </div>
-                                        </section>
-                                     </div>
+                                            <div v-else class="text-slate-400 text-xs text-center italic">ไม่ได้ระบุตำแหน่ง</div>
+                                        </div>
+                                    </section>
                                 </div>
 
-                                <!-- Middle: Physical Exam -->
+                                <!-- Treatment & Plan -->
                                 <section>
-                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">การตรวจร่างกาย</h4>
-                                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 text-sm text-slate-700 leading-relaxed whitespace-pre-line font-medium">
-                                        {{ booking.treatment_record.physical_exam || 'ไม่มีข้อมูลการตรวจร่างกาย' }}
-                                    </div>
-                                    <div v-if="booking.treatment_record.pain_areas && booking.treatment_record.pain_areas.length > 0" class="mt-4 pt-4 border-t border-slate-100">
-                                        <h5 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">ตำแหน่งที่ปวด</h5>
-                                        <div class="bg-white p-4 rounded-xl border border-slate-200 flex justify-center">
-                                            <BodyPartSelector :model-value="booking.treatment_record.pain_areas" :readonly="true" />
+                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">แผนการรักษา (Treatment Plan)</h4>
+                                    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                                        <div class="p-6 md:p-8">
+                                             <div class="prose prose-sm prose-slate max-w-none mb-6">
+                                                <p class="whitespace-pre-wrap leading-relaxed">{{ booking.treatment_record.treatment_details || 'ไม่มีข้อมูลรายละเอียดการรักษา' }}</p>
+                                             </div>
+                                             
+                                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-slate-100">
+                                                 <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-center">
+                                                     <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">น้ำหนักมือ</div>
+                                                     <div class="text-lg font-bold text-slate-800 capitalize">{{ booking.treatment_record.massage_weight || '-' }}</div>
+                                                 </div>
+                                                  <div class="p-4 rounded-2xl bg-rose-50 border border-rose-100 text-center">
+                                                     <div class="text-[10px] font-bold text-rose-400 uppercase mb-1">Pain (Before)</div>
+                                                     <div class="text-2xl font-bold text-rose-600">{{ booking.treatment_record.pain_level_before ?? '-' }}</div>
+                                                 </div>
+                                                  <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-100 text-center">
+                                                     <div class="text-[10px] font-bold text-emerald-400 uppercase mb-1">Pain (After)</div>
+                                                     <div class="text-2xl font-bold text-emerald-600">{{ booking.treatment_record.pain_level_after ?? '-' }}</div>
+                                                 </div>
+                                             </div>
                                         </div>
                                     </div>
                                 </section>
 
-                                <!-- Bottom: Treatment & Notes -->
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                     <section>
-                                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">แผนการรักษา</h4>
-                                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm h-full">
-                                             <div class="prose prose-sm text-slate-700 mb-4 whitespace-pre-wrap">{{ booking.treatment_record.treatment_details || 'ไม่มีข้อมูลรายละเอียดการรักษา' }}</div>
-                                             <div class="mt-4 pt-4 border-t border-slate-100 space-y-3">
-                                                 <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
-                                                     <span class="text-xs font-bold text-slate-500">น้ำหนักมือ</span>
-                                                     <span class="font-bold text-slate-700 capitalize">{{ booking.treatment_record.massage_weight || '-' }}</span>
-                                                 </div>
-                                                 <div class="grid grid-cols-2 gap-3">
-                                                    <div class="flex flex-col items-center p-3 rounded-xl bg-rose-50 border border-rose-100 text-center">
-                                                        <span class="text-[10px] font-bold text-rose-400 mb-1">ระดับอาการปวดก่อนการรักษา</span>
-                                                        <span class="text-xl font-bold text-rose-700">{{ booking.treatment_record.pain_level_before ?? '-' }}</span>
-                                                    </div>
-                                                    <div class="flex flex-col items-center p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-center">
-                                                         <span class="text-[10px] font-bold text-emerald-400 mb-1">หลังรักษา</span>
-                                                         <span class="text-xl font-bold text-emerald-700">{{ booking.treatment_record.pain_level_after ?? '-' }}</span>
-                                                    </div>
-                                                 </div>
-                                             </div>
-                                        </div>
-                                    </section>
+                                <section v-if="booking.treatment_record.notes">
+                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">หมายเหตุแพทย์</h4>
+                                    <div class="bg-yellow-50 p-6 rounded-2xl border border-yellow-100 text-yellow-900 text-sm relative"> 
+                                        {{ booking.treatment_record.notes }}
+                                    </div>
+                                </section>
 
-                                    <section v-if="booking.treatment_record.notes">
-                                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">หมายเหตุแพทย์</h4>
-                                        <div class="bg-yellow-50 p-5 rounded-2xl border border-yellow-100 text-yellow-900 text-sm relative shadow-sm h-full"> 
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="absolute top-4 right-4 text-yellow-200 size-6" viewBox="0 0 20 20" fill="currentColor">
-                                              <path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clip-rule="evenodd" />
-                                            </svg>
-                                            {{ booking.treatment_record.notes }}
-                                        </div>
-                                    </section>
-                                </div>
                                 <div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center bg-indigo-50 p-4 rounded-xl">
                                     <span class="text-sm font-bold text-indigo-900 uppercase">ยอดรวมค่ารักษา (Total Bill)</span>
                                     <span class="text-2xl font-bold text-indigo-700">{{ booking.price ? Number(booking.price).toLocaleString() : '0' }} ฿</span>

@@ -16,26 +16,6 @@ const props = defineProps({
 });
 
 const form = useForm({
-    // Patient Information
-    patient_name: props.previousRecord?.patient_name || (props.booking.user ? props.booking.user.name : props.booking.customer_name) || '',
-    id_card_number: props.previousRecord?.id_card_number || '',
-    date_of_birth: props.previousRecord?.date_of_birth || '',
-    age: props.previousRecord?.age || '',
-    gender: props.previousRecord?.gender || '',
-    race: props.previousRecord?.race || '',
-    nationality: props.previousRecord?.nationality || '',
-    religion: props.previousRecord?.religion || '',
-    occupation: props.previousRecord?.occupation || '',
-    address: props.previousRecord?.address || '',
-    emergency_contact_name: props.previousRecord?.emergency_contact_name || '',
-    emergency_contact_phone: props.previousRecord?.emergency_contact_phone || '',
-
-    // Patient History
-    underlying_disease: props.previousRecord?.underlying_disease || '',
-    surgery_history: props.previousRecord?.surgery_history || '',
-    drug_allergy: props.previousRecord?.drug_allergy || '',
-    accident_history: props.previousRecord?.accident_history || '',
-    
     // Vital Signs
     weight: props.previousRecord?.weight || '',
     height: props.previousRecord?.height || '',
@@ -108,116 +88,7 @@ const submit = () => {
 
                     <form @submit.prevent="submit" class="p-8 space-y-8">
                         
-                         <!-- Section 1: Patient Information (ข้อมูลส่วนตัว) -->
-                         <div class="bg-slate-50 p-6 rounded-xl border border-slate-200">
-                            <h4 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 text-indigo-600">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                                </svg>
-                                Patient Information (ข้อมูลทั่วไปของผู้ป่วย)
-                            </h4>
-                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                <div class="md:col-span-4">
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Name (ชื่อ-นามสกุล)</label>
-                                    <input type="text" v-model="form.patient_name" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                    <InputError class="mt-2" :message="form.errors.patient_name" />
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">ID Card No. (เลขบัตรประชาชน)</label>
-                                    <input type="text" v-model="form.id_card_number" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                    <InputError class="mt-2" :message="form.errors.id_card_number" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Date of Birth (วันเกิด)</label>
-                                    <input type="date" v-model="form.date_of_birth" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                    <InputError class="mt-2" :message="form.errors.date_of_birth" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Age (อายุ)</label>
-                                    <input type="number" v-model="form.age" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                    <InputError class="mt-2" :message="form.errors.age" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Gender (เพศ)</label>
-                                    <select v-model="form.gender" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                        <option value="">Select...</option>
-                                        <option value="male">Male (ชาย)</option>
-                                        <option value="female">Female (หญิง)</option>
-                                        <option value="other">Other (อื่นๆ)</option>
-                                    </select>
-                                    <InputError class="mt-2" :message="form.errors.gender" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Race (เชื้อชาติ)</label>
-                                    <input type="text" v-model="form.race" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                    <InputError class="mt-2" :message="form.errors.race" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Nationality (สัญชาติ)</label>
-                                    <input type="text" v-model="form.nationality" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                    <InputError class="mt-2" :message="form.errors.nationality" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Religion (ศาสนา)</label>
-                                    <input type="text" v-model="form.religion" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                    <InputError class="mt-2" :message="form.errors.religion" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Occupation (อาชีพ)</label>
-                                    <input type="text" v-model="form.occupation" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                    <InputError class="mt-2" :message="form.errors.occupation" />
-                                </div>
-                                <div class="md:col-span-3">
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Address (ที่อยู่ปัจจุบัน)</label>
-                                    <input type="text" v-model="form.address" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                    <InputError class="mt-2" :message="form.errors.address" />
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Emergency Contact (ญาติที่ติดต่อได้)</label>
-                                    <input type="text" v-model="form.emergency_contact_name" placeholder="Name (ชื่อ-นามสกุล)" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                    <InputError class="mt-2" :message="form.errors.emergency_contact_name" />
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Emergency Phone (เบอร์โทรญาติ)</label>
-                                    <input type="text" v-model="form.emergency_contact_phone" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                    <InputError class="mt-2" :message="form.errors.emergency_contact_phone" />
-                                </div>
-                            </div>
-                         </div>
-                        
-                        <!-- Section 2: Patient History (ประวัติการเจ็บป่วย) -->
-                         <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 space-y-4">
-                            <h4 class="font-bold text-slate-800 flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 text-indigo-600">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
-                                </svg>
-                                History Taking (ประวัติการเจ็บป่วย)
-                            </h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Underlying Disease (โรคประจำตัว)</label>
-                                    <input type="text" v-model="form.underlying_disease" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    <InputError class="mt-2" :message="form.errors.underlying_disease" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Surgery History (ประวัติการผ่าตัด)</label>
-                                    <input type="text" v-model="form.surgery_history" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    <InputError class="mt-2" :message="form.errors.surgery_history" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Allergies (ประวัติแพ้ยา/อาหาร)</label>
-                                    <input type="text" v-model="form.drug_allergy" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    <InputError class="mt-2" :message="form.errors.drug_allergy" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Accident (อุบัติเหตุ)</label>
-                                    <input type="text" v-model="form.accident_history" placeholder="" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    <InputError class="mt-2" :message="form.errors.accident_history" />
-                                </div>
-                            </div>
-                         </div>
-                        
-                        <!-- Section 2: Vital Signs -->
+                        <!-- Section 1: Vital Signs -->
                         <div class="space-y-4">
                             <h4 class="font-bold text-slate-800 flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 text-indigo-600">

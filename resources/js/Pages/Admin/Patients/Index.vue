@@ -70,7 +70,7 @@ watch(search, debounce((value) => {
                                             </span>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <div class="text-slate-800">{{ patient.email }}</div>
+                                            <div class="text-slate-800" v-if="!patient.email.startsWith('guest_')">{{ patient.email }}</div>
                                             <span v-if="patient.phone_number" class="text-xs text-slate-500">{{ patient.phone_number }}</span>
                                         </td>
                                         <td class="px-6 py-4">{{ new Date(patient.created_at).toLocaleDateString() }}</td>

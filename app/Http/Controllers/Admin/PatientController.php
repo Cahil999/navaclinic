@@ -139,6 +139,77 @@ class PatientController extends Controller
         ]);
     }
 
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'phone_number' => 'nullable|string|max:20',
+            'id_card_number' => 'nullable|string|max:20',
+            'date_of_birth' => 'nullable|date',
+            'gender' => 'nullable|string',
+            'race' => 'nullable|string',
+            'nationality' => 'nullable|string',
+            'religion' => 'nullable|string',
+            'occupation' => 'nullable|string',
+            'address' => 'nullable|string',
+            'emergency_contact_name' => 'nullable|string',
+            'emergency_contact_phone' => 'nullable|string',
+
+            // Medical
+            'underlying_disease' => 'nullable|string',
+            'surgery_history' => 'nullable|string',
+            'drug_allergy' => 'nullable|string',
+            'accident_history' => 'nullable|string',
+        ]);
+
+        if (str_starts_with($id, 'guest_')) {
+            // CONVERT GUEST TO REGISTERED USER
+            $bookingId = str_replace('guest_', '', $id);
+            $latestBooking = \App\Models\Booking::findOrFail($bookingId);
+
+            // Create new User
+            // We'll use phone number as email if email is not available or make a dummy one?
+            // Generate Patient ID (HN)
+            // Format: HN-ddmmyyyy-XXXX (e.g., HN-21012026-0001)
+            $datePart = now()->format('dmY');
+            $countToday = User::whereDate('created_at', now()->toDateString())->count() + 1;
+            $hnId = 'HN-' . $datePart . '-' . str_pad($countToday, 4, '0', STR_PAD_LEFT);
+
+            // Generate dummy email if needed (required by DB)
+            $email = $validated['phone_number']
+                ? 'guest_' . $validated['phone_number'] . '@navaclinic.com'
+                : 'guest_' . uniqid() . '@navaclinic.com';
+
+            $user = User::create([
+                'patient_id' => $hnId, // Set the generated HN
+                'name' => $validated['name'],
+                'phone_number' => $validated['phone_number'] ?? $latestBooking->customer_phone,
+                'email' => $email,
+                'password' => \Illuminate\Support\Facades\Hash::make($validated['phone_number'] ?? '12345678'),
+                'is_admin' => false,
+                'is_doctor' => false,
+            ]);
+
+            // Fill the rest of the profile
+            $user->update($validated);
+
+            // Link all matching guest bookings to this new user
+            \App\Models\Booking::whereNull('user_id')
+                ->where('customer_name', $latestBooking->customer_name)
+                ->where('customer_phone', $latestBooking->customer_phone)
+                ->update(['user_id' => $user->id]);
+
+            return redirect()->route('admin.patients.show', $user->id)
+                ->with('success', 'Guest patient promoted to registered user and updated successfully.');
+
+        } else {
+            // REGULAR USER UPDATE
+            $user = User::findOrFail($id);
+            $user->update($validated);
+            return redirect()->back()->with('success', 'Patient information updated successfully.');
+        }
+    }
+
     public function showGuest(\App\Models\Booking $booking)
     {
         // Find other bookings by this guest (matching name and phone)

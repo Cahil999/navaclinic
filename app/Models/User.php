@@ -22,6 +22,20 @@ class User extends Authenticatable
         'password',
         'is_admin',
         'phone_number',
+        'id_card_number',
+        'date_of_birth',
+        'gender',
+        'race',
+        'nationality',
+        'religion',
+        'occupation',
+        'address',
+        'emergency_contact_name',
+        'emergency_contact_phone',
+        'underlying_disease',
+        'surgery_history',
+        'drug_allergy',
+        'accident_history',
     ];
 
     /**
