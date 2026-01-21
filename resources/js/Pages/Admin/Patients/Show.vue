@@ -27,6 +27,10 @@ const props = defineProps({
         type: Array,
         required: true,
     },
+    visits: {
+        type: Array,
+        default: () => [],
+    },
     stats: {
         type: Object,
         default: () => ({}),
@@ -313,6 +317,60 @@ const patientAge = computed(() => {
                                 </div>
                                 <p class="text-slate-500 font-medium">No medical records available yet.</p>
                                 <p class="text-slate-400 text-sm">Vital signs and treatment areas will appear here after the first visit.</p>
+                            </div>
+                        </div>
+
+                        <!-- Visits History -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                             <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+                                <h3 class="font-bold text-slate-800 text-lg">Visits History</h3>
+                                <Link :href="route('admin.visits.create', { user_id: patient.id })" class="text-sm font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-lg transition-colors flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    Add Visit
+                                </Link>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left text-slate-600">
+                                    <thead class="text-xs text-slate-500 uppercase bg-emerald-50/50 border-b border-slate-100">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 font-semibold">Date / Time</th>
+                                            <th scope="col" class="px-6 py-3 font-semibold">Doctor</th>
+                                            <th scope="col" class="px-6 py-3 font-semibold">Symptoms / Notes</th>
+                                            <th scope="col" class="px-6 py-3 font-semibold text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-50">
+                                        <tr v-for="visit in visits" :key="visit.id" class="hover:bg-slate-50 transition-colors">
+                                            <td class="px-6 py-4">
+                                                <div class="font-bold text-slate-900">{{ new Date(visit.visit_date).toLocaleDateString() }}</div>
+                                                <div class="text-xs text-slate-500">{{ new Date(visit.visit_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }}</div>
+                                            </td>
+                                            <td class="px-6 py-4 font-medium text-slate-700">
+                                                {{ visit.doctor?.name }}
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <div class="text-slate-900 font-medium">
+                                                    {{ visit.symptoms || '-' }}
+                                                </div>
+                                                <div v-if="visit.notes" class="text-xs text-slate-500 mt-1">
+                                                    {{ visit.notes }}
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 text-right">
+                                                <Link :href="route('admin.visits.show', visit.id)" class="text-emerald-600 hover:text-emerald-800 font-bold text-xs uppercase tracking-wide border border-emerald-100 px-3 py-1.5 rounded hover:bg-emerald-50 transition-all">
+                                                    View Details
+                                                </Link>
+                                            </td>
+                                        </tr>
+                                        <tr v-if="visits.length === 0">
+                                            <td colspan="4" class="px-6 py-12 text-center text-slate-500">
+                                                No visits recorded.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
 

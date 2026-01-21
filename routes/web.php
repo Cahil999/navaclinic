@@ -83,6 +83,18 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::post('/settings/schedule', [\App\Http\Controllers\Admin\SettingController::class, 'updateSchedule'])->name('admin.settings.schedule.update');
     Route::post('/settings/holidays', [\App\Http\Controllers\Admin\SettingController::class, 'storeHoliday'])->name('admin.settings.holidays.store');
     Route::delete('/settings/holidays/{holiday}', [\App\Http\Controllers\Admin\SettingController::class, 'destroyHoliday'])->name('admin.settings.holidays.destroy');
+    // Visit Management
+    Route::get('/visits/create', [\App\Http\Controllers\Admin\VisitController::class, 'create'])->name('admin.visits.create');
+    Route::post('/visits', [\App\Http\Controllers\Admin\VisitController::class, 'store'])->name('admin.visits.store');
+    Route::get('/visits/{visit}', [\App\Http\Controllers\Admin\VisitController::class, 'show'])->name('admin.visits.show');
+
+    // Visit Treatment Records
+    Route::get('/visits/{visit}/treatment/create', [\App\Http\Controllers\Admin\TreatmentController::class, 'createForVisit'])->name('admin.visits.treatment.create');
+    Route::post('/visits/{visit}/treatment', [\App\Http\Controllers\Admin\TreatmentController::class, 'storeForVisit'])->name('admin.visits.treatment.store');
+
+    // Visit Payments
+    Route::post('/visits/{visit}/payments', [\App\Http\Controllers\Admin\PaymentController::class, 'storeForVisit'])->name('admin.visits.payments.store');
+
 });
 
 require __DIR__ . '/auth.php';

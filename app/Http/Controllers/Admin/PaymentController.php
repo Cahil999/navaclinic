@@ -28,4 +28,17 @@ class PaymentController extends Controller
         $payment->delete();
         return back()->with('success', 'Payment deleted successfully!');
     }
+    public function storeForVisit(Request $request, \App\Models\Visit $visit)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0',
+            'payment_method' => 'required|string',
+            'payment_date' => 'required|date',
+            'notes' => 'nullable|string',
+        ]);
+
+        $visit->payments()->create($validated);
+
+        return back()->with('success', 'Payment added successfully!');
+    }
 }

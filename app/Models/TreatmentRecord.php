@@ -11,6 +11,7 @@ class TreatmentRecord extends Model
 
     protected $fillable = [
         'booking_id',
+        'visit_id',
         'patient_name',
         'id_card_number',
         'date_of_birth',
@@ -51,5 +52,10 @@ class TreatmentRecord extends Model
     public function booking()
     {
         return $this->belongsTo(Booking::class);
+    }
+
+    public function visit()
+    {
+        return $this->belongsTo(Visit::class);
     }
 }

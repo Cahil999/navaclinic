@@ -129,11 +129,12 @@ class PatientController extends Controller
             'last_updated' => $latestRecord->created_at,
         ] : null;
 
-        $user->load(['bookings.doctor']); // Load booking history
+        $user->load(['bookings.doctor', 'visits.doctor', 'visits.booking']); // Load history
 
         return Inertia::render('Admin/Patients/Show', [
             'patient' => $user,
-            'bookings' => $user->bookings()->latest()->get(),
+            'bookings' => $user->bookings()->with('doctor')->latest()->get(),
+            'visits' => $user->visits()->with(['doctor', 'booking'])->latest('visit_date')->get(),
             'stats' => $stats,
             'medicalSummary' => $medicalSummary
         ]);
@@ -217,7 +218,7 @@ class PatientController extends Controller
             ->where('customer_name', $booking->customer_name)
             ->where('customer_phone', $booking->customer_phone)
             ->latest()
-            ->with(['doctor'])
+            ->with(['doctor', 'treatmentRecord'])
             ->get();
 
         // Logic to reconstruct the ID
