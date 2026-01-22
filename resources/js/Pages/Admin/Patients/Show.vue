@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import BodyPartSelector from '@/Components/BodyPartSelector.vue';
 import Modal from '@/Components/Modal.vue';
 import InputError from '@/Components/InputError.vue';
@@ -324,12 +324,15 @@ const patientAge = computed(() => {
                         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                              <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
                                 <h3 class="font-bold text-slate-800 text-lg">Visits History</h3>
-                                <Link :href="route('admin.visits.create', { user_id: patient.id })" class="text-sm font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-lg transition-colors flex items-center">
+                                <button 
+                                    @click="router.get(route('admin.visits.create', { user_id: patient.id }))" 
+                                    class="text-sm font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-lg transition-colors flex items-center"
+                                >
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                     </svg>
                                     Add Visit
-                                </Link>
+                                </button>
                             </div>
                             <div class="overflow-x-auto">
                                 <table class="w-full text-sm text-left text-slate-600">

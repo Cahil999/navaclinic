@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 import InputError from '@/Components/InputError.vue';
 
 const props = defineProps({
@@ -24,6 +24,16 @@ const form = useForm({
 });
 
 const visitTime = ref('');
+
+// Calculate the correct route for the patient (Guest vs Registered)
+const patientRoute = computed(() => {
+    const id = String(props.patient.id);
+    if (id.startsWith('guest_')) {
+        const bookingId = id.replace('guest_', '');
+        return route('admin.patients.guest.show', bookingId);
+    }
+    return route('admin.patients.show', props.patient.id);
+});
 
 // Initialize form type
 onMounted(() => {
@@ -80,7 +90,7 @@ const submit = () => {
     <AuthenticatedLayout>
         <template #header>
             <div class="flex items-center gap-4">
-                <Link :href="route('admin.patients.show', patient.id)" class="text-slate-400 hover:text-slate-600">
+                <Link :href="patientRoute" class="text-slate-400 hover:text-slate-600">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
@@ -187,7 +197,7 @@ const submit = () => {
                             </div>
 
                             <div class="pt-6 border-t border-slate-100 flex items-center justify-end gap-4">
-                                <Link :href="route('admin.patients.show', patient.id)" class="text-slate-500 hover:text-slate-700 font-medium text-sm">
+                                <Link :href="patientRoute" class="text-slate-500 hover:text-slate-700 font-medium text-sm">
                                     Cancel
                                 </Link>
                                 <button 

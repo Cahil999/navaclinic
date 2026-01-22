@@ -162,13 +162,7 @@ import { computed } from 'vue';
                                 >
                                     ยกเลิกการจอง
                                 </button>
-                                <Link
-                                    v-if="booking.status !== 'pending' && booking.status !== 'completed' && booking.status !== 'cancelled'"
-                                    :href="route('admin.treatment.create', booking.id)"
-                                    class="btn bg-indigo-600 hover:bg-indigo-700 text-white border-none shadow-md hover:shadow-lg transition-all"
-                                >
-                                    เพิ่มรายละเอียดการรักษา
-                                </Link>
+
                                 <Link
                                     :href="route('admin.bookings.edit', booking.id)"
                                     class="btn bg-slate-600 hover:bg-slate-700 text-white border-none shadow-md hover:shadow-lg transition-all"
