@@ -284,15 +284,28 @@ const deletePayment = (id) => {
                                     </div>
                                     
                                     <!-- Pain Details List -->
-                                    <div v-if="visit.treatment_record.pain_areas && visit.treatment_record.pain_areas.some(i => i.symptom || i.pain_level)" class="border-t border-slate-100 p-3 bg-white max-h-60 overflow-y-auto custom-scrollbar">
-                                        <ul class="space-y-2">
-                                            <li v-for="(item, idx) in visit.treatment_record.pain_areas" :key="idx" class="text-xs">
-                                                <div class="p-2 rounded-lg bg-rose-50 border border-rose-100/50">
-                                                    <div class="font-bold text-rose-700 mb-0.5">{{ item.area }} <span class="font-normal text-rose-500 ml-1">({{ item.pain_level ? 'Pain: ' + item.pain_level : '' }} {{ item.pain_level_after ? '→ ' + item.pain_level_after : '' }})</span></div>
-                                                    <div class="text-rose-600/80">{{ item.symptom || '-' }}</div>
+                                    <div v-if="visit.treatment_record.pain_areas && visit.treatment_record.pain_areas.some(i => i.symptom || i.pain_level)" class="border-t border-slate-100 bg-slate-50/50 p-4 max-h-60 overflow-y-auto custom-scrollbar">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div v-for="(item, idx) in visit.treatment_record.pain_areas" :key="idx" class="bg-white border-l-4 border-rose-400 shadow-sm rounded-r-xl p-3 flex flex-col gap-2 group hover:shadow-md transition-all">
+                                                <div class="flex justify-between items-start">
+                                                    <span class="font-bold text-slate-700 text-sm border-b border-transparent group-hover:border-rose-200 transition-colors">{{ item.area }}</span>
+                                                    <div v-if="item.pain_level || item.pain_level_after" class="flex items-center gap-1.5 bg-slate-100 px-2 py-1 rounded-md text-[10px] font-bold border border-slate-200">
+                                                        <div class="flex items-center gap-1">
+                                                            <span class="text-rose-500">Pain:</span>
+                                                            <span class="text-slate-700 text-sm">{{ item.pain_level || '-' }}</span>
+                                                        </div>
+                                                        <template v-if="item.pain_level_after">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3 text-slate-400">
+                                                                <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 0 1 1.414 0l4 4a1 1 0 0 1 0 1.414l-4 4a1 1 0 0 1-1.414-1.414L14.586 11H3a1 1 0 1 1 0-2h11.586l-2.293-2.293a1 1 0 0 1 0-1.414Z" clip-rule="evenodd" />
+                                                            </svg>
+                                                            <span class="text-emerald-600 text-sm">{{ item.pain_level_after }}</span>
+                                                        </template>
+                                                    </div>
                                                 </div>
-                                            </li>
-                                        </ul>
+                                                <p class="text-xs text-slate-500 leading-relaxed font-medium bg-slate-50 p-2 rounded-lg" v-if="item.symptom">{{ item.symptom }}</p>
+                                                <p class="text-xs text-slate-300 italic" v-else>ไม่มีรายละเอียดอาการ</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
