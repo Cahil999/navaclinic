@@ -14,7 +14,7 @@ class PatientController extends Controller
     {
         // 1. Fetch Registered Users (excluding admins and doctors)
         $users = User::where('is_admin', false)
-            ->doesntHave('doctor')
+            ->where('is_doctor', false)
             ->latest()
             ->get()
             ->map(function ($user) {

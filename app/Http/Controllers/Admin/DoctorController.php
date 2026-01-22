@@ -38,17 +38,20 @@ class DoctorController extends Controller
             'password' => 'required|string|min:8',
         ]);
 
-        $user = \App\Models\User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => \Illuminate\Support\Facades\Hash::make($validated['password']),
-        ]);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($validated) {
+            $user = \App\Models\User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => \Illuminate\Support\Facades\Hash::make($validated['password']),
+                'is_doctor' => true,
+            ]);
 
-        Doctor::create([
-            'name' => $validated['name'],
-            'specialty' => $validated['specialty'],
-            'user_id' => $user->id,
-        ]);
+            Doctor::create([
+                'name' => $validated['name'],
+                'specialty' => $validated['specialty'],
+                'user_id' => $user->id,
+            ]);
+        });
 
         return redirect()->back();
     }
@@ -67,7 +70,13 @@ class DoctorController extends Controller
 
     public function destroy(Doctor $doctor)
     {
-        $doctor->delete();
+        $user = $doctor->user;
+
+        if ($user) {
+            $user->delete();
+        } else {
+            $doctor->delete();
+        }
 
         return redirect()->back();
     }

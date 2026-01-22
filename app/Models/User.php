@@ -21,6 +21,7 @@ class User extends Authenticatable
         'email',
         'password',
         'is_admin',
+        'is_doctor',
         'phone_number',
         'id_card_number',
         'date_of_birth',
@@ -59,6 +60,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
+            'is_doctor' => 'boolean',
         ];
     }
     public function bookings()
