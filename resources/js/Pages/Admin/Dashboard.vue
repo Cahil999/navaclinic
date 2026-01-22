@@ -13,12 +13,13 @@ import {
 } from 'chart.js'
 import { Bar, Pie } from 'vue-chartjs'
 import { computed, ref } from 'vue';
+import Pagination from '@/Components/Pagination.vue';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend)
 
 const props = defineProps({
     bookings: {
-        type: Array,
+        type: Object,
         required: true,
     },
     upcomingBookings: {
@@ -327,7 +328,7 @@ const getStatusClass = (status) => {
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-slate-100">
-                                    <tr v-for="booking in bookings" :key="booking.id" class="hover:bg-blue-50/50 transition-colors">
+                                    <tr v-for="booking in bookings.data" :key="booking.id" class="hover:bg-blue-50/50 transition-colors">
                                         <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">
                                             <div v-if="booking.user">
                                                 {{ booking.user.name }}
@@ -355,13 +356,16 @@ const getStatusClass = (status) => {
                                             </Link>
                                         </td>
                                     </tr>
-                                    <tr v-if="bookings.length === 0">
+                                    <tr v-if="bookings.data.length === 0">
                                         <td colspan="6" class="px-6 py-8 text-center text-slate-500">
                                             No bookings found.
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                        <div class="mt-6 flex justify-end">
+                            <Pagination :links="bookings.links" />
                         </div>
 
                     </div>

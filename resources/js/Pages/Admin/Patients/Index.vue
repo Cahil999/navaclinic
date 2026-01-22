@@ -3,6 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import { debounce } from 'lodash';
+import Pagination from '@/Components/Pagination.vue';
 
 const props = defineProps({
     patients: {
@@ -102,8 +103,8 @@ watch(search, debounce((value) => {
                     </div>
                     
                     <!-- Pagination could be added here -->
-                    <div v-if="patients.links && patients.links.length > 3" class="mt-4">
-                        <!-- TODO: Pagination Component -->
+                    <div class="mt-4 flex justify-end">
+                        <Pagination :links="patients.links" />
                     </div>
 
                 </div>
