@@ -109,8 +109,8 @@ class PatientController extends Controller
 
         // Helper to get stats and medical summary
         $stats = [
-            'total_visits' => $user->bookings()->where('status', 'completed')->count(),
-            'last_visit' => $user->bookings()->where('status', 'completed')->latest('appointment_date')->first()?->appointment_date,
+            'total_visits' => $user->visits()->count(),
+            'last_visit' => $user->visits()->latest('visit_date')->first()?->visit_date?->format('Y-m-d'),
             'next_appointment' => $user->bookings()->whereIn('status', ['pending', 'confirmed'])->where('appointment_date', '>=', now()->toDateString())->orderBy('appointment_date')->orderBy('start_time')->first(),
         ];
 
@@ -272,8 +272,8 @@ class PatientController extends Controller
         $guestBookingIds = $relatedBookings->pluck('id');
 
         $stats = [
-            'total_visits' => $relatedBookings->where('status', 'completed')->count(),
-            'last_visit' => $relatedBookings->where('status', 'completed')->sortByDesc('appointment_date')->first()?->appointment_date,
+            'total_visits' => \App\Models\Visit::whereIn('booking_id', $guestBookingIds)->count(),
+            'last_visit' => \App\Models\Visit::whereIn('booking_id', $guestBookingIds)->latest('visit_date')->first()?->visit_date?->format('Y-m-d'),
             'next_appointment' => $relatedBookings->whereIn('status', ['pending', 'confirmed'])->where('appointment_date', '>=', now()->toDateString())->sortBy('appointment_date')->first(),
         ];
 
