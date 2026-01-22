@@ -201,29 +201,106 @@ const patientAge = computed(() => {
                         </div>
 
                         <!-- Medical Alerts (Compact) -->
-                        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                             <div class="bg-gradient-to-r from-red-50 to-white px-6 py-4 border-b border-red-50 flex items-center justify-between">
+                        <!-- Medical Alerts (Rich Design) -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-red-100 overflow-hidden flex flex-col">
+                             <div class="bg-gradient-to-r from-red-50 via-white to-white px-6 py-4 border-b border-red-50 flex items-center justify-between">
                                 <h3 class="font-bold text-red-900 flex items-center text-sm uppercase tracking-wider">
                                     <ExclamationTriangleIcon class="w-5 h-5 mr-2 text-red-500" />
                                     ข้อมูลสำคัญทางการแพทย์
                                 </h3>
                             </div>
-                            <div class="divide-y divide-slate-50">
-                                <div class="p-5 hover:bg-slate-50 transition-colors">
-                                    <p class="text-xs font-bold text-red-500 uppercase mb-1">Drug Allergies (แพ้ยา)</p>
-                                    <p class="text-slate-900 font-bold break-words">{{ patient.drug_allergy || 'No known allergies' }}</p>
+                            
+                            <div class="p-5 space-y-5">
+                                <!-- 1. Drug Allergies -->
+                                <div>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <div class="w-1.5 h-1.5 rounded-full" :class="patient.drug_allergy ? 'bg-red-500' : 'bg-emerald-400'"></div>
+                                        <p class="text-xs font-bold uppercase tracking-wider" :class="patient.drug_allergy ? 'text-red-500' : 'text-slate-400'">
+                                            Drug Allergies (แพ้ยา)
+                                        </p>
+                                    </div>
+                                    <div class="rounded-xl p-4 border transition-all relative overflow-hidden group" 
+                                        :class="patient.drug_allergy ? 'bg-red-50 border-red-200' : 'bg-slate-50 border-slate-100'">
+                                        
+                                        <div v-if="patient.drug_allergy" class="absolute right-0 top-0 opacity-5 -mr-4 -mt-4 transform rotate-12">
+                                            <ExclamationTriangleIcon class="w-24 h-24" />
+                                        </div>
+
+                                        <p class="font-bold text-sm leading-relaxed relative z-10 break-words" 
+                                           :class="patient.drug_allergy ? 'text-red-700' : 'text-slate-500 italic'">
+                                           {{ patient.drug_allergy || 'No known allergies' }}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div class="p-5 hover:bg-slate-50 transition-colors">
-                                    <p class="text-xs font-bold text-indigo-500 uppercase mb-1">Underlying Diseases (โรคประจำตัว)</p>
-                                    <p class="text-slate-900 font-medium break-words">{{ patient.underlying_disease || 'None' }}</p>
+
+                                <!-- 2. Underlying Diseases -->
+                                <div>
+                                     <div class="flex items-center gap-2 mb-2">
+                                        <div class="w-1.5 h-1.5 rounded-full" :class="patient.underlying_disease ? 'bg-indigo-500' : 'bg-emerald-400'"></div>
+                                        <p class="text-xs font-bold uppercase tracking-wider" :class="patient.underlying_disease ? 'text-indigo-500' : 'text-slate-400'">
+                                            Underlying Diseases (โรคประจำตัว)
+                                        </p>
+                                    </div>
+                                    <div class="rounded-xl p-4 border transition-all relative overflow-hidden"
+                                         :class="patient.underlying_disease ? 'bg-indigo-50 border-indigo-200' : 'bg-slate-50 border-slate-100'">
+                                         
+                                        <div v-if="patient.underlying_disease" class="absolute right-0 top-0 opacity-5 -mr-4 -mt-4">
+                                            <HeartIcon class="w-24 h-24" />
+                                        </div>
+
+                                        <p class="font-medium text-sm leading-relaxed relative z-10 break-words"
+                                           :class="patient.underlying_disease ? 'text-indigo-900' : 'text-slate-500 italic'">
+                                           {{ patient.underlying_disease || 'None' }}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div class="p-5 hover:bg-slate-50 transition-colors">
-                                    <p class="text-xs font-bold text-slate-400 uppercase mb-1">ประวัติการผ่าตัด</p>
-                                    <p class="text-slate-700 text-sm">{{ patient.surgery_history || '-' }}</p>
+
+                                <!-- 3. Surgery History -->
+                                <div>
+                                     <div class="flex items-center gap-2 mb-2">
+                                        <div class="w-1.5 h-1.5 rounded-full" :class="patient.surgery_history ? 'bg-blue-500' : 'bg-slate-300'"></div>
+                                        <p class="text-xs font-bold uppercase tracking-wider" :class="patient.surgery_history ? 'text-blue-500' : 'text-slate-400'">
+                                            Surgery History (ประวัติการผ่าตัด)
+                                        </p>
+                                    </div>
+                                    <div class="rounded-xl p-4 border transition-all relative overflow-hidden"
+                                         :class="patient.surgery_history ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-100'">
+                                         
+                                        <!-- Optional Icon for Surgery if present -->
+                                         <div v-if="patient.surgery_history" class="absolute right-0 top-0 opacity-5 -mr-4 -mt-4">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-24 h-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" />
+                                            </svg>
+                                        </div>
+
+                                        <p class="font-medium text-sm leading-relaxed relative z-10 break-words"
+                                           :class="patient.surgery_history ? 'text-blue-900' : 'text-slate-500 italic'">
+                                           {{ patient.surgery_history || '-' }}
+                                        </p>
+                                    </div>
                                 </div>
-                                 <div class="p-5 hover:bg-slate-50 transition-colors">
-                                    <p class="text-xs font-bold text-slate-400 uppercase mb-1">ประวัติอุบัติเหตุ</p>
-                                    <p class="text-slate-700 text-sm">{{ patient.accident_history || '-' }}</p>
+
+                                <!-- 4. Accident History -->
+                                <div>
+                                     <div class="flex items-center gap-2 mb-2">
+                                        <div class="w-1.5 h-1.5 rounded-full" :class="patient.accident_history ? 'bg-amber-500' : 'bg-slate-300'"></div>
+                                        <p class="text-xs font-bold uppercase tracking-wider" :class="patient.accident_history ? 'text-amber-500' : 'text-slate-400'">
+                                            Accident History (ประวัติอุบัติเหตุ)
+                                        </p>
+                                    </div>
+                                    <div class="rounded-xl p-4 border transition-all relative overflow-hidden"
+                                         :class="patient.accident_history ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-100'">
+                                         
+                                         <!-- Optional Icon for Accident if present -->
+                                         <div v-if="patient.accident_history" class="absolute right-0 top-0 opacity-5 -mr-4 -mt-4">
+                                            <ExclamationTriangleIcon class="w-24 h-24" />
+                                        </div>
+
+                                        <p class="font-medium text-sm leading-relaxed relative z-10 break-words"
+                                           :class="patient.accident_history ? 'text-amber-900' : 'text-slate-500 italic'">
+                                           {{ patient.accident_history || '-' }}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
