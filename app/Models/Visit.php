@@ -15,6 +15,7 @@ class Visit extends Model
         'notes',
         'status',
         'price',
+        'duration_minutes',
     ];
 
     protected $casts = [

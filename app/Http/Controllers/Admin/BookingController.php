@@ -74,7 +74,7 @@ class BookingController extends Controller
             'customer_phone' => 'required_if:user_type,guest|nullable|string|max:20',
         ]);
 
-        // Validate Schedule & Holidays (Reuse logic is better, but copying for speed as per user request context - often faster to duplicate small validation logic or move to service if big. Here it is small enough).
+        // Validate Schedule & Holidays
         $date = $validated['appointment_date'];
 
         // Check Holiday
@@ -90,34 +90,88 @@ class BookingController extends Controller
             return back()->withErrors(['appointment_date' => "Clinic is closed on this day."]);
         }
 
-        $bookingData = [
-            'doctor_id' => $validated['doctor_id'],
-            'appointment_date' => $validated['appointment_date'],
-            'start_time' => $validated['start_time'],
-            'duration_minutes' => $validated['duration_minutes'],
-            'symptoms' => $validated['symptoms'],
-            // 'status' => 'pending', // Removed duplicate
-            // Actually, for Walk-in, usually it's Confirmed directly. 
-            // Let's set to 'confirmed' for Admin created bookings to save a step.
-            'status' => 'confirmed'
-        ];
-
         if ($validated['user_type'] === 'existing') {
-            $bookingData['user_id'] = $validated['user_id'];
-            // Fetch user to fill customer name/phone fallback if needed?
-            // Actually Booking model relies on relationship for users.
+            $userId = $validated['user_id'];
+
+            // Standard Booking Flow for Existing Users
+            // (Assuming 'existing' implies a standard booking, but if they want walk-in behavior for existing users too, 
+            // they might need a toggle. For now, strict 'user_type === guest' is the trigger for "Visit Only")
+
+            $bookingData = [
+                'doctor_id' => $validated['doctor_id'],
+                'appointment_date' => $validated['appointment_date'],
+                'start_time' => $validated['start_time'],
+                'duration_minutes' => $validated['duration_minutes'],
+                'symptoms' => $validated['symptoms'],
+                'user_id' => $userId,
+                'status' => 'confirmed',
+                'customer_name' => null,
+                'customer_phone' => null,
+            ];
+
+            $booking = Booking::create($bookingData);
+
+            // Auto-create visit for confirmed booking? Or wait?
+            // Previous logic was auto-create. I'll keep it for consistency.
+            \App\Models\Visit::create([
+                'visit_date' => $booking->appointment_date . ' ' . $booking->start_time,
+                'patient_id' => $userId,
+                'doctor_id' => $booking->doctor_id,
+                'booking_id' => $booking->id,
+                'symptoms' => $booking->symptoms,
+                'status' => 'pending',
+                'price' => 0,
+                'duration_minutes' => $validated['duration_minutes'],
+            ]);
+
+            return redirect()->route('admin.dashboard')->with('success', 'Booking created successfully!');
+
         } else {
-            // Check if there is an existing user with this name and phone to be smart?
-            // The implementation plan said: "Create Booking for Walk-in (Guest)... Is user_id null?"
-            // Yes, strictly guest.
-            $bookingData['user_id'] = null;
-            $bookingData['customer_name'] = $validated['customer_name'];
-            $bookingData['customer_phone'] = $validated['customer_phone'];
+            // "Walk-in" Guest Logic -> VISIT ONLY
+            // 1. Try to find existing user by phone
+            $existingUser = \App\Models\User::where('phone_number', $validated['customer_phone'])->first();
+
+            if ($existingUser) {
+                $userId = $existingUser->id;
+            } else {
+                // 2. Create new User
+                $email = 'guest_' . preg_replace('/[^0-9]/', '', $validated['customer_phone']) . '@navaclinic.com';
+
+                if (\App\Models\User::where('email', $email)->exists()) {
+                    $email = 'guest_' . preg_replace('/[^0-9]/', '', $validated['customer_phone']) . '_' . uniqid() . '@navaclinic.com';
+                }
+
+                $datePart = now()->format('dmY');
+                $countToday = \App\Models\User::whereDate('created_at', now()->toDateString())->count() + 1;
+                $hnId = 'HN-' . $datePart . '-' . str_pad($countToday, 4, '0', STR_PAD_LEFT);
+
+                $newUser = \App\Models\User::create([
+                    'name' => $validated['customer_name'],
+                    'phone_number' => $validated['customer_phone'],
+                    'patient_id' => $hnId,
+                    'email' => $email,
+                    'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                    'is_admin' => false,
+                ]);
+                $userId = $newUser->id;
+            }
+
+            // CREATE VISIT DIRECTLY (No Booking)
+            $visitDate = $validated['appointment_date'] . ' ' . $validated['start_time'];
+
+            \App\Models\Visit::create([
+                'visit_date' => $visitDate,
+                'patient_id' => $userId,
+                'doctor_id' => $validated['doctor_id'],
+                'booking_id' => null, // Explicitly null
+                'symptoms' => $validated['symptoms'],
+                'status' => 'pending',
+                'price' => 0,
+                'duration_minutes' => $validated['duration_minutes'],
+            ]);
+
+            return redirect()->route('admin.dashboard')->with('success', 'Walk-in Visit created successfully (No Booking generated).');
         }
-
-        Booking::create($bookingData);
-
-        return redirect()->route('admin.dashboard')->with('success', 'Booking created successfully!');
     }
     public function edit(Booking $booking)
     {

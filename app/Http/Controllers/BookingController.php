@@ -182,12 +182,23 @@ class BookingController extends Controller
         \Illuminate\Support\Facades\Log::info("Checking slots for Date: $date, Duration: $duration");
 
         $doctors = Doctor::all();
-        \Illuminate\Support\Facades\Log::info("Doctors found: " . $doctors->count());
 
+        // 1. Fetch Bookings
         $bookings = Booking::where('appointment_date', $date)
             ->whereIn('status', ['pending', 'confirmed'])
             ->get();
-        \Illuminate\Support\Facades\Log::info("Bookings found: " . $bookings->count());
+
+        // 2. Fetch Visits (Walk-ins) on this date
+        // Note: Visit has 'visit_date' which is a DateTime. We need to filter by DATE part.
+        $visits = \App\Models\Visit::whereDate('visit_date', $date)
+            ->whereIn('status', ['pending', 'ongoing']) // Assuming pending/ongoing blocks the doctor. Completed might strictly mean "Done", but for today's schedule, it WAS blocked? 
+            // Actually, if it's completed, it's in the past relative to execution? Or it blocked that slot.
+            // Let's include 'completed' as well if it was today, because you can't double book a past slot anyway, or we want to show it as "Busy" in history.
+            // Usually 'cancelled' is the only one that frees up the slot.
+            ->where('status', '!=', 'cancelled')
+            ->get();
+
+        \Illuminate\Support\Facades\Log::info("Bookings found: " . $bookings->count() . ", Visits found: " . $visits->count());
 
         // Use dynamic Open/Close times from Schedule
         $startOfDay = \Carbon\Carbon::parse($date . ' ' . $schedule->open_time);
@@ -209,30 +220,43 @@ class BookingController extends Controller
             }
 
             $timeStr = $slotStart->format('H:i');
-
-            // Calculate effective end time for the requested slot (Duration + 30m buffer)
-            // We check if the [Start, Start + Duration + 30) range is free.
             $checkEnd = $slotStart->copy()->addMinutes($duration + 30);
 
             // Process all doctors for this slot
-            $doctorsWithStatus = $doctors->map(function ($doctor) use ($bookings, $slotStart, $checkEnd) {
-                // Get all bookings for this doctor to show full schedule
+            $doctorsWithStatus = $doctors->map(function ($doctor) use ($bookings, $visits, $slotStart, $checkEnd) {
+
+                // --- Check Bookings ---
                 $doctorBookings = $bookings->where('doctor_id', $doctor->id);
 
-                $busySlots = $doctorBookings->map(function ($booking) {
-                    $bStart = \Carbon\Carbon::parse($booking->appointment_date . ' ' . $booking->start_time)->format('H:i');
-                    $bEnd = \Carbon\Carbon::parse($booking->appointment_date . ' ' . $booking->start_time)->addMinutes($booking->duration_minutes)->format('H:i');
-                    return "$bStart-$bEnd";
-                })->values()->all();
+                // --- Check Visits ---
+                $doctorVisits = $visits->where('doctor_id', $doctor->id);
 
-                // Check if doctor has any overlapping booking for THIS slot
+                // Merge Busy Slots for display
+                $busySlots = [];
+
+                foreach ($doctorBookings as $b) {
+                    $bStart = \Carbon\Carbon::parse($b->appointment_date . ' ' . $b->start_time)->format('H:i');
+                    $bEnd = \Carbon\Carbon::parse($b->appointment_date . ' ' . $b->start_time)->addMinutes($b->duration_minutes)->format('H:i');
+                    $busySlots[] = "$bStart-$bEnd";
+                }
+                foreach ($doctorVisits as $v) {
+                    // Check if this visit is already covered by a booking (linked)
+                    // If linked, we skip to avoid double counting, although overlap logic handles it fine.
+                    if ($v->booking_id)
+                        continue;
+
+                    $vStart = \Carbon\Carbon::parse($v->visit_date);
+                    $duration = $v->duration_minutes ?? 30; // Default if null
+                    $vEnd = $vStart->copy()->addMinutes($duration);
+                    $busySlots[] = $vStart->format('H:i') . '-' . $vEnd->format('H:i');
+                }
+
+                // Check Overlaps
+
+                // 1. Bookings Overlap
                 $conflictingBooking = $doctorBookings->first(function ($booking) use ($slotStart, $checkEnd) {
                     $bookingStart = \Carbon\Carbon::parse($booking->appointment_date . ' ' . $booking->start_time);
-
-                    // Existing booking effectively blocks its Duration + 30m buffer as well.
                     $bookingEnd = $bookingStart->copy()->addMinutes($booking->duration_minutes + 30);
-
-                    // Check overlap: (StartA < EndB) and (EndA > StartB)
                     return $slotStart < $bookingEnd && $checkEnd > $bookingStart;
                 });
 
@@ -246,6 +270,33 @@ class BookingController extends Controller
                         'specialty' => $doctor->specialty,
                         'status' => 'busy',
                         'reason' => "ติดคิว $bStart-$bEnd",
+                        'busy_slots' => $busySlots
+                    ];
+                }
+
+                // 2. Visits Overlap (Walk-ins without Booking)
+                $conflictingVisit = $doctorVisits->first(function ($visit) use ($slotStart, $checkEnd) {
+                    if ($visit->booking_id)
+                        return false; // Handled by booking
+
+                    $visitStart = \Carbon\Carbon::parse($visit->visit_date);
+                    $duration = $visit->duration_minutes ?? 30;
+                    $visitEnd = $visitStart->copy()->addMinutes($duration + 30);
+
+                    return $slotStart < $visitEnd && $checkEnd > $visitStart;
+                });
+
+                if ($conflictingVisit) {
+                    $vStart = \Carbon\Carbon::parse($conflictingVisit->visit_date);
+                    $duration = $conflictingVisit->duration_minutes ?? 30;
+                    $vEnd = $vStart->copy()->addMinutes($duration);
+
+                    return [
+                        'id' => $doctor->id,
+                        'name' => $doctor->name,
+                        'specialty' => $doctor->specialty,
+                        'status' => 'busy',
+                        'reason' => "Walk-in {$vStart->format('H:i')}-{$vEnd->format('H:i')}",
                         'busy_slots' => $busySlots
                     ];
                 }
