@@ -14,6 +14,23 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
+const formatLabel = (part) => {
+    if (typeof part === 'string') return part;
+    if (!part) return '';
+    
+    let label = part.area;
+    if (part.symptom) label += `: ${part.symptom}`;
+    
+    const before = part.pain_level;
+    const after = part.pain_level_after;
+    
+    if (before || after) {
+        label += ` (Pain: ${before || '-'} → ${after || '-'})`;
+    }
+    
+    return label;
+};
+
 const selectedParts = ref([...props.modelValue]);
 
 watch(() => props.modelValue, (newVal) => {
@@ -23,15 +40,29 @@ watch(() => props.modelValue, (newVal) => {
 const togglePart = (part) => {
     if (props.readonly) return;
     
-    if (selectedParts.value.includes(part)) {
-        selectedParts.value = selectedParts.value.filter(p => p !== part);
+    const partName = typeof part === 'object' ? part.area : part;
+    
+    // Check if exists
+    const index = selectedParts.value.findIndex(p => {
+        const pName = typeof p === 'object' ? p.area : p;
+        return pName === partName;
+    });
+
+    if (index !== -1) {
+        selectedParts.value.splice(index, 1);
     } else {
         selectedParts.value.push(part);
     }
     emit('update:modelValue', selectedParts.value);
 };
 
-const isSelected = (part) => selectedParts.value.includes(part);
+const isSelected = (part) => {
+    const partName = typeof part === 'object' ? part.area : part;
+    return selectedParts.value.some(p => {
+        const pName = typeof p === 'object' ? p.area : p;
+        return pName === partName;
+    });
+};
 
 </script>
 
@@ -155,9 +186,9 @@ const isSelected = (part) => selectedParts.value.includes(part);
         </div>
         
         <div class="mt-4 flex flex-wrap gap-2 justify-center max-w-lg">
-            <span v-for="part in selectedParts" :key="part" class="px-2 py-1 bg-rose-100 text-rose-700 rounded-lg text-xs font-bold border border-rose-200">
-                {{ part }}
-                <button @click.stop="togglePart(part)" class="ml-1 text-rose-400 hover:text-rose-900">&times;</button>
+            <span v-for="part in selectedParts" :key="typeof part === 'object' ? part.area : part" class="px-2 py-1 bg-rose-100 text-rose-700 rounded-lg text-xs font-bold border border-rose-200">
+                {{ formatLabel(part) }}
+                <button @click.stop="togglePart(part)" class="ml-1 text-rose-400 hover:text-rose-900" v-if="!readonly">&times;</button>
             </span>
         </div>
     </div>

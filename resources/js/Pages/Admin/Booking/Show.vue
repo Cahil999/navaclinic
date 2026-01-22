@@ -63,6 +63,17 @@ const getStatusLabel = (status) => {
 };
 import { computed } from 'vue';
 
+const getPainAreaNames = (areas) => {
+    if (!Array.isArray(areas)) return [];
+    if (areas.length === 0) return [];
+    if (typeof areas[0] === 'string') return areas;
+    return areas.map(a => a.area);
+};
+
+const isDetailedPainArea = (areas) => {
+    return Array.isArray(areas) && areas.length > 0 && typeof areas[0] !== 'string';
+};
+
 // ... (props)
 
 
@@ -289,11 +300,29 @@ import { computed } from 'vue';
                                     </section>
                                     <section>
                                         <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">ตำแหน่งที่ปวด</h4>
-                                         <div class="bg-white p-4 rounded-2xl border border-slate-200 flex justify-center items-center h-full min-h-[250px]">
-                                            <div v-if="booking.treatment_record.pain_areas && booking.treatment_record.pain_areas.length > 0">
-                                                <BodyPartSelector :model-value="booking.treatment_record.pain_areas" :readonly="true" />
+                                         <div class="bg-white p-4 rounded-2xl border border-slate-200 flex flex-col justify-start items-center h-full min-h-[250px]">
+                                            <div v-if="booking.treatment_record.pain_areas && booking.treatment_record.pain_areas.length > 0" class="w-full">
+                                                <div class="flex justify-center">
+                                                    <BodyPartSelector :model-value="booking.treatment_record.pain_areas" :readonly="true" />
+                                                </div>
+                                                
+                                                <div v-if="isDetailedPainArea(booking.treatment_record.pain_areas)" class="mt-6 border-t border-slate-100 pt-4 w-full">
+                                                    <h5 class="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wide">รายละเอียดอาการ</h5>
+                                                    <ul class="space-y-3">
+                                                        <li v-for="(item, idx) in booking.treatment_record.pain_areas" :key="idx" class="text-sm bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                                            <div class="font-bold text-indigo-900 flex items-center justify-between">
+                                                                {{ item.area }}
+                                                                <div class="flex gap-2">
+                                                                    <span v-if="item.pain_level" class="text-xs px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 border border-rose-200">Before: {{ item.pain_level }}/10</span>
+                                                                    <span v-if="item.pain_level_after" class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200">After: {{ item.pain_level_after }}/10</span>
+                                                                </div>
+                                                            </div>
+                                                            <div v-if="item.symptom" class="text-slate-600 mt-1 pl-2 border-l-2 border-indigo-200">{{ item.symptom }}</div>
+                                                        </li>
+                                                    </ul>
+                                                </div>
                                             </div>
-                                            <div v-else class="text-slate-400 text-xs text-center italic">ไม่ได้ระบุตำแหน่ง</div>
+                                            <div v-else class="text-slate-400 text-xs text-center italic my-auto">ไม่ได้ระบุตำแหน่ง</div>
                                         </div>
                                     </section>
                                 </div>
