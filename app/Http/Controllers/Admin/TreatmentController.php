@@ -59,6 +59,7 @@ class TreatmentController extends Controller
             'treatment_details' => 'required|string',
             'notes' => 'nullable|string',
             'price' => 'nullable|numeric|min:0',
+            'save_action' => 'nullable|string|in:stay,exit',
         ]);
 
         // Update the booking price
@@ -70,6 +71,10 @@ class TreatmentController extends Controller
             ['booking_id' => $booking->id],
             collect($validated)->except('price')->toArray()
         );
+
+        if ($request->input('save_action') === 'stay') {
+            return back()->with('success', 'Treatment details saved successfully.');
+        }
 
         return redirect()->route('admin.bookings.show', $booking->id)
             ->with('success', 'Treatment details saved successfully.');
@@ -123,6 +128,7 @@ class TreatmentController extends Controller
             'treatment_details' => 'required|string',
             'notes' => 'nullable|string',
             'price' => 'nullable|numeric|min:0',
+            'save_action' => 'nullable|string|in:stay,exit',
         ]);
 
         // Update the visit price
@@ -134,6 +140,10 @@ class TreatmentController extends Controller
             ['visit_id' => $visit->id],
             collect($validated)->except('price')->toArray()
         );
+
+        if ($request->input('save_action') === 'stay') {
+            return back()->with('success', 'Treatment details saved successfully.');
+        }
 
         return redirect()->route('admin.visits.show', $visit->id)
             ->with('success', 'Treatment details saved successfully.');

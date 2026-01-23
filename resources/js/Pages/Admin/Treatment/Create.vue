@@ -71,6 +71,7 @@ const form = useForm({
     treatment_details: props.previousRecord?.treatment_details || '',
     notes: props.previousRecord?.notes || '',
     price: entityPrice || '',
+    save_action: 'exit', // Default to exit
 });
 
 // Computed property for BodyPartSelector (needs simple array of strings)
@@ -86,7 +87,8 @@ const updateParts = (newParts) => {
     // 2. Add new areas that are selected but not in form data
     newParts.forEach(part => {
         if (!form.pain_areas.find(item => item.area === part)) {
-            form.pain_areas.push({
+            // Unshift to add to top of list
+            form.pain_areas.unshift({
                 area: part,
                 symptom: '',
                 pain_level: '',
@@ -108,6 +110,7 @@ const submit = () => {
         cancelButtonText: 'ยกเลิก'
     }).then((result) => {
         if (result.isConfirmed) {
+            form.save_action = 'exit';
             const routeName = props.isVisit ? 'admin.visits.treatment.store' : 'admin.treatment.store';
             const routeParam = entity.id;
             
@@ -124,6 +127,34 @@ const submit = () => {
                     });
                 }
             });
+        }
+    });
+};
+
+const saveRow = () => {
+    form.save_action = 'stay';
+    const routeName = props.isVisit ? 'admin.visits.treatment.store' : 'admin.treatment.store';
+    const routeParam = entity.id;
+    
+    form.post(route(routeName, routeParam), {
+        preserveScroll: true,
+        onSuccess: () => {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+
+            Toast.fire({
+                icon: 'success',
+                title: 'Data Saved'
+            })
         }
     });
 };
@@ -161,8 +192,81 @@ const submit = () => {
 
                     <form @submit.prevent="submit" class="p-8 space-y-8">
                         
-                        <!-- Section 1: Vital Signs -->
-                        <div class="space-y-4">
+                        <!-- 1. Pain Areas (Top Priority) -->
+                        <div class="space-y-6">
+                            <h4 class="font-bold text-slate-800 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 text-rose-500">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                </svg>
+                                Pain Areas & Symptoms (ตำแหน่งที่ปวด & อาการ)
+                            </h4>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <!-- Col 1: Body Map -->
+                                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-center min-h-[500px]">
+                                    <BodyPartSelector 
+                                        :model-value="selectedParts"
+                                        @update:model-value="updateParts" 
+                                    />
+                                </div>
+                                
+                                <!-- Col 2: Symptom List -->
+                                <div class="flex flex-col h-[500px]">
+                                    <h5 class="text-sm font-bold text-indigo-900 border-b border-indigo-100 pb-2 mb-3">Symptom Details (รายละเอียดอาการ)</h5>
+                                    
+                                    <div v-if="form.pain_areas.length === 0" class="flex-1 flex flex-col items-center justify-center text-center p-8 bg-slate-50 rounded-xl border border-dashed border-slate-300 text-slate-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8 mx-auto mb-2 text-slate-400">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672ZM12 2.25V4.5m5.834.166-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243-1.59-1.59" />
+                                        </svg>
+                                        <p class="text-sm">Click on the body map to add symptoms.</p>
+                                        <p class="text-xs text-slate-400 mt-1">(คลิกที่รูปหุ่นเพื่อระบุอาการ)</p>
+                                    </div>
+                                    
+                                    <div v-else class="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4">
+                                        <div v-for="(item, index) in form.pain_areas" :key="index" class="bg-slate-50 p-4 rounded-xl border border-slate-100 animate-fadeIn relative shadow-sm hover:shadow-md transition-all">
+                                            <div class="flex justify-between items-center mb-3">
+                                                <span class="font-bold text-slate-800 flex items-center gap-2">
+                                                    <span class="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center text-xs text-indigo-600 font-bold">{{ form.pain_areas.length - index }}</span>
+                                                    {{ item.area }}
+                                                </span>
+                                                <button type="button" @click="updateParts(selectedParts.filter(p => p !== item.area))" class="text-xs text-rose-500 hover:text-rose-700 hover:underline">
+                                                    Remove
+                                                </button>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-3">
+                                                <div class="col-span-2">
+                                                    <label class="block text-xs font-medium text-slate-600 mb-1">Symptom (อาการ)</label>
+                                                    <input type="text" v-model="item.symptom" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" placeholder="Ex. ปวดตึง, ร้าวลงขา...">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-medium text-slate-600 mb-1">Pain (Before)</label>
+                                                    <input type="number" min="0" max="10" v-model="item.pain_level" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" placeholder="Before">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-medium text-slate-600 mb-1">Pain (After)</label>
+                                                    <input type="number" min="0" max="10" v-model="item.pain_level_after" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm bg-emerald-50 border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500" placeholder="After">
+                                                </div>
+                                                <div class="col-span-2">
+                                                     <button 
+                                                        type="button" 
+                                                        @click="saveRow"
+                                                        class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-1"
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-3">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                                        </svg>
+                                                        Save
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Vital Signs -->
+                        <div class="space-y-4 pt-6 border-t border-slate-100">
                             <h4 class="font-bold text-slate-800 flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 text-indigo-600">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
@@ -203,7 +307,7 @@ const submit = () => {
                             </div>
                         </div>
 
-                        <!-- Section 3: Examination -->
+                        <!-- 3. Examination -->
                         <div class="space-y-6 pt-6 border-t border-slate-100">
                              <div class="space-y-4">
                                 <div>
@@ -219,7 +323,7 @@ const submit = () => {
                             </div>
                         </div>
 
-                        <!-- Section 4: Diagnosis & Treatment -->
+                        <!-- 4. Diagnosis & Treatment -->
                         <div class="space-y-6 pt-6 border-t border-slate-100">
                              <div>
                                 <label class="block text-sm font-bold text-slate-900 mb-1">Diagnosis (การวินิจฉัยโรค)</label>
@@ -267,61 +371,9 @@ const submit = () => {
                                     </div>
                                 </div>
                             </div>
-
-
-                            <div class="pt-6 border-t border-slate-100">
-                                <label class="block text-sm font-bold text-slate-900 mb-4">Pain Areas (บริเวณที่ปวด)</label>
-                                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                                    <BodyPartSelector 
-                                        :model-value="selectedParts"
-                                        @update:model-value="updateParts" 
-                                    />
-                                </div>
-                                
-                                <!-- Detailed Pain Symptoms List -->
-                                <div class="mt-6 space-y-4">
-                                    <h5 class="text-sm font-bold text-indigo-900 border-b border-indigo-100 pb-2">Symptom Details (รายละเอียดอาการ)</h5>
-                                    
-                                    <div v-if="form.pain_areas.length === 0" class="text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-300 text-slate-500">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8 mx-auto mb-2 text-slate-400">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672ZM12 2.25V4.5m5.834.166-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243-1.59-1.59" />
-                                        </svg>
-                                        <p class="text-sm">Click on the body map above to add symptom details.</p>
-                                        <p class="text-xs text-slate-400 mt-1">(คลิกที่รูปหุ่นด้านบนเพื่อระบุรายละเอียดอาการ)</p>
-                                    </div>
-                                    
-                                    <div v-else class="space-y-4">
-                                        <div v-for="(item, index) in form.pain_areas" :key="index" class="bg-slate-50 p-4 rounded-xl border border-slate-100 animate-fadeIn">
-                                        <div class="flex justify-between items-center mb-3">
-                                            <span class="font-bold text-slate-800 flex items-center gap-2">
-                                                <span class="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center text-xs text-indigo-600 font-bold">{{ index + 1 }}</span>
-                                                {{ item.area }}
-                                            </span>
-                                            <button type="button" @click="updateParts(selectedParts.filter(p => p !== item.area))" class="text-xs text-rose-500 hover:text-rose-700 hover:underline">
-                                                Remove
-                                            </button>
-                                        </div>
-                                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                            <div class="md:col-span-2">
-                                                <label class="block text-xs font-medium text-slate-600 mb-1">Symptom (อาการ)</label>
-                                                <input type="text" v-model="item.symptom" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" placeholder="Ex. Achy, Sharp pain...">
-                                            </div>
-                                            <div>
-                                                <label class="block text-xs font-medium text-slate-600 mb-1">Pain (Before)</label>
-                                                <input type="number" min="0" max="10" v-model="item.pain_level" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" placeholder="0-10">
-                                            </div>
-                                             <div>
-                                                <label class="block text-xs font-medium text-slate-600 mb-1">Pain (After)</label>
-                                                <input type="number" min="0" max="10" v-model="item.pain_level_after" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm bg-emerald-50 border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500" placeholder="0-10">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
-                    </div>
 
-                        <!-- Section 5: Other -->
+                        <!-- 5. Other -->
                         <div class="space-y-6 pt-6 border-t border-slate-100">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Price (Total Bill - ยอดรวมค่ารักษา)</label>
