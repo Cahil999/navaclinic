@@ -28,15 +28,76 @@ Route::get('/siam-retreat', function () {
 
 Route::get('/dashboard', function () {
     $user = auth()->user();
+
     if ($user->doctor) {
-        $bookings = $user->doctor->bookings()->with('user')->latest()->get();
+        // For doctors, we want to see upcoming and recent bookings
+        $query = $user->doctor->bookings()->with('user');
+
+        // Calculate Today's Stats
+        $today = now()->format('Y-m-d');
+        $todayStats = [
+            'total' => $user->doctor->bookings()->whereDate('appointment_date', $today)->count(),
+            'pending' => $user->doctor->bookings()->whereDate('appointment_date', $today)->whereIn('status', ['pending', 'confirmed'])->count(),
+            'completed' => $user->doctor->bookings()->whereDate('appointment_date', $today)->where('status', 'completed')->count(),
+            'revenue' => $user->doctor->bookings()->whereDate('appointment_date', $today)->where('status', '!=', 'cancelled')->sum('price'),
+        ];
+
+        // Weekly Workload Chart Data (Last 7 Days)
+        $dates = collect(range(6, 0))->map(function ($days) {
+            return now()->subDays($days)->format('Y-m-d');
+        });
+
+        $workloadCounts = $user->doctor->bookings()
+            ->whereIn('appointment_date', $dates)
+            ->selectRaw('DATE(appointment_date) as date, count(*) as count')
+            ->groupBy('date')
+            ->pluck('count', 'date');
+
+        $chartData = [
+            'labels' => $dates->map(fn($date) => \Carbon\Carbon::parse($date)->format('D d'))->toArray(),
+            'data' => $dates->map(fn($date) => $workloadCounts->get($date, 0))->toArray(),
+        ];
+
+        // Find Next Booking (Earliest upcoming today or in future)
+        $nextBooking = $user->doctor->bookings()
+            ->with('user')
+            ->where('status', 'confirmed')
+            ->where(function ($q) use ($today) {
+                $q->whereDate('appointment_date', '>', $today)
+                    ->orWhere(function ($sub) use ($today) {
+                        $sub->whereDate('appointment_date', $today)
+                            ->where('start_time', '>=', now()->format('H:i:s'));
+                    });
+            })
+            ->orderBy('appointment_date', 'asc')
+            ->orderBy('start_time', 'asc')
+            ->first();
+
+        // Main List: Sort by date descending (newest/future first)
+        $bookings = $query->orderBy('appointment_date', 'desc')
+            ->orderBy('start_time', 'asc')
+            ->get();
+
+        return Inertia::render('Dashboard', [
+            'bookings' => $bookings,
+            'isDoctor' => true,
+            'todayStats' => $todayStats,
+            'nextBooking' => $nextBooking,
+            'workloadChart' => $chartData,
+        ]);
     } else {
-        $bookings = $user->bookings()->with('doctor')->latest()->get();
+        // For patients
+        $bookings = $user->bookings()
+            ->with('doctor')
+            ->orderBy('appointment_date', 'desc')
+            ->orderBy('start_time', 'asc')
+            ->get();
+
+        return Inertia::render('Dashboard', [
+            'bookings' => $bookings,
+            'isDoctor' => false,
+        ]);
     }
-    return Inertia::render('Dashboard', [
-        'bookings' => $bookings,
-        'isDoctor' => $user->doctor ? true : false,
-    ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
