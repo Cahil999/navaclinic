@@ -14,7 +14,7 @@ import {
   Legend,
   ArcElement
 } from 'chart.js';
-import { Line } from 'vue-chartjs';
+import { Line, Pie, Bar } from 'vue-chartjs';
 
 ChartJS.register(
   CategoryScale,
@@ -30,9 +30,13 @@ ChartJS.register(
 
 const props = defineProps({
     stats: Object,
+    financial_overview: Object,
     doctor_stats: Array,
     filters: Object,
     chart_data: Object,
+    chart_new_vs_returning: Object,
+    chart_peak_hours: Object,
+    upcoming_bookings: Array,
     top_patients: Array,
 });
 
@@ -97,6 +101,47 @@ const revenueChartOptions = {
         }
     }
 };
+
+const newVsReturningChartConfig = computed(() => ({
+    labels: props.chart_new_vs_returning.labels,
+    datasets: [{
+        label: 'Patients',
+        data: props.chart_new_vs_returning.data,
+        backgroundColor: ['#22c55e', '#3b82f6'],
+        hoverOffset: 4
+    }]
+}));
+
+const newVsReturningChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: { position: 'bottom' }
+    }
+};
+
+const peakHoursChartConfig = computed(() => ({
+    labels: props.chart_peak_hours.labels,
+    datasets: [{
+        label: 'Visits',
+        data: props.chart_peak_hours.data,
+        backgroundColor: '#f59e0b',
+        borderRadius: 4,
+    }]
+}));
+
+const peakHoursChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: { display: false }
+    },
+    scales: {
+        y: {
+            beginAtZero: true
+        }
+    }
+};
 </script>
 
 <template>
@@ -128,6 +173,74 @@ const revenueChartOptions = {
                     </div>
                 </div>
 
+                <!-- Financial Snapshots (Today, Month, Year) -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Today -->
+                    <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg shadow-lg p-6 text-white">
+                        <div class="text-indigo-100 text-sm font-medium uppercase tracking-wider mb-4">Today's Overview</div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <div class="text-xs text-indigo-200">Revenue</div>
+                                <div class="text-xl font-bold">{{ formatCurrency(financial_overview.today.revenue) }}</div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-indigo-200">Doctor Pay</div>
+                                <div class="text-xl font-bold">{{ formatCurrency(financial_overview.today.doctor_fee) }}</div>
+                            </div>
+                            <div class="col-span-2 border-t border-indigo-400/30 pt-2 mt-2">
+                                <div class="flex justify-between items-center">
+                                    <div class="text-xs text-indigo-200">Net Profit</div>
+                                    <div class="text-2xl font-bold">{{ formatCurrency(financial_overview.today.net_profit) }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- This Month -->
+                    <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg shadow-lg p-6 text-white">
+                        <div class="text-emerald-100 text-sm font-medium uppercase tracking-wider mb-4">This Month</div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <div class="text-xs text-emerald-200">Revenue</div>
+                                <div class="text-xl font-bold">{{ formatCurrency(financial_overview.month.revenue) }}</div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-emerald-200">Doctor Pay</div>
+                                <div class="text-xl font-bold">{{ formatCurrency(financial_overview.month.doctor_fee) }}</div>
+                            </div>
+                            <div class="col-span-2 border-t border-emerald-400/30 pt-2 mt-2">
+                                <div class="flex justify-between items-center">
+                                    <div class="text-xs text-emerald-200">Net Profit</div>
+                                    <div class="text-2xl font-bold">{{ formatCurrency(financial_overview.month.net_profit) }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- This Year -->
+                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
+                        <div class="text-purple-100 text-sm font-medium uppercase tracking-wider mb-4">This Year</div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <div class="text-xs text-purple-200">Revenue</div>
+                                <div class="text-xl font-bold">{{ formatCurrency(financial_overview.year.revenue) }}</div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-purple-200">Doctor Pay</div>
+                                <div class="text-xl font-bold">{{ formatCurrency(financial_overview.year.doctor_fee) }}</div>
+                            </div>
+                            <div class="col-span-2 border-t border-purple-400/30 pt-2 mt-2">
+                                <div class="flex justify-between items-center">
+                                    <div class="text-xs text-purple-200">Net Profit</div>
+                                    <div class="text-2xl font-bold">{{ formatCurrency(financial_overview.year.net_profit) }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-200 my-6"></div>
+
                 <!-- Global Stats Row 1 -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-indigo-500">
@@ -145,6 +258,25 @@ const revenueChartOptions = {
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-purple-500">
                         <div class="text-slate-500 text-sm font-medium uppercase tracking-wider">Avg. Ticket Size</div>
                         <div class="text-2xl font-bold text-slate-900 mt-2">{{ formatCurrency(stats.avg_ticket_size) }}</div>
+                    </div>
+                </div>
+
+                <!-- Insights Row -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- New vs Returning Chart -->
+                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-slate-200 p-6">
+                        <h3 class="text-lg font-bold text-slate-800 mb-4">New vs Returning</h3>
+                        <div class="h-64 w-full flex justify-center">
+                            <Pie :data="newVsReturningChartConfig" :options="newVsReturningChartOptions" />
+                        </div>
+                    </div>
+                    
+                    <!-- Peak Hours Chart -->
+                    <div class="md:col-span-2 bg-white overflow-hidden shadow-sm sm:rounded-lg border border-slate-200 p-6">
+                        <h3 class="text-lg font-bold text-slate-800 mb-4">Peak Hours</h3>
+                        <div class="h-64 w-full">
+                            <Bar :data="peakHoursChartConfig" :options="peakHoursChartOptions" />
+                        </div>
                     </div>
                 </div>
 
@@ -175,6 +307,47 @@ const revenueChartOptions = {
                         <div v-else class="text-center text-slate-500 py-8 italic">
                             No patient data available.
                         </div>
+                    </div>
+                </div>
+
+                <!-- Upcoming Bookings -->
+                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-slate-200 p-6">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4">Upcoming Bookings</h3>
+                    <div v-if="upcoming_bookings.length > 0" class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-slate-600">
+                            <thead class="text-xs text-slate-700 uppercase bg-slate-50 border-b border-slate-100">
+                                <tr>
+                                    <th class="px-6 py-3">Date</th>
+                                    <th class="px-6 py-3">Time</th>
+                                    <th class="px-6 py-3">Patient</th>
+                                    <th class="px-6 py-3">Doctor</th>
+                                    <th class="px-6 py-3">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <tr v-for="booking in upcoming_bookings" :key="booking.id" class="hover:bg-slate-50">
+                                    <td class="px-6 py-4">{{ booking.date }}</td>
+                                    <td class="px-6 py-4 font-bold text-slate-800">{{ booking.time }}</td>
+                                    <td class="px-6 py-4">{{ booking.patient_name }}</td>
+                                    <td class="px-6 py-4">{{ booking.doctor_name }}</td>
+                                    <td class="px-6 py-4">
+                                        <span 
+                                            class="px-2 py-1 text-xs font-semibold rounded-full"
+                                            :class="{
+                                                'bg-green-100 text-green-800': booking.status === 'Confirmed',
+                                                'bg-yellow-100 text-yellow-800': booking.status === 'Pending',
+                                                'bg-slate-100 text-slate-800': booking.status === 'Completed',
+                                            }"
+                                        >
+                                            {{ booking.status }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div v-else class="text-center text-slate-500 py-8">
+                        No upcoming bookings found.
                     </div>
                 </div>
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Visit;
 use App\Models\Doctor;
+use App\Models\Booking;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Carbon\Carbon;
@@ -131,6 +132,90 @@ class OwnerDashboardController extends Controller
             ];
         })->values();
 
+        // --- New vs Returning Patients ---
+        // Get unique patients in the current period
+        $patientIdsInPeriod = $visits->pluck('patient_id')->unique()->filter();
+
+        // Count how many of these patients had visits BEFORE the start date
+        // If they had a visit before, they are "Returning". If not, they are "New".
+        $returningPatientsCount = 0;
+        if ($patientIdsInPeriod->isNotEmpty()) {
+            $returningPatientsCount = Visit::whereIn('patient_id', $patientIdsInPeriod)
+                ->where('visit_date', '<', $startDate)
+                ->distinct('patient_id')
+                ->count('patient_id');
+        }
+
+        $totalUniquePatients = $patientIdsInPeriod->count();
+        $newPatientsCount = $totalUniquePatients - $returningPatientsCount;
+
+        // --- Peak Hours ---
+        // Group visits by hour (0-23)
+        $visitsByHour = $visits->groupBy(function ($visit) {
+            return $visit->visit_date->format('H');
+        });
+
+        $peakHoursData = [];
+        // Initialize all likely hours (e.g., 8 to 20) with 0
+        for ($h = 8; $h <= 20; $h++) {
+            $hourStr = sprintf('%02d', $h);
+            $count = isset($visitsByHour[$hourStr]) ? $visitsByHour[$hourStr]->count() : 0;
+            $peakHoursData[] = [
+                'hour' => $hourStr . ':00',
+                'count' => $count
+            ];
+        }
+
+        // --- Upcoming Bookings ---
+        $upcomingBookings = Booking::with(['user', 'doctor'])
+            ->where('appointment_date', '>=', Carbon::today())
+            ->where('status', '!=', 'cancelled') // Assuming we want active bookings
+            ->orderBy('appointment_date', 'asc')
+            ->orderBy('start_time', 'asc')
+            ->limit(5)
+            ->get()
+            ->map(function ($booking) {
+                return [
+                    'id' => $booking->id,
+                    'patient_name' => $booking->user ? $booking->user->name : $booking->customer_name ?? 'Guest',
+                    'doctor_name' => $booking->doctor ? $booking->doctor->name : 'Unassigned',
+                    'date' => Carbon::parse($booking->appointment_date)->format('d M Y'),
+                    'time' => Carbon::parse($booking->start_time)->format('H:i'),
+                    'status' => ucfirst($booking->status),
+                ];
+            });
+
+        // --- Financial Overview (Today, Month, Year) ---
+        // Fetch all visits for the current year to minimize queries
+        $currentDate = Carbon::now();
+        $yearlyVisits = Visit::with('doctor')
+            ->whereYear('visit_date', $currentDate->year)
+            ->whereNotNull('doctor_id')
+            ->get();
+
+        $calculateMetrics = function ($visitsCollection) {
+            $revenue = $visitsCollection->sum('price');
+            $doctorFee = $visitsCollection->reduce(function ($carry, $visit) {
+                $rate = $visit->doctor ? $visit->doctor->commission_rate : 50; // Default 50%
+                return $carry + ($visit->price * $rate / 100);
+            }, 0);
+            return [
+                'revenue' => $revenue,
+                'doctor_fee' => $doctorFee,
+                'net_profit' => $revenue - $doctorFee
+            ];
+        };
+
+        $todayMetrics = $calculateMetrics($yearlyVisits->filter(function ($visit) use ($currentDate) {
+            return $visit->visit_date->isSameDay($currentDate);
+        }));
+
+        $monthMetrics = $calculateMetrics($yearlyVisits->filter(function ($visit) use ($currentDate) {
+            return $visit->visit_date->isSameMonth($currentDate);
+        }));
+
+        $yearMetrics = $calculateMetrics($yearlyVisits);
+
         return Inertia::render('Admin/Owner/Dashboard', [
             'stats' => [
                 'total_revenue' => $totalRevenue,
@@ -139,10 +224,24 @@ class OwnerDashboardController extends Controller
                 'avg_ticket_size' => $avgTicketSize,
                 'total_visits' => $totalVisits,
             ],
+            'financial_overview' => [
+                'today' => $todayMetrics,
+                'month' => $monthMetrics,
+                'year' => $yearMetrics,
+            ],
             'chart_data' => [
                 'labels' => $chartLabels,
                 'data' => $chartValues,
             ],
+            'chart_new_vs_returning' => [
+                'labels' => ['New Patients', 'Returning Patients'],
+                'data' => [$newPatientsCount, $returningPatientsCount],
+            ],
+            'chart_peak_hours' => [
+                'labels' => array_column($peakHoursData, 'hour'),
+                'data' => array_column($peakHoursData, 'count'),
+            ],
+            'upcoming_bookings' => $upcomingBookings,
             'top_patients' => $topPatients,
             'doctor_stats' => $doctorStats,
             'filters' => [
