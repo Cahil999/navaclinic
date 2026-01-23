@@ -64,15 +64,15 @@ const formatCurrency = (value) => {
 const formatDuration = (minutes) => {
     const hrs = Math.floor(minutes / 60);
     const mins = minutes % 60;
-    if (hrs > 0) return `${hrs}h ${mins}m`;
-    return `${mins}m`;
+    if (hrs > 0) return `${hrs} ชม. ${mins} น.`;
+    return `${mins} น.`;
 };
 
 // --- Chart Configs ---
 const revenueChartConfig = computed(() => ({
     labels: props.chart_data.labels,
     datasets: [{
-        label: 'Revenue',
+        label: 'รายได้',
         data: props.chart_data.data,
         borderColor: '#4f46e5',
         backgroundColor: 'rgba(79, 70, 229, 0.1)',
@@ -88,7 +88,7 @@ const revenueChartOptions = {
         legend: { display: false },
         tooltip: {
             callbacks: {
-                label: (context) => `Revenue: ${formatCurrency(context.raw)}`
+                label: (context) => `รายได้: ${formatCurrency(context.raw)}`
             }
         }
     },
@@ -105,7 +105,7 @@ const revenueChartOptions = {
 const newVsReturningChartConfig = computed(() => ({
     labels: props.chart_new_vs_returning.labels,
     datasets: [{
-        label: 'Patients',
+        label: 'ผู้ป่วย',
         data: props.chart_new_vs_returning.data,
         backgroundColor: ['#22c55e', '#3b82f6'],
         hoverOffset: 4
@@ -123,7 +123,7 @@ const newVsReturningChartOptions = {
 const peakHoursChartConfig = computed(() => ({
     labels: props.chart_peak_hours.labels,
     datasets: [{
-        label: 'Visits',
+        label: 'การเข้าชม',
         data: props.chart_peak_hours.data,
         backgroundColor: '#f59e0b',
         borderRadius: 4,
@@ -145,12 +145,12 @@ const peakHoursChartOptions = {
 </script>
 
 <template>
-    <Head title="Owner Dashboard" />
+    <Head title="แดชบอร์ดผู้บริหาร" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-slate-800 leading-tight">
-                Owner Dashboard
+                แดชบอร์ดผู้บริหาร
             </h2>
         </template>
 
@@ -161,15 +161,15 @@ const peakHoursChartOptions = {
                 <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
                     <div class="flex items-center space-x-4">
                         <select v-model="period" @change="updateDashboard" class="rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            <option value="daily">Daily</option>
-                            <option value="weekly">Weekly</option>
-                            <option value="monthly">Monthly</option>
-                            <option value="yearly">Yearly</option>
+                            <option value="daily">รายวัน</option>
+                            <option value="weekly">รายสัปดาห์</option>
+                            <option value="monthly">รายเดือน</option>
+                            <option value="yearly">รายปี</option>
                         </select>
                         <input type="date" v-model="date" @change="updateDashboard" class="rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     </div>
                     <div class="text-slate-500 text-sm">
-                        Displaying data for: <span class="font-semibold text-slate-700">{{ filters.startDate }}</span> to <span class="font-semibold text-slate-700">{{ filters.endDate }}</span>
+                        แสดงข้อมูล: <span class="font-semibold text-slate-700">{{ filters.startDate }}</span> ถึง <span class="font-semibold text-slate-700">{{ filters.endDate }}</span>
                     </div>
                 </div>
 
@@ -177,19 +177,19 @@ const peakHoursChartOptions = {
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- Today -->
                     <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg shadow-lg p-6 text-white">
-                        <div class="text-indigo-100 text-sm font-medium uppercase tracking-wider mb-4">Today's Overview</div>
+                        <div class="text-indigo-100 text-sm font-medium uppercase tracking-wider mb-4">ภาพรวมวันนี้</div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <div class="text-xs text-indigo-200">Revenue</div>
+                                <div class="text-xs text-indigo-200">รายได้</div>
                                 <div class="text-xl font-bold">{{ formatCurrency(financial_overview.today.revenue) }}</div>
                             </div>
                             <div>
-                                <div class="text-xs text-indigo-200">Doctor Pay</div>
+                                <div class="text-xs text-indigo-200">ค่ามือแพทย์</div>
                                 <div class="text-xl font-bold">{{ formatCurrency(financial_overview.today.doctor_fee) }}</div>
                             </div>
                             <div class="col-span-2 border-t border-indigo-400/30 pt-2 mt-2">
                                 <div class="flex justify-between items-center">
-                                    <div class="text-xs text-indigo-200">Net Profit</div>
+                                    <div class="text-xs text-indigo-200">กำไรสุทธิ</div>
                                     <div class="text-2xl font-bold">{{ formatCurrency(financial_overview.today.net_profit) }}</div>
                                 </div>
                             </div>
@@ -198,19 +198,19 @@ const peakHoursChartOptions = {
 
                     <!-- This Month -->
                     <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg shadow-lg p-6 text-white">
-                        <div class="text-emerald-100 text-sm font-medium uppercase tracking-wider mb-4">This Month</div>
+                        <div class="text-emerald-100 text-sm font-medium uppercase tracking-wider mb-4">เดือนนี้</div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <div class="text-xs text-emerald-200">Revenue</div>
+                                <div class="text-xs text-emerald-200">รายได้</div>
                                 <div class="text-xl font-bold">{{ formatCurrency(financial_overview.month.revenue) }}</div>
                             </div>
                             <div>
-                                <div class="text-xs text-emerald-200">Doctor Pay</div>
+                                <div class="text-xs text-emerald-200">ค่ามือแพทย์</div>
                                 <div class="text-xl font-bold">{{ formatCurrency(financial_overview.month.doctor_fee) }}</div>
                             </div>
                             <div class="col-span-2 border-t border-emerald-400/30 pt-2 mt-2">
                                 <div class="flex justify-between items-center">
-                                    <div class="text-xs text-emerald-200">Net Profit</div>
+                                    <div class="text-xs text-emerald-200">กำไรสุทธิ</div>
                                     <div class="text-2xl font-bold">{{ formatCurrency(financial_overview.month.net_profit) }}</div>
                                 </div>
                             </div>
@@ -219,19 +219,19 @@ const peakHoursChartOptions = {
 
                     <!-- This Year -->
                     <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
-                        <div class="text-purple-100 text-sm font-medium uppercase tracking-wider mb-4">This Year</div>
+                        <div class="text-purple-100 text-sm font-medium uppercase tracking-wider mb-4">ปีนี้</div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <div class="text-xs text-purple-200">Revenue</div>
+                                <div class="text-xs text-purple-200">รายได้</div>
                                 <div class="text-xl font-bold">{{ formatCurrency(financial_overview.year.revenue) }}</div>
                             </div>
                             <div>
-                                <div class="text-xs text-purple-200">Doctor Pay</div>
+                                <div class="text-xs text-purple-200">ค่ามือแพทย์</div>
                                 <div class="text-xl font-bold">{{ formatCurrency(financial_overview.year.doctor_fee) }}</div>
                             </div>
                             <div class="col-span-2 border-t border-purple-400/30 pt-2 mt-2">
                                 <div class="flex justify-between items-center">
-                                    <div class="text-xs text-purple-200">Net Profit</div>
+                                    <div class="text-xs text-purple-200">กำไรสุทธิ</div>
                                     <div class="text-2xl font-bold">{{ formatCurrency(financial_overview.year.net_profit) }}</div>
                                 </div>
                             </div>
@@ -244,19 +244,19 @@ const peakHoursChartOptions = {
                 <!-- Global Stats Row 1 -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-indigo-500">
-                        <div class="text-slate-500 text-sm font-medium uppercase tracking-wider">Total Revenue</div>
+                        <div class="text-slate-500 text-sm font-medium uppercase tracking-wider">รายได้รวม</div>
                         <div class="text-2xl font-bold text-slate-900 mt-2">{{ formatCurrency(stats.total_revenue) }}</div>
                     </div>
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-emerald-500">
-                        <div class="text-slate-500 text-sm font-medium uppercase tracking-wider">Total Duration</div>
+                        <div class="text-slate-500 text-sm font-medium uppercase tracking-wider">เวลาให้บริการรวม</div>
                         <div class="text-2xl font-bold text-slate-900 mt-2">{{ formatDuration(stats.total_duration) }}</div>
                     </div>
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-blue-500">
-                        <div class="text-slate-500 text-sm font-medium uppercase tracking-wider">Total Patients</div>
+                        <div class="text-slate-500 text-sm font-medium uppercase tracking-wider">จำนวนรวมผู้ป่วย (ครั้ง)</div>
                         <div class="text-2xl font-bold text-slate-900 mt-2">{{ stats.total_patients }}</div>
                     </div>
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-purple-500">
-                        <div class="text-slate-500 text-sm font-medium uppercase tracking-wider">Avg. Ticket Size</div>
+                        <div class="text-slate-500 text-sm font-medium uppercase tracking-wider">ยอดใช้จ่ายเฉลี่ยต่อบิล</div>
                         <div class="text-2xl font-bold text-slate-900 mt-2">{{ formatCurrency(stats.avg_ticket_size) }}</div>
                     </div>
                 </div>
@@ -265,7 +265,7 @@ const peakHoursChartOptions = {
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- New vs Returning Chart -->
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-slate-200 p-6">
-                        <h3 class="text-lg font-bold text-slate-800 mb-4">New vs Returning</h3>
+                        <h3 class="text-lg font-bold text-slate-800 mb-4">ลูกค้าใหม่ vs ลูกค้าเก่า</h3>
                         <div class="h-64 w-full flex justify-center">
                             <Pie :data="newVsReturningChartConfig" :options="newVsReturningChartOptions" />
                         </div>
@@ -273,7 +273,7 @@ const peakHoursChartOptions = {
                     
                     <!-- Peak Hours Chart -->
                     <div class="md:col-span-2 bg-white overflow-hidden shadow-sm sm:rounded-lg border border-slate-200 p-6">
-                        <h3 class="text-lg font-bold text-slate-800 mb-4">Peak Hours</h3>
+                        <h3 class="text-lg font-bold text-slate-800 mb-4">ช่วงเวลาที่มีผู้ใช้บริการหนาแน่น</h3>
                         <div class="h-64 w-full">
                             <Bar :data="peakHoursChartConfig" :options="peakHoursChartOptions" />
                         </div>
@@ -284,7 +284,7 @@ const peakHoursChartOptions = {
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Revenue Chart -->
                     <div class="lg:col-span-2 bg-white overflow-hidden shadow-sm sm:rounded-lg border border-slate-200 p-6">
-                        <h3 class="text-lg font-bold text-slate-800 mb-4">Revenue Trend</h3>
+                        <h3 class="text-lg font-bold text-slate-800 mb-4">แนวโน้มรายได้</h3>
                         <div class="h-80 w-full">
                              <Line :data="revenueChartConfig" :options="revenueChartOptions" />
                         </div>
@@ -292,12 +292,12 @@ const peakHoursChartOptions = {
 
                     <!-- Top Patients -->
                      <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-slate-200 p-6">
-                        <h3 class="text-lg font-bold text-slate-800 mb-4">Top Spending Patients</h3>
+                        <h3 class="text-lg font-bold text-slate-800 mb-4">ลูกค้าที่มียอดใช้จ่ายสูงสุด</h3>
                         <div v-if="top_patients.length > 0" class="space-y-4">
                             <div v-for="(patient, index) in top_patients" :key="index" class="flex items-center justify-between border-b last:border-0 border-slate-100 pb-2 last:pb-0">
                                 <div>
                                     <div class="font-medium text-slate-900">{{ patient.name }}</div>
-                                    <div class="text-xs text-slate-500">{{ patient.visits_count }} visits</div>
+                                    <div class="text-xs text-slate-500">{{ patient.visits_count }} ครั้ง</div>
                                 </div>
                                 <div class="font-bold text-indigo-600">
                                     {{ formatCurrency(patient.total_spent) }}
@@ -305,23 +305,23 @@ const peakHoursChartOptions = {
                             </div>
                         </div>
                         <div v-else class="text-center text-slate-500 py-8 italic">
-                            No patient data available.
+                            ไม่พบข้อมูลผู้ป่วย
                         </div>
                     </div>
                 </div>
 
                 <!-- Upcoming Bookings -->
                  <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-slate-200 p-6">
-                    <h3 class="text-lg font-bold text-slate-800 mb-4">Upcoming Bookings</h3>
+                    <h3 class="text-lg font-bold text-slate-800 mb-4">การนัดหมายที่จะมาถึง</h3>
                     <div v-if="upcoming_bookings.length > 0" class="overflow-x-auto">
                         <table class="w-full text-sm text-left text-slate-600">
                             <thead class="text-xs text-slate-700 uppercase bg-slate-50 border-b border-slate-100">
                                 <tr>
-                                    <th class="px-6 py-3">Date</th>
-                                    <th class="px-6 py-3">Time</th>
-                                    <th class="px-6 py-3">Patient</th>
-                                    <th class="px-6 py-3">Doctor</th>
-                                    <th class="px-6 py-3">Status</th>
+                                    <th class="px-6 py-3">วันที่</th>
+                                    <th class="px-6 py-3">เวลา</th>
+                                    <th class="px-6 py-3">ผู้ป่วย</th>
+                                    <th class="px-6 py-3">แพทย์</th>
+                                    <th class="px-6 py-3">สถานะ</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
@@ -339,7 +339,11 @@ const peakHoursChartOptions = {
                                                 'bg-slate-100 text-slate-800': booking.status === 'Completed',
                                             }"
                                         >
-                                            {{ booking.status }}
+                                            {{ 
+                                                booking.status === 'Confirmed' ? 'ยืนยันแล้ว' : 
+                                                booking.status === 'Pending' ? 'รอดำเนินการ' : 
+                                                booking.status === 'Completed' ? 'เสร็จสิ้น' : booking.status 
+                                            }}
                                         </span>
                                     </td>
                                 </tr>
@@ -347,16 +351,16 @@ const peakHoursChartOptions = {
                         </table>
                     </div>
                     <div v-else class="text-center text-slate-500 py-8">
-                        No upcoming bookings found.
+                        ไม่พบการนัดหมายที่จะมาถึง
                     </div>
                 </div>
 
                 <!-- Full Width Doctor Breakdown -->
                 <div class="space-y-6">
-                    <h3 class="text-lg font-bold text-slate-800">Detailed Doctor Performance</h3>
+                    <h3 class="text-lg font-bold text-slate-800">รายละเอียดผลงานแพทย์</h3>
                     
                     <div v-if="doctor_stats.length === 0" class="text-center py-12 bg-white rounded-lg border border-slate-200 text-slate-500">
-                        No data found for the selected period.
+                        ไม่พบข้อมูลสำหรับช่วงเวลาที่เลือก
                     </div>
 
                     <div v-for="doctor in doctor_stats" :key="doctor.doctor_id" class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-slate-200">
@@ -364,16 +368,16 @@ const peakHoursChartOptions = {
                             <div>
                                 <h4 class="text-lg font-bold text-slate-900">{{ doctor.doctor_name }}</h4>
                                 <div class="text-sm text-slate-500 mt-1">
-                                    {{ doctor.visits.length }} visits
+                                    {{ doctor.visits.length }} ครั้ง
                                 </div>
                             </div>
                             <div class="flex gap-4">
                                 <div class="text-right">
-                                    <div class="text-xs text-slate-500 uppercase tracking-wide">Revenue</div>
+                                    <div class="text-xs text-slate-500 uppercase tracking-wide">รายได้</div>
                                     <div class="font-bold text-indigo-600">{{ formatCurrency(doctor.total_revenue) }}</div>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-xs text-slate-500 uppercase tracking-wide">Duration</div>
+                                    <div class="text-xs text-slate-500 uppercase tracking-wide">ระยะเวลารวม</div>
                                     <div class="font-bold text-emerald-600">{{ formatDuration(doctor.total_duration) }}</div>
                                 </div>
                             </div>
@@ -383,11 +387,11 @@ const peakHoursChartOptions = {
                             <table class="w-full text-sm text-left text-slate-600">
                                 <thead class="text-xs text-slate-700 uppercase bg-slate-50 border-b border-slate-100">
                                     <tr>
-                                        <th class="px-6 py-3">Date</th>
-                                        <th class="px-6 py-3">Time</th>
-                                        <th class="px-6 py-3">Patient</th>
-                                        <th class="px-6 py-3">Duration</th>
-                                        <th class="px-6 py-3 text-right">Fee</th>
+                                        <th class="px-6 py-3">วันที่</th>
+                                        <th class="px-6 py-3">เวลา</th>
+                                        <th class="px-6 py-3">ผู้ป่วย</th>
+                                        <th class="px-6 py-3">ระยะเวลา</th>
+                                        <th class="px-6 py-3 text-right">ค่ารักษา</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100">
@@ -395,7 +399,7 @@ const peakHoursChartOptions = {
                                         <td class="px-6 py-4 whitespace-nowrap">{{ visit.visit_date }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-slate-500">{{ visit.visit_time }}</td>
                                         <td class="px-6 py-4 font-medium text-slate-900">{{ visit.patient_name }}</td>
-                                        <td class="px-6 py-4">{{ visit.duration_minutes }} mins</td>
+                                        <td class="px-6 py-4">{{ visit.duration_minutes }} นาที</td>
                                         <td class="px-6 py-4 text-right font-medium text-slate-900">{{ formatCurrency(visit.price) }}</td>
                                     </tr>
                                 </tbody>
