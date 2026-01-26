@@ -46,7 +46,19 @@ const getInitialPainAreas = () => {
             characteristic: ''
         }));
     }
-    return areas;
+    
+    // Sanitize existing data (fix potential nested objects from previous bugs)
+    return areas.map(item => {
+        let areaName = item.area;
+        // If area became an object {area: "Name", ...}, extract the name
+        if (typeof areaName === 'object' && areaName !== null && areaName.area) {
+            areaName = areaName.area;
+        }
+        return {
+            ...item,
+            area: areaName
+        };
+    });
 };
 
 const form = useForm({
@@ -76,7 +88,11 @@ const form = useForm({
 
 // Computed property for BodyPartSelector (needs simple array of strings)
 const selectedParts = computed(() => {
-    return form.pain_areas.map(item => item.area);
+    return form.pain_areas.map(item => {
+        // Defensive check
+        if (typeof item.area === 'object' && item.area) return item.area.area;
+        return item.area;
+    });
 });
 
 // Handle updates from BodyPartSelector
@@ -201,17 +217,17 @@ const saveRow = () => {
                                 Pain Areas & Symptoms (ตำแหน่งที่ปวด & อาการ)
                             </h4>
 
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                <!-- Col 1: Body Map -->
-                                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-center min-h-[500px]">
+                            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                                <!-- Col 1: Body Map (2 cols) -->
+                                <div class="lg:col-span-2 min-h-[600px]">
                                     <BodyPartSelector 
                                         :model-value="selectedParts"
                                         @update:model-value="updateParts" 
                                     />
                                 </div>
                                 
-                                <!-- Col 2: Symptom List -->
-                                <div class="flex flex-col h-[500px]">
+                                <!-- Col 2: Symptom List (3 cols) -->
+                                <div class="lg:col-span-3 flex flex-col h-[700px]">
                                     <h5 class="text-sm font-bold text-indigo-900 border-b border-indigo-100 pb-2 mb-3">Symptom Details (รายละเอียดอาการ)</h5>
                                     
                                     <div v-if="form.pain_areas.length === 0" class="flex-1 flex flex-col items-center justify-center text-center p-8 bg-slate-50 rounded-xl border border-dashed border-slate-300 text-slate-500">
@@ -224,12 +240,17 @@ const saveRow = () => {
                                     
                                     <div v-else class="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4">
                                         <div v-for="(item, index) in form.pain_areas" :key="index" class="bg-slate-50 p-4 rounded-xl border border-slate-100 animate-fadeIn relative shadow-sm hover:shadow-md transition-all">
-                                            <div class="flex justify-between items-center mb-3">
-                                                <span class="font-bold text-slate-800 flex items-center gap-2">
-                                                    <span class="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center text-xs text-indigo-600 font-bold">{{ form.pain_areas.length - index }}</span>
-                                                    {{ item.area }}
-                                                </span>
-                                                <button type="button" @click="updateParts(selectedParts.filter(p => p !== item.area))" class="text-xs text-rose-500 hover:text-rose-700 hover:underline">
+                                            <div class="flex justify-between items-start gap-2 mb-3">
+                                                <div class="flex items-center gap-2 min-w-0 flex-1">
+                                                    <span class="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center text-xs text-indigo-600 font-bold flex-shrink-0 mt-0.5">
+                                                        {{ form.pain_areas.length - index }}
+                                                    </span>
+                                                    <span class="font-bold text-slate-800 text-sm break-words leading-tight">
+                                                        {{ typeof item.area === 'string' ? item.area.replace(/_/g, ' ') : (item.area?.area || 'Unknown') }}
+                                                    </span>
+                                                </div>
+                                                
+                                                <button type="button" @click="updateParts(selectedParts.filter(p => p !== item.area))" class="text-xs font-medium text-rose-500 hover:text-rose-700 bg-rose-50 px-2 py-1 rounded hover:bg-rose-100 transition-colors flex-shrink-0">
                                                     Remove
                                                 </button>
                                             </div>
