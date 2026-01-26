@@ -138,12 +138,13 @@ const removeItem = (item) => {
             <div class="p-4 flex-1 relative flex justify-center items-start overflow-auto custom-scrollbar">
                 <!-- Wrapper to constraint size -->
                 <!-- Wrapper to constraint size -->
-                <div class="relative w-full" :class="embedded ? 'h-full max-w-full' : 'h-[600px] max-w-[500px]'">
+                <div class="relative w-full" :class="embedded ? 'min-h-[1000px] max-w-none' : 'h-[600px] max-w-[500px]'">
                     <InteractiveSvg 
                         :src="currentSvgParams.file" 
                         :selected-parts="selectedParts"
                         @toggle="handleToggle"
                         class="w-full h-full"
+                        :class="{ 'unconstrained': embedded }"
                     />
                 </div>
             </div>

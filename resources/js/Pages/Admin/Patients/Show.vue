@@ -456,8 +456,8 @@ const patientAge = computed(() => {
                                         <div class="grid grid-cols-1 xl:grid-cols-12 divide-y xl:divide-y-0 xl:divide-x divide-slate-100">
                                             
                                             <!-- Body Map Section (Fixed Width) -->
-                                            <div class="xl:col-span-5 bg-slate-50 p-2 flex flex-col items-center justify-center border-r border-slate-100">
-                                                <div class="w-full relative min-h-[800px] flex items-center justify-center">
+                                            <div class="xl:col-span-6 bg-slate-50 p-2 flex flex-col items-center justify-center border-r border-slate-100">
+                                                <div class="w-full relative min-h-[1000px] flex items-center justify-center">
                                                      <BodyPartSelector 
                                                         :modelValue="medicalSummary.pain_areas" 
                                                         :readonly="true" 
@@ -468,7 +468,7 @@ const patientAge = computed(() => {
                                             </div>
                                             
                                             <!-- Details Table Section (Flexible) -->
-                                            <div class="xl:col-span-7 flex flex-col">
+                                            <div class="xl:col-span-6 flex flex-col">
                                                 <div class="p-5 border-b border-slate-100 bg-white flex justify-between items-center">
                                                     <h5 class="font-bold text-slate-800 flex items-center gap-2">
                                                         <ClipboardDocumentListIcon class="w-5 h-5 text-indigo-500" />
