@@ -165,21 +165,34 @@ const updateParts = (newParts) => {
 };
 
 const submit = () => {
-    // Directly submit without asking for confirmation
-    form.save_action = 'exit';
-    const routeName = props.isVisit ? 'admin.visits.treatment.store' : 'admin.treatment.store';
-    const routeParam = entity.id;
-    
-    form.post(route(routeName, routeParam), {
-        onSuccess: () => {
-            Swal.fire({
-                title: 'Data Saved Successfully',
-                text: 'Treatment details have been recorded.',
-                icon: 'success',
-                confirmButtonText: 'OK',
-                confirmButtonColor: '#4f46e5', // indigo-600
-                timer: 3000,
-                timerProgressBar: true
+    Swal.fire({
+        title: 'ยืนยันการบันทึกข้อมูล',
+        text: 'ต้องการยืนยันการบันทึกข้อมูลใช่หรือไม่?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'ยืนยัน',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#4f46e5', // indigo-600
+        cancelButtonColor: '#ef4444', // red-500
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.save_action = 'exit';
+            const routeName = props.isVisit ? 'admin.visits.treatment.store' : 'admin.treatment.store';
+            const routeParam = entity.id;
+            
+            form.post(route(routeName, routeParam), {
+                onSuccess: () => {
+                    Swal.fire({
+                        title: 'Data Saved Successfully',
+                        text: 'Treatment details have been recorded.',
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#4f46e5',
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                }
             });
         }
     });
