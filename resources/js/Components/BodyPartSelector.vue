@@ -216,6 +216,7 @@ const removeItem = (item) => {
                     <span :class="['text-[10px] font-bold uppercase tracking-wider w-16 text-right', embedded ? 'text-slate-400' : 'text-slate-500']">{{ group.label }}</span>
                     <div class="flex gap-1">
                         <button 
+                            type="button"
                             v-for="view in group.options" 
                             :key="view.id"
                             @click="currentView = view.id"
