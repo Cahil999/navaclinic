@@ -57,6 +57,7 @@ const getStatusClass = (status) => {
 };
 
 const showEditModal = ref(false);
+const showBodyMapModal = ref(false);
 
 const form = useForm({
     name: props.patient.name,
@@ -453,73 +454,86 @@ const patientAge = computed(() => {
                                     </h4>
                                     
                                     <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-                                        <!-- Body Map Section (Full Width) -->
-                                        <div class="bg-slate-50/30 p-8 border-b border-slate-100 flex items-center justify-center">
-                                            <div class="w-full">
-                                                 <BodyPartSelector 
-                                                    :modelValue="medicalSummary.pain_areas" 
-                                                    :readonly="true" 
-                                                    :embedded="true"
-                                                    :expand-all="true"
-                                                    class="w-full"
-                                                />
+                                        <div class="grid grid-cols-1 lg:grid-cols-2">
+                                            <!-- Body Map Preview (Left Panel) -->
+                                            <div class="p-6 bg-slate-50/50 border-b lg:border-b-0 lg:border-r border-slate-200 flex flex-col items-center justify-center relative group cursor-pointer" @click="showBodyMapModal = true">
+                                                 <div class="absolute top-3 right-3 z-10">
+                                                    <span class="bg-white text-indigo-600 text-[10px] font-bold px-2 py-1 rounded-full shadow-sm border border-indigo-100 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM10.5 7.5v6m3-3h-6" />
+                                                        </svg>
+                                                        ขยาย
+                                                    </span>
+                                                </div>
+                                                
+                                                <div class="h-[600px] w-full">
+                                                     <BodyPartSelector 
+                                                        :modelValue="medicalSummary.pain_areas" 
+                                                        :readonly="true" 
+                                                        :thumbnail="true"
+                                                    />
+                                                </div>
+                                                
+                                                <div class="mt-4 text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center">
+                                                    แผนภาพตำแหน่งปวด (Body Map)
+                                                </div>
                                             </div>
-                                        </div>
-                                        
-                                        <!-- Details Table Section (Full Width) -->
-                                        <div class="flex flex-col">
-                                            <div class="p-5 border-b border-slate-100 bg-white flex justify-between items-center">
-                                                <h5 class="font-bold text-slate-800 flex items-center gap-2">
-                                                    <ClipboardDocumentListIcon class="w-5 h-5 text-indigo-500" />
-                                                    รายการอาการแยกตามจุด (Symptom Details)
-                                                </h5>
-                                            </div>
+                                            
+                                            <!-- Details Table Section (Right Panel) -->
+                                            <div class="flex flex-col">
+                                                <div class="p-5 border-b border-slate-100 bg-white flex justify-between items-center">
+                                                    <h5 class="font-bold text-slate-800 flex items-center gap-2">
+                                                        <ClipboardDocumentListIcon class="w-5 h-5 text-indigo-500" />
+                                                        รายการอาการแยกตามจุด (Symptom Details)
+                                                    </h5>
+                                                </div>
 
-                                            <div class="overflow-x-auto">
-                                                <table class="w-full text-left text-sm z-0">
-                                                    <thead class="bg-slate-50/70 text-slate-500 text-xs uppercase font-bold border-b border-slate-100">
-                                                        <tr>
-                                                            <th class="px-6 py-4 w-12 text-center">#</th>
-                                                            <th class="px-6 py-4 w-1/4">ตำแหน่ง (Area)</th>
-                                                            <th class="px-6 py-4 col-span-2">อาการ (Symptoms)</th>
-                                                            <th class="px-6 py-4 text-center w-1/4">ระดับความปวด (Pain)</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody class="divide-y divide-slate-50">
-                                                        <tr v-for="(item, idx) in medicalSummary.pain_areas" :key="idx" class="hover:bg-indigo-50/30 transition-colors">
-                                                            <td class="px-6 py-4 text-center text-slate-400 font-medium">
-                                                                {{ idx + 1 }}
-                                                            </td>
-                                                            <td class="px-6 py-4 align-top">
-                                                                <span class="font-bold text-indigo-900 block">
-                                                                    {{ typeof item.area === 'string' ? item.area.replace(/_/g, ' ') : (item.area?.area || item.area) }}
-                                                                </span>
-                                                            </td>
-                                                            <td class="px-6 py-4 align-top">
-                                                                 <p v-if="item.symptom" class="text-slate-600 leading-relaxed">{{ item.symptom }}</p>
-                                                                 <p v-else class="text-slate-300 italic text-xs">- ไม่ระบุ -</p>
-                                                            </td>
-                                                            <td class="px-6 py-4 align-top text-center">
-                                                                <div v-if="item.pain_level || item.pain_level_after" class="inline-flex items-center bg-white border border-slate-200 rounded-lg p-1 shadow-sm">
-                                                                     <div class="px-3 py-1 flex flex-col items-center border-r border-slate-100">
-                                                                         <span class="text-[9px] text-slate-400 uppercase font-bold">Before</span>
-                                                                         <span class="text-lg font-bold text-rose-500">{{ item.pain_level || '-' }}</span>
-                                                                     </div>
-                                                                     <div class="px-2 text-slate-300">
-                                                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
-                                                                           <path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd" />
-                                                                         </svg>
-                                                                     </div>
-                                                                     <div class="px-3 py-1 flex flex-col items-center">
-                                                                         <span class="text-[9px] text-slate-400 uppercase font-bold">After</span>
-                                                                         <span class="text-lg font-bold text-emerald-500">{{ item.pain_level_after || '-' }}</span>
-                                                                     </div>
-                                                                </div>
-                                                                <span v-else class="text-slate-300">-</span>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
+                                                <div class="overflow-x-auto">
+                                                    <table class="w-full text-left text-sm z-0">
+                                                        <thead class="bg-slate-50/70 text-slate-500 text-xs uppercase font-bold border-b border-slate-100">
+                                                            <tr>
+                                                                <th class="px-6 py-4 w-12 text-center">#</th>
+                                                                <th class="px-6 py-4 w-1/4">ตำแหน่ง (Area)</th>
+                                                                <th class="px-6 py-4">อาการ (Symptoms)</th>
+                                                                <th class="px-6 py-4 text-center w-1/4">ระดับความปวด (Pain)</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody class="divide-y divide-slate-50">
+                                                            <tr v-for="(item, idx) in medicalSummary.pain_areas" :key="idx" class="hover:bg-indigo-50/30 transition-colors">
+                                                                <td class="px-6 py-4 text-center text-slate-400 font-medium">
+                                                                    {{ idx + 1 }}
+                                                                </td>
+                                                                <td class="px-6 py-4 align-top">
+                                                                    <span class="font-bold text-indigo-900 block">
+                                                                        {{ typeof item.area === 'string' ? item.area.replace(/_/g, ' ') : (item.area?.area || item.area) }}
+                                                                    </span>
+                                                                </td>
+                                                                <td class="px-6 py-4 align-top">
+                                                                     <p v-if="item.symptom" class="text-slate-600 leading-relaxed">{{ item.symptom }}</p>
+                                                                     <p v-else class="text-slate-300 italic text-xs">- ไม่ระบุ -</p>
+                                                                </td>
+                                                                <td class="px-6 py-4 align-top text-center">
+                                                                    <div v-if="item.pain_level || item.pain_level_after" class="inline-flex items-center bg-white border border-slate-200 rounded-lg p-1 shadow-sm">
+                                                                         <div class="px-3 py-1 flex flex-col items-center border-r border-slate-100">
+                                                                             <span class="text-[9px] text-slate-400 uppercase font-bold">Before</span>
+                                                                             <span class="text-lg font-bold text-rose-500">{{ item.pain_level || '-' }}</span>
+                                                                         </div>
+                                                                         <div class="px-2 text-slate-300">
+                                                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+                                                                               <path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd" />
+                                                                             </svg>
+                                                                         </div>
+                                                                         <div class="px-3 py-1 flex flex-col items-center">
+                                                                             <span class="text-[9px] text-slate-400 uppercase font-bold">After</span>
+                                                                             <span class="text-lg font-bold text-emerald-500">{{ item.pain_level_after || '-' }}</span>
+                                                                         </div>
+                                                                    </div>
+                                                                    <span v-else class="text-slate-300">-</span>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -751,6 +765,42 @@ const patientAge = computed(() => {
                         </button>
                     </div>
                 </form>
+            </div>
+        </Modal>
+
+        <!-- Zoom Modal for Body Map -->
+        <Modal :show="showBodyMapModal" @close="showBodyMapModal = false" maxWidth="4xl">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 text-indigo-600">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                        </svg>
+                        Pain Areas Map (แผนภาพตำแหน่งปวด)
+                    </h3>
+                    <button @click="showBodyMapModal = false" class="text-slate-400 hover:text-slate-600 transition-colors bg-slate-100 hover:bg-slate-200 p-1 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-5">
+                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Full View with Expand All -->
+                <div class="flex justify-center items-center bg-slate-50 rounded-xl p-4 min-h-[600px]">
+                    <BodyPartSelector 
+                        :model-value="medicalSummary.pain_areas" 
+                        :readonly="true" 
+                        :expand-all="true" 
+                        :show-all-views="true"
+                        height="600"
+                    />
+                </div>
+                
+                <div class="mt-6 flex justify-end">
+                    <button @click="showBodyMapModal = false" class="px-5 py-2 bg-slate-800 text-white rounded-lg text-sm font-bold hover:bg-slate-700 transition-colors shadow-lg">
+                        Close
+                    </button>
+                </div>
             </div>
         </Modal>
     </AuthenticatedLayout>
