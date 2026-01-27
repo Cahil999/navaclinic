@@ -97,6 +97,34 @@ const selectedParts = computed(() => {
 
 // Handle updates from BodyPartSelector
 const updateParts = (newParts) => {
+    // Check for removed items
+    const removedItems = form.pain_areas.filter(item => !newParts.includes(item.area));
+    
+    if (removedItems.length > 0) {
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+
+        removedItems.forEach(item => {
+             const areaName = typeof item.area === 'string' ? item.area : (item.area?.area || String(item.area));
+             const formattedPart = areaName.replace(/_/g, ' ');
+             
+             Toast.fire({
+                icon: 'info',
+                title: 'ลบตำแหน่งแล้ว',
+                text: `ลบ "${formattedPart}" ออกจากรายการแล้ว`,
+            });
+        });
+    }
+
     // 1. Remove areas that are no longer selected
     form.pain_areas = form.pain_areas.filter(item => newParts.includes(item.area));
     
@@ -110,6 +138,27 @@ const updateParts = (newParts) => {
                 pain_level: '',
                 pain_level_after: '',
                 characteristic: ''
+            });
+
+            // Notify user
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+
+            const formattedPart = part.replace(/_/g, ' ');
+
+            Toast.fire({
+                icon: 'success',
+                title: 'เลือกตำแหน่งเรียบร้อย',
+                text: `เพิ่ม "${formattedPart}" ลงในรายการแล้ว โปรดระบุอาการ`,
             });
         }
     });
