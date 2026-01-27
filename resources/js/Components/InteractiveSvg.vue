@@ -32,6 +32,16 @@ const fetchSvg = async () => {
         text = text.replace(/onclick="[^"]*"/gim, "");
         text = text.replace(/onmouseover="[^"]*"/gim, "");
         
+        // Remove filters (shadows) defined in SVG
+        text = text.replace(/<filter\b[^>]*>([\s\S]*?)<\/filter>/gim, "");
+        text = text.replace(/filter="url\(#[^"]+\)"/gim, "");
+        text = text.replace(/style="[^"]*filter:[^"]*"/gim, "");
+        
+        // Remove clipping masks which often cut off edges in Illustrator exports
+        text = text.replace(/<clipPath\b[^>]*>([\s\S]*?)<\/clipPath>/gim, "");
+        text = text.replace(/clip-path="url\(#[^"]+\)"/gim, "");
+        text = text.replace(/mask="url\(#[^"]+\)"/gim, "");
+
         // Ensure SVG takes full size
         if (!text.includes('width="100%"')) {
              text = text.replace('<svg ', '<svg width="100%" height="100%" ');
@@ -161,7 +171,7 @@ watch(() => props.selectedParts, () => {
 </script>
 
 <template>
-    <div ref="container" class="interactive-svg-container w-full h-full flex justify-center items-center overflow-hidden" v-html="svgContent">
+    <div ref="container" class="interactive-svg-container w-full h-full flex justify-center items-center" v-html="svgContent">
     </div>
 </template>
 
@@ -172,7 +182,11 @@ watch(() => props.selectedParts, () => {
     max-height: 100%;
     width: 100%;
     height: auto;
+    overflow: visible !important; /* Allow parts to spill over if needed */
     transition: all 0.3s ease;
+    filter: none !important; /* Disable any filters */
+    transform: scale(0.92); /* Shrink slightly to ensure strokes at edges aren't clipped */
+    transform-origin: center;
 }
 
 .interactive-svg-container.unconstrained svg {
@@ -187,8 +201,10 @@ watch(() => props.selectedParts, () => {
     transition: fill 0.2s ease, stroke 0.2s ease;
     fill: #ffffff; /* Default fill */
     stroke: #475569; /* Slate 600 - Darker for visibility */
-    stroke-width: 1px; /* Thicker */
-    vector-effect: non-scaling-stroke; /* Keep stroke constant on zoom */
+    stroke-width: 1.5px; /* Thicker and clearer */
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke; /* Keep stroke constant on zoom so lines don't disappear */
 }
 
 /* Fix for internal detail lines in some SVGs (like hands/feet) that rely on opacity */

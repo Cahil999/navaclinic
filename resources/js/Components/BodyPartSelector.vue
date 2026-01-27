@@ -14,6 +14,10 @@ const props = defineProps({
     embedded: {
         type: Boolean,
         default: false
+    },
+    expandAll: {
+        type: Boolean,
+        default: false
     }
 });
 
@@ -21,30 +25,76 @@ const emit = defineEmits(['update:modelValue']);
 
 // View Management
 const currentView = ref('front');
-const views = [
-    { id: 'front', label: 'Body (Front)', file: '/images/body/Front_body_interactive.svg' },
-    { id: 'back', label: 'Body (Back)', file: '/images/body/Interactive_Map_Final.svg' },
-    { id: 'head', label: 'Head', file: '/images/body/head_interactive.svg' },
-    { id: 'hand_l', label: 'Hand (L)', file: '/images/body/hand2_interactive_L.svg' },
-    { id: 'hand_r', label: 'Hand (R)', file: '/images/body/hand2_interactive_R.svg' },
-    { id: 'foot_l', label: 'Foot (L)', file: '/images/body/foot_interactive_L.svg' },
-    { id: 'foot_r', label: 'Foot (R)', file: '/images/body/foot_interactive_R.svg' },
+
+const viewGroups = [
+    {
+        label: 'ร่างกาย (Body)',
+        options: [
+            { id: 'front', label: 'หน้า', fullLabel: 'เต็มตัว (หน้า)', file: '/images/body/Front_body_interactive.svg', prefix: '' },
+            { id: 'back', label: 'หลัง', fullLabel: 'เต็มตัว (หลัง)', file: '/images/body/Interactive_Map_Final.svg', prefix: '' },
+            { id: 'head', label: 'ศีรษะ', fullLabel: 'ศีรษะ', file: '/images/body/head_interactive.svg', prefix: 'Head_' },
+        ]
+    },
+    {
+        label: 'มือ (Hands)',
+        options: [
+            { id: 'hand_l', label: 'ซ้าย', fullLabel: 'มือซ้าย', file: '/images/body/hand2_interactive_L.svg', prefix: 'Hand_L_' },
+            { id: 'hand_r', label: 'ขวา', fullLabel: 'มือขวา', file: '/images/body/hand2_interactive_R.svg', prefix: 'Hand_R_' },
+        ]
+    },
+    {
+        label: 'เท้า (Feet)',
+        options: [
+            { id: 'foot_l', label: 'ซ้าย', fullLabel: 'เท้าซ้าย', file: '/images/body/foot_interactive_L.svg', prefix: 'Foot_L_' },
+            { id: 'foot_r', label: 'ขวา', fullLabel: 'เท้าขวา', file: '/images/body/foot_interactive_R.svg', prefix: 'Foot_R_' },
+        ]
+    }
 ];
 
+const allViews = computed(() => viewGroups.flatMap(g => g.options));
+
 const currentSvgParams = computed(() => {
-    return views.find(v => v.id === currentView.value);
+    return allViews.value.find(v => v.id === currentView.value);
 });
 
 // Selection Logic
-const selectedParts = computed(() => {
+// Helper to get parts for a specific view configuration
+const getPartsForView = (viewParams) => {
+    const currentPrefix = viewParams?.prefix || '';
+    
     // Extract just the area/ID names from the modelValue
-    return props.modelValue.map(item => {
-        return typeof item === 'object' ? item.area : item;
-    });
+    return props.modelValue.reduce((acc, item) => {
+        const rawName = typeof item === 'object' ? item.area : item;
+        
+        if (currentPrefix) {
+            if (rawName.startsWith(currentPrefix)) {
+                acc.push(rawName.substring(currentPrefix.length));
+            }
+        } else {
+            // Body View (Front/Back) - take everything?
+            // If we have a prefix match for something else (e.g. Hand_L_), do we show it on Body?
+            // Usually not, unless Body SVG has that ID.
+            // For safety, Body view gets everything, assuming ID collision is handled by SVG content.
+            acc.push(rawName);
+        }
+        return acc;
+    }, []);
+};
+
+// Selection Logic for Single View Mode
+const selectedParts = computed(() => {
+    return getPartsForView(currentSvgParams.value);
 });
 
-const handleToggle = (partName) => {
+const handleToggle = (rawPartName, specificViewParams = null) => {
     if (props.readonly) return;
+    
+    // If specificViewParams is passed (Expand All Mode), use it. Otherwise use current global view.
+    const viewParams = specificViewParams || currentSvgParams.value;
+    
+    // Prepend prefix if applicable (e.g. Hand_L_Thumb)
+    const prefix = viewParams?.prefix || '';
+    const partName = prefix + rawPartName;
     
     // Check if exists
     const existingIndex = props.modelValue.findIndex(item => {
@@ -114,43 +164,93 @@ const removeItem = (item) => {
 
 <template>
     <div class="flex flex-col gap-4">
-        <!-- View Switcher -->
-        <div :class="['flex flex-wrap gap-2 justify-center', embedded ? '' : 'bg-slate-50 p-2 rounded-xl border border-slate-200']">
-            <button 
-                v-for="view in views" 
-                :key="view.id"
-                @click="currentView = view.id"
-                class="px-4 py-2 text-xs font-bold rounded-lg transition-all border"
-                :class="currentView === view.id 
-                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-md transform scale-105' 
-                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100 hover:border-slate-300'"
-            >
-                {{ view.label }}
-            </button>
-        </div>
+        
+        <!-- Expand All Mode -->
+        <div v-if="expandAll" class="space-y-12 animate-fadeIn py-6">
+            <div v-for="(group, gIdx) in viewGroups" :key="gIdx">
+                <!-- Group Header -->
+                <div class="flex items-center gap-4 mb-6">
+                     <div class="h-px bg-slate-200 flex-1"></div>
+                     <h4 class="font-bold text-slate-400 text-sm uppercase tracking-wider">{{ group.label }}</h4>
+                     <div class="h-px bg-slate-200 flex-1"></div>
+                </div>
 
-        <!-- Interactive SVG Area -->
-        <!-- Interactive SVG Area -->
-        <div :class="[
-            'relative overflow-hidden flex flex-col transition-all',
-            embedded ? 'bg-transparent' : 'bg-white rounded-2xl border border-slate-200 shadow-sm min-h-[600px]'
-        ]">
-            <div class="p-4 flex-1 relative flex justify-center items-start overflow-auto custom-scrollbar">
-                <!-- Wrapper to constraint size -->
-                <!-- Wrapper to constraint size -->
-                <div class="relative w-full" :class="embedded ? 'min-h-[1000px] max-w-none' : 'h-[600px] max-w-[500px]'">
-                    <InteractiveSvg 
-                        :src="currentSvgParams.file" 
-                        :selected-parts="selectedParts"
-                        @toggle="handleToggle"
-                        class="w-full h-full"
-                        :class="{ 'unconstrained': embedded }"
-                    />
+                <div :class="[
+                    'grid gap-8 px-4', 
+                    'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto'
+                ]">
+                     <div v-for="view in group.options" :key="view.id" 
+                          class="relative flex flex-col items-center bg-transparent rounded-xl">
+                         
+                         <!-- Label -->
+                         <div class="mb-2 z-10 hidden">
+                            <span class="px-4 py-1.5 rounded-full bg-slate-50 text-slate-400 text-[10px] font-bold uppercase tracking-wider border border-slate-100">
+                                {{ view.fullLabel }}
+                            </span>
+                         </div>
+                         
+                         <!-- Floating Label (Top Right) -->
+                         <div class="absolute top-0 right-0 z-10 block">
+                             <span class="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{{ view.label }}</span>
+                         </div>
+
+                         <!-- SVG Content -->
+                         <div class="w-full flex items-start justify-center">
+                             <InteractiveSvg 
+                                :src="view.file"
+                                :selected-parts="getPartsForView(view)"
+                                @toggle="(name) => handleToggle(name, view)"
+                                :class="['w-full h-auto', group.options.length === 3 ? '' : 'max-h-[500px]']"
+                             />
+                         </div>
+                     </div>
                 </div>
             </div>
-            
-            <div class="absolute bottom-4 right-4 bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm text-[10px] text-slate-400 font-mono">
-                View: {{ currentSvgParams.label }}
+        </div>
+
+        <!-- Single View Mode (Tabs) -->
+        <div v-else class="flex flex-col gap-4">
+            <!-- View Switcher -->
+            <div :class="['flex flex-col gap-3 justify-center items-center', embedded ? '' : 'bg-slate-50 p-3 rounded-xl border border-slate-200']">
+                <div v-for="(group, idx) in viewGroups" :key="idx" class="flex items-center gap-3">
+                    <span :class="['text-[10px] font-bold uppercase tracking-wider w-16 text-right', embedded ? 'text-slate-400' : 'text-slate-500']">{{ group.label }}</span>
+                    <div class="flex gap-1">
+                        <button 
+                            v-for="view in group.options" 
+                            :key="view.id"
+                            @click="currentView = view.id"
+                            class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all border min-w-[3rem]"
+                            :class="currentView === view.id 
+                                ? 'bg-indigo-600 text-white border-indigo-600 shadow-md transform scale-105' 
+                                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100 hover:border-slate-300'"
+                        >
+                            {{ view.label }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive SVG Area -->
+            <div :class="[
+                'relative overflow-hidden flex flex-col transition-all',
+                embedded ? 'bg-transparent' : 'bg-white rounded-2xl border border-slate-200 shadow-sm min-h-[600px]'
+            ]">
+                <div class="p-4 flex-1 relative flex justify-center items-start overflow-auto custom-scrollbar">
+                    <!-- Wrapper to constraint size -->
+                    <div class="relative w-full" :class="embedded ? 'min-h-[1000px] max-w-none' : 'h-[600px] max-w-[500px]'">
+                        <InteractiveSvg 
+                            :src="currentSvgParams.file" 
+                            :selected-parts="selectedParts"
+                            @toggle="handleToggle"
+                            class="w-full h-full"
+                            :class="{ 'unconstrained': embedded }"
+                        />
+                    </div>
+                </div>
+                
+                <div class="absolute bottom-4 right-4 bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm text-[10px] text-slate-400 font-mono">
+                    View: {{ currentSvgParams.fullLabel }}
+                </div>
             </div>
         </div>
         
