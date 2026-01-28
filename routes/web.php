@@ -126,6 +126,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/bookings/{booking}/treatment/create', [\App\Http\Controllers\Admin\TreatmentController::class, 'create'])->name('admin.treatment.create');
     Route::post('/bookings/{booking}/treatment', [\App\Http\Controllers\Admin\TreatmentController::class, 'store'])->name('admin.treatment.store');
 
+    // Treatment Details Step (Step 2)
+    Route::get('/treatment-records/{treatmentRecord}/details', [\App\Http\Controllers\Admin\TreatmentController::class, 'details'])->name('admin.treatment.details');
+    Route::put('/treatment-records/{treatmentRecord}/details', [\App\Http\Controllers\Admin\TreatmentController::class, 'updateDetails'])->name('admin.treatment.update-details');
+
     // Patient Management
     Route::post('/patients', [\App\Http\Controllers\Admin\PatientController::class, 'store'])->name('admin.patients.store');
     Route::get('/patients', [\App\Http\Controllers\Admin\PatientController::class, 'index'])->name('admin.patients.index');

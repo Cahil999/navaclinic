@@ -54,30 +54,25 @@ class TreatmentController extends Controller
             'pain_areas.*.pain_level' => 'nullable|numeric|between:0,10',
             'pain_areas.*.pain_level_after' => 'nullable|numeric|between:0,10',
             'pain_areas.*.characteristic' => 'nullable|string',
-
-            'diagnosis' => $request->input('save_action') === 'exit' ? 'required|string' : 'nullable|string',
-            'treatment_details' => $request->input('save_action') === 'exit' ? 'required|string' : 'nullable|string',
-            'notes' => 'nullable|string',
-            'price' => 'nullable|numeric|min:0',
-            'save_action' => 'nullable|string|in:stay,exit',
         ]);
 
-        // Update the booking price
-        if ($request->has('price')) {
-            $booking->update(['price' => $request->price]);
-        }
 
-        $booking->treatmentRecord()->updateOrCreate(
+        $record = $booking->treatmentRecord()->updateOrCreate(
             ['booking_id' => $booking->id],
-            collect($validated)->except('price')->toArray()
+            $validated
         );
 
-        if ($request->input('save_action') === 'stay') {
-            return back()->with('success', 'Treatment details saved successfully.');
+        if ($request->input('save_action') === 'next') {
+            return redirect()->route('admin.treatment.details', $record->id)
+                ->with('success', 'Intake saved. Proceeding to Plan.');
         }
 
-        return redirect()->route('admin.bookings.show', $booking->id)
-            ->with('success', 'Treatment details saved successfully.');
+        if ($request->input('save_action') === 'exit') {
+            return redirect()->route('admin.bookings.show', $booking->id)
+                ->with('success', 'Intake & Examination saved successfully.');
+        }
+
+        return back()->with('success', 'Intake & Examination saved successfully.');
     }
     public function createForVisit(\App\Models\Visit $visit)
     {
@@ -124,28 +119,73 @@ class TreatmentController extends Controller
             'pain_areas.*.pain_level' => 'nullable|numeric|between:0,10',
             'pain_areas.*.pain_level_after' => 'nullable|numeric|between:0,10',
             'pain_areas.*.characteristic' => 'nullable|string',
-            'diagnosis' => $request->input('save_action') === 'exit' ? 'required|string' : 'nullable|string',
-            'treatment_details' => $request->input('save_action') === 'exit' ? 'required|string' : 'nullable|string',
-            'notes' => 'nullable|string',
-            'price' => 'nullable|numeric|min:0',
-            'save_action' => 'nullable|string|in:stay,exit',
         ]);
 
-        // Update the visit price
-        if ($request->has('price')) {
-            $visit->update(['price' => $request->price]);
-        }
 
-        $visit->treatmentRecord()->updateOrCreate(
+        $record = $visit->treatmentRecord()->updateOrCreate(
             ['visit_id' => $visit->id],
-            collect($validated)->except('price')->toArray()
+            $validated
         );
 
-        if ($request->input('save_action') === 'stay') {
-            return back()->with('success', 'Treatment details saved successfully.');
+        if ($request->input('save_action') === 'next') {
+            return redirect()->route('admin.treatment.details', $record->id)
+                ->with('success', 'Intake saved. Proceeding to Plan.');
         }
 
-        return redirect()->route('admin.visits.show', $visit->id)
-            ->with('success', 'Treatment details saved successfully.');
+        if ($request->input('save_action') === 'exit') {
+            return redirect()->route('admin.visits.show', $visit->id)
+                ->with('success', 'Intake & Examination saved successfully.');
+        }
+
+        return back()->with('success', 'Intake & Examination saved successfully.');
+    }
+
+    public function details(TreatmentRecord $treatmentRecord)
+    {
+        $treatmentRecord->load(['booking.user', 'booking.doctor', 'visit.patient', 'visit.doctor']);
+
+        // Determine the parent entity (Booking or Visit)
+        $entity = $treatmentRecord->visit ?? $treatmentRecord->booking;
+        $isVisit = (bool) $treatmentRecord->visit_id;
+
+        return Inertia::render('Admin/Treatment/Details', [
+            'treatmentRecord' => $treatmentRecord,
+            'entity' => $entity,
+            'isVisit' => $isVisit,
+        ]);
+    }
+
+    public function updateDetails(Request $request, TreatmentRecord $treatmentRecord)
+    {
+        $validated = $request->validate([
+            'diagnosis' => 'required|string',
+            'treatment_details' => 'required|string',
+            'massage_weight' => 'nullable|string|in:light,medium,heavy',
+            'pain_level_before' => 'nullable|integer|between:0,10',
+            'pain_level_after' => 'nullable|integer|between:0,10',
+            'notes' => 'nullable|string',
+            'price' => 'nullable|numeric|min:0',
+        ]);
+
+        // Update Price if present
+        if ($request->has('price')) {
+            if ($treatmentRecord->visit) {
+                $treatmentRecord->visit->update(['price' => $request->price]);
+            } elseif ($treatmentRecord->booking) {
+                $treatmentRecord->booking->update(['price' => $request->price]);
+            }
+        }
+
+        $treatmentRecord->update(collect($validated)->except('price')->toArray());
+
+        if ($request->input('save_action') === 'stay') {
+            return back()->with('success', 'Treatment Plan saved successfully.');
+        }
+
+        $route = $treatmentRecord->visit_id
+            ? route('admin.visits.show', $treatmentRecord->visit_id)
+            : route('admin.bookings.show', $treatmentRecord->booking_id);
+
+        return redirect($route)->with('success', 'Treatment Record completed successfully.');
     }
 }
