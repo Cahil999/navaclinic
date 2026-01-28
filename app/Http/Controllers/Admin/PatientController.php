@@ -159,6 +159,68 @@ class PatientController extends Controller
             'medicalSummary' => $medicalSummary
         ]);
     }
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'phone_number' => 'nullable|string|max:20',
+            'id_card_number' => 'nullable|string|max:20',
+            'date_of_birth' => 'nullable|date',
+            'gender' => 'nullable|string',
+            'race' => 'nullable|string',
+            'nationality' => 'nullable|string',
+            'religion' => 'nullable|string',
+            'occupation' => 'nullable|string',
+            'address' => 'nullable|string',
+            'emergency_contact_name' => 'nullable|string',
+            'emergency_contact_phone' => 'nullable|string',
+            'underlying_disease' => 'nullable|string',
+            'surgery_history' => 'nullable|string',
+            'drug_allergy' => 'nullable|string',
+            'accident_history' => 'nullable|string',
+        ]);
+
+        // Generate HN
+        $datePart = now()->format('dmY');
+        $countToday = User::whereDate('created_at', now()->toDateString())->count() + 1;
+        $hnId = 'HN-' . $datePart . '-' . str_pad($countToday, 4, '0', STR_PAD_LEFT);
+
+        // Generate dummy email if not provided (required by DB)
+        $email = $validated['phone_number']
+            ? 'patient_' . $validated['phone_number'] . '@navaclinic.com'
+            : 'patient_' . uniqid() . '@navaclinic.com';
+
+        // Check for existing email to avoid unique constraint violation if re-registering same phone
+        if (User::where('email', $email)->exists()) {
+            $email = 'patient_' . uniqid() . '@navaclinic.com';
+        }
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $email,
+            'password' => \Illuminate\Support\Facades\Hash::make('12345678'),
+            'phone_number' => $validated['phone_number'] ?? null,
+            'patient_id' => $hnId,
+            'is_admin' => false,
+            'is_doctor' => false,
+            'id_card_number' => $validated['id_card_number'] ?? null,
+            'date_of_birth' => $validated['date_of_birth'] ?? null,
+            'gender' => $validated['gender'] ?? null,
+            'race' => $validated['race'] ?? null,
+            'nationality' => $validated['nationality'] ?? null,
+            'religion' => $validated['religion'] ?? null,
+            'occupation' => $validated['occupation'] ?? null,
+            'address' => $validated['address'] ?? null,
+            'emergency_contact_name' => $validated['emergency_contact_name'] ?? null,
+            'emergency_contact_phone' => $validated['emergency_contact_phone'] ?? null,
+            'underlying_disease' => $validated['underlying_disease'] ?? null,
+            'surgery_history' => $validated['surgery_history'] ?? null,
+            'drug_allergy' => $validated['drug_allergy'] ?? null,
+            'accident_history' => $validated['accident_history'] ?? null,
+        ]);
+
+        return redirect()->route('admin.patients.index')->with('success', 'Patient registered successfully.');
+    }
 
     public function update(Request $request, $id)
     {
