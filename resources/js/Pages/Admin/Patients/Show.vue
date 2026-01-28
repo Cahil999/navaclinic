@@ -59,6 +59,23 @@ const getStatusClass = (status) => {
 const showEditModal = ref(false);
 const showBodyMapModal = ref(false);
 
+// Magnifier Lens Logic
+const mapContainer = ref(null);
+const showLens = ref(false);
+const lensX = ref(0);
+const lensY = ref(0);
+
+const handleMouseMove = (e) => {
+    if (!mapContainer.value) return;
+    const rect = mapContainer.value.getBoundingClientRect();
+    lensX.value = e.clientX - rect.left;
+    lensY.value = e.clientY - rect.top;
+};
+
+const handleMouseLeave = () => {
+    showLens.value = false;
+};
+
 const form = useForm({
     name: props.patient.name,
     phone_number: props.patient.phone_number,
@@ -484,14 +501,57 @@ const patientAge = computed(() => {
                                                      </button>
                                                 </div>
 
-                                                <div class="flex-1 flex items-center justify-center p-6 cursor-pointer" @click="showBodyMapModal = true">
-                                                     <div class="w-full h-full max-h-[500px] transition-all duration-500 hover:scale-[1.02]">
+                                                <div class="flex-1 flex items-center justify-center p-6 cursor-pointer relative" 
+                                                     ref="mapContainer"
+                                                     @mousemove="handleMouseMove"
+                                                     @mouseenter="showLens = true"
+                                                     @mouseleave="handleMouseLeave"
+                                                     @click="showBodyMapModal = true">
+                                                     
+                                                     <div class="w-full h-full max-h-[500px]">
                                                           <BodyPartSelector 
                                                             :modelValue="medicalSummary.pain_areas" 
                                                             :readonly="true" 
                                                             :thumbnail="true"
                                                         />
                                                      </div>
+
+                                                    <!-- Magnifying Lens -->
+                                                    <div v-show="showLens" 
+                                                         class="absolute z-20 w-32 h-32 rounded-xl border-2 border-indigo-500 bg-white shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] overflow-hidden pointer-events-none transition-opacity duration-200"
+                                                         :style="{ 
+                                                             left: (lensX - 64) + 'px', 
+                                                             top: (lensY - 64) + 'px',
+                                                         }">
+                                                         
+                                                         <!-- Inner Container for Zoomed Content -->
+                                                         <div class="absolute bg-slate-50"
+                                                              :style="{
+                                                                  width: (mapContainer?.offsetWidth || 0) + 'px',
+                                                                  height: (mapContainer?.offsetHeight || 0) + 'px',
+                                                                  transform: 'scale(2.5)',
+                                                                  transformOrigin: '0 0',
+                                                                  left: (-lensX * 2.5 + 64) + 'px',
+                                                                  top: (-lensY * 2.5 + 64) + 'px'
+                                                              }">
+                                                              <div class="w-full h-full flex items-center justify-center p-6">
+                                                                 <div class="w-full h-full max-h-[500px]">
+                                                                      <BodyPartSelector 
+                                                                        :modelValue="medicalSummary.pain_areas" 
+                                                                        :readonly="true" 
+                                                                        :thumbnail="true"
+                                                                    />
+                                                                 </div>
+                                                              </div>
+                                                         </div>
+                                                         
+                                                         <!-- Grid/Crosshair overlay for tech feel -->
+                                                         <div class="absolute inset-0 bg-indigo-500/5 mix-blend-overlay pointer-events-none"></div>
+                                                         <div class="absolute inset-0 flex items-center justify-center opacity-20">
+                                                             <div class="w-full h-px bg-indigo-500"></div>
+                                                             <div class="h-full w-px bg-indigo-500 absolute"></div>
+                                                         </div>
+                                                    </div>
                                                 </div>
                                                 
                                                 <div class="pb-4 text-center">
