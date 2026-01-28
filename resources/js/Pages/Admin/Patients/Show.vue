@@ -123,7 +123,7 @@ const patientAge = computed(() => {
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
-                        แก้ไขข้อมูล
+                        ลงทะเบียนหรือแก้ไขข้อมูลคนไข้
                     </button>
                     <Link :href="route('admin.bookings.create', { user_id: patient.id })" class="inline-flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 shadow-md shadow-indigo-200 transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -662,7 +662,7 @@ const patientAge = computed(() => {
             <div class="p-6">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-xl font-bold text-slate-900">
-                        แก้ไขข้อมูลผู้ป่วย
+                        ลงทะเบียนหรือแก้ไขข้อมูลคนไข้
                     </h2>
                      <button @click="showEditModal = false" class="text-slate-400 hover:text-slate-600 transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
