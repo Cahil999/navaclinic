@@ -36,7 +36,7 @@ class SettingController extends Controller
             ]);
         }
 
-        return redirect()->back()->with('success', 'Schedule updated successfully.');
+        return redirect()->back()->with('success', 'อัปเดตตารางเวลาเรียบร้อยแล้ว');
     }
 
     public function storeHoliday(Request $request)
@@ -48,13 +48,13 @@ class SettingController extends Controller
 
         ClinicHoliday::create($validated);
 
-        return redirect()->back()->with('success', 'Holiday added successfully.');
+        return redirect()->back()->with('success', 'เพิ่มวันหยุดเรียบร้อยแล้ว');
     }
 
     public function destroyHoliday(ClinicHoliday $holiday)
     {
         $holiday->delete();
 
-        return redirect()->back()->with('success', 'Holiday removed successfully.');
+        return redirect()->back()->with('success', 'ลบวันหยุดเรียบร้อยแล้ว');
     }
 }
