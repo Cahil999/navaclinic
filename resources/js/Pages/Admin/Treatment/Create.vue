@@ -131,8 +131,8 @@ const updateParts = (newParts) => {
     // 2. Add new areas that are selected but not in form data
     newParts.forEach(part => {
         if (!form.pain_areas.find(item => item.area === part)) {
-            // Unshift to add to top of list
-            form.pain_areas.unshift({
+            // Push to add to end of list (Chronological order)
+            form.pain_areas.push({
                 area: part,
                 symptom: '',
                 pain_level: '',
@@ -220,7 +220,7 @@ const saveRow = () => {
 
             Toast.fire({
                 icon: 'success',
-                title: 'Data Saved'
+                title: 'บันทึกข้อมูลเรียบร้อยแล้ว'
             })
         }
     });
@@ -341,7 +341,7 @@ const saveRow = () => {
                                             <div class="flex justify-between items-start gap-2 mb-3">
                                                 <div class="flex items-center gap-2 min-w-0 flex-1">
                                                     <span class="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center text-xs text-indigo-600 font-bold flex-shrink-0 mt-0.5">
-                                                        {{ form.pain_areas.length - index }}
+                                                        {{ index + 1 }}
                                                     </span>
                                                     <span class="font-bold text-slate-800 text-sm break-words leading-tight">
                                                         {{ typeof item.area === 'string' ? item.area.replace(/_/g, ' ') : (item.area?.area || 'Unknown') }}
