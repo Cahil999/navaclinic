@@ -177,8 +177,26 @@ const submitForm = () => {
 };
 
 const handleSave = (action) => {
-    form.save_action = action;
-    submitForm();
+    let text = 'ต้องการบันทึกข้อมูลและอยู่หน้านี้ต่อใช่หรือไม่?';
+    if (action === 'exit') text = 'ต้องการบันทึกข้อมูลและกลับไปหน้าเดิมใช่หรือไม่?';
+    if (action === 'next') text = 'ต้องการบันทึกข้อมูลและไปขั้นตอนถัดไปใช่หรือไม่?';
+
+    Swal.fire({
+        title: 'ยืนยันการบันทึก',
+        text: text,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'ยืนยัน',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#4f46e5',
+        cancelButtonColor: '#94a3b8',
+        reverseButtons: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.save_action = action;
+            submitForm();
+        }
+    });
 };
 
 const getPainColor = (level) => {
@@ -359,7 +377,7 @@ const bmiColor = computed(() => {
                                                 </div>
                                                 
                                                 <div class="flex items-center gap-2 flex-shrink-0">
-                                                    <button type="button" @click="saveRow" class="text-xs font-medium text-emerald-600 hover:text-emerald-800 bg-emerald-50 px-2 py-1 rounded hover:bg-emerald-100 transition-colors">
+                                                    <button type="button" @click="handleSave('stay')" class="text-xs font-medium text-emerald-600 hover:text-emerald-800 bg-emerald-50 px-2 py-1 rounded hover:bg-emerald-100 transition-colors">
                                                         บันทึก
                                                     </button>
                                                     <button type="button" @click="updateParts(selectedParts.filter(p => p !== item.area))" class="text-xs font-medium text-rose-500 hover:text-rose-700 bg-rose-50 px-2 py-1 rounded hover:bg-rose-100 transition-colors">
@@ -434,6 +452,18 @@ const bmiColor = computed(() => {
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
                                 </svg>
                                 บันทึก (อยู่หน้านี้)
+                            </button>
+
+                            <button 
+                                type="button" 
+                                @click="handleSave('exit')"
+                                :disabled="form.processing"
+                                class="px-6 py-2.5 bg-white text-slate-700 border border-slate-300 rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 hover:text-slate-900 transition-all disabled:opacity-50 flex items-center gap-2"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+                                </svg>
+                                บันทึกและกลับ
                             </button>
                             
                             <button 
