@@ -779,25 +779,25 @@ const formatDate = (dateString) => {
                         <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-4 border-b border-indigo-100 pb-2">ข้อมูลทั่วไป</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อ-นามสกุล (Name)</label>
-                                <input type="text" v-model="form.name" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อ-นามสกุล (Name) <span class="text-rose-500">*</span></label>
+                                <input type="text" v-model="form.name" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="นายสมชาย สมหญิง">
                                 <InputError :message="form.errors.name" class="mt-2" />
                             </div>
                              <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">เบอร์โทรศัพท์</label>
-                                <input type="text" v-model="form.phone_number" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <label class="block text-sm font-medium text-slate-700 mb-1">เบอร์โทรศัพท์ <span class="text-rose-500">*</span></label>
+                                <input type="text" v-model="form.phone_number" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="0967543214">
                                 <InputError :message="form.errors.phone_number" class="mt-2" />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">เลขบัตรประชาชน</label>
-                                <input type="text" v-model="form.id_card_number" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <label class="block text-sm font-medium text-slate-700 mb-1">เลขบัตรประชาชน <span class="text-rose-500">*</span></label>
+                                <input type="text" v-model="form.id_card_number" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="1-xxxx-xxxxx-xx-x">
                             </div>
                              <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">วันเกิด</label>
-                                <input type="date" v-model="form.date_of_birth" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <label class="block text-sm font-medium text-slate-700 mb-1">วันเกิด <span class="text-rose-500">*</span></label>
+                                <input type="date" v-model="form.date_of_birth" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="dd/mm/yyyy">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">เพศ</label>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">เพศ <span class="text-rose-500">*</span></label>
                                 <select v-model="form.gender" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                     <option value="male">ชาย (Male)</option>
                                     <option value="female">หญิง (Female)</option>
@@ -806,31 +806,31 @@ const formatDate = (dateString) => {
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">อาชีพ</label>
-                                <input type="text" v-model="form.occupation" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <input type="text" v-model="form.occupation" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="พนักงานออฟฟิศ, ค้าขาย">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">เชื้อชาติ</label>
-                                <input type="text" v-model="form.race" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <input type="text" v-model="form.race" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="ไทย">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">สัญชาติ</label>
-                                <input type="text" v-model="form.nationality" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <input type="text" v-model="form.nationality" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="ไทย">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">ศาสนา</label>
-                                <input type="text" v-model="form.religion" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <input type="text" v-model="form.religion" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="พุทธ">
                             </div>
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-slate-700 mb-1">ที่อยู่</label>
-                                <textarea v-model="form.address" rows="2" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+                                <textarea v-model="form.address" rows="2" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="ที่อยู่ปัจจุบัน..."></textarea>
                             </div>
                              <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">ผู้ติดต่อฉุกเฉิน</label>
-                                <input type="text" v-model="form.emergency_contact_name" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <input type="text" v-model="form.emergency_contact_name" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="ชื่อ-นามสกุล">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">เบอร์โทรฉุกเฉิน</label>
-                                <input type="text" v-model="form.emergency_contact_phone" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <input type="text" v-model="form.emergency_contact_phone" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="0xx-xxx-xxxx">
                             </div>
                         </div>
                     </div>
@@ -841,19 +841,19 @@ const formatDate = (dateString) => {
                          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-slate-700 mb-1">โรคประจำตัว</label>
-                                <input type="text" v-model="form.underlying_disease" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="เช่น ความดันโลหิตสูง, เบาหวาน">
+                                <input type="text" v-model="form.underlying_disease" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="ระบุถ้ามี (เช่น ความดันโลหิตสูง, เบาหวาน)">
                             </div>
                              <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-slate-700 mb-1">แพ้ยา/อาหาร</label>
-                                <input type="text" v-model="form.drug_allergy" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="เช่น แพ้เพนิซิลลิน, แพ้อาหารทะเล">
+                                <input type="text" v-model="form.drug_allergy" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="ระบุถ้ามี (เช่น แพ้เพนิซิลลิน, แพ้อาหารทะเล)">
                             </div>
                              <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">ประวัติการผ่าตัด</label>
-                                <input type="text" v-model="form.surgery_history" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <input type="text" v-model="form.surgery_history" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="ระบุถ้ามี (เช่น ผ่าตัดไส้ติ่ง)">
                             </div>
                              <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">ประวัติอุบัติเหตุ</label>
-                                <input type="text" v-model="form.accident_history" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <input type="text" v-model="form.accident_history" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="ระบุถ้ามี (เช่น รถล้ม)">
                             </div>
                         </div>
                     </div>

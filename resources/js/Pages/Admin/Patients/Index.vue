@@ -234,25 +234,35 @@ const submitRegister = () => {
                         <h3 class="text-lg font-medium text-blue-900 border-b pb-2 mb-4">ข้อมูลส่วนตัว</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <InputLabel for="name" value="ชื่อ-นามสกุล *" />
-                                <TextInput id="name" v-model="registerForm.name" class="mt-1 block w-full" required />
+                                <InputLabel for="name">
+                                    ชื่อ-นามสกุล <span class="text-rose-500">*</span>
+                                </InputLabel>
+                                <TextInput id="name" v-model="registerForm.name" class="mt-1 block w-full" required placeholder="นายสมชาย สมหญิง" />
                                 <InputError :message="registerForm.errors.name" class="mt-2" />
                             </div>
                             <div>
-                                <InputLabel for="phone_number" value="เบอร์โทรศัพท์" />
-                                <TextInput id="phone_number" v-model="registerForm.phone_number" class="mt-1 block w-full" />
+                                <InputLabel for="phone_number">
+                                    เบอร์โทรศัพท์ <span class="text-rose-500">*</span>
+                                </InputLabel>
+                                <TextInput id="phone_number" v-model="registerForm.phone_number" class="mt-1 block w-full" placeholder="0967543214" />
                                 <InputError :message="registerForm.errors.phone_number" class="mt-2" />
                             </div>
                             <div>
-                                <InputLabel for="id_card_number" value="เลขบัตรประชาชน / พาสปอร์ต" />
-                                <TextInput id="id_card_number" v-model="registerForm.id_card_number" class="mt-1 block w-full" />
+                                <InputLabel for="id_card_number">
+                                    เลขบัตรประชาชน <span class="text-rose-500">*</span>
+                                </InputLabel>
+                                <TextInput id="id_card_number" v-model="registerForm.id_card_number" class="mt-1 block w-full" placeholder="1-xxxx-xxxxx-xx-x" />
                             </div>
                             <div>
-                                <InputLabel for="date_of_birth" value="วันเกิด" />
-                                <TextInput id="date_of_birth" type="date" v-model="registerForm.date_of_birth" class="mt-1 block w-full" />
+                                <InputLabel for="date_of_birth">
+                                    วันเกิด <span class="text-rose-500">*</span>
+                                </InputLabel>
+                                <TextInput id="date_of_birth" type="date" v-model="registerForm.date_of_birth" class="mt-1 block w-full" placeholder="dd/mm/yyyy" />
                             </div>
                             <div>
-                                <InputLabel for="gender" value="เพศ" />
+                                <InputLabel for="gender">
+                                    เพศ <span class="text-rose-500">*</span>
+                                </InputLabel>
                                 <select 
                                     id="gender" 
                                     v-model="registerForm.gender"
@@ -266,21 +276,21 @@ const submitRegister = () => {
                             </div>
                            <div>
                                 <InputLabel for="occupation" value="อาชีพ" />
-                                <TextInput id="occupation" v-model="registerForm.occupation" class="mt-1 block w-full" />
+                                <TextInput id="occupation" v-model="registerForm.occupation" class="mt-1 block w-full" placeholder="พนักงานออฟฟิศ, ค้าขาย" />
                             </div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                             <div>
                                 <InputLabel for="race" value="เชื้อชาติ" />
-                                <TextInput id="race" v-model="registerForm.race" class="mt-1 block w-full" />
+                                <TextInput id="race" v-model="registerForm.race" class="mt-1 block w-full" placeholder="ไทย" />
                             </div>
                             <div>
                                 <InputLabel for="nationality" value="สัญชาติ" />
-                                <TextInput id="nationality" v-model="registerForm.nationality" class="mt-1 block w-full" />
+                                <TextInput id="nationality" v-model="registerForm.nationality" class="mt-1 block w-full" placeholder="ไทย" />
                             </div>
                             <div>
                                 <InputLabel for="religion" value="ศาสนา" />
-                                <TextInput id="religion" v-model="registerForm.religion" class="mt-1 block w-full" />
+                                <TextInput id="religion" v-model="registerForm.religion" class="mt-1 block w-full" placeholder="พุทธ" />
                             </div>
                         </div>
                         <div class="mt-4">
@@ -290,6 +300,7 @@ const submitRegister = () => {
                                 v-model="registerForm.address"
                                 class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                                 rows="2"
+                                placeholder="ที่อยู่ปัจจุบัน..."
                             ></textarea>
                         </div>
                     </div>
@@ -300,11 +311,11 @@ const submitRegister = () => {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <InputLabel for="emergency_contact_name" value="ชื่อผู้ติดต่อ" />
-                                <TextInput id="emergency_contact_name" v-model="registerForm.emergency_contact_name" class="mt-1 block w-full" />
+                                <TextInput id="emergency_contact_name" v-model="registerForm.emergency_contact_name" class="mt-1 block w-full" placeholder="ชื่อ-นามสกุล" />
                             </div>
                             <div>
                                 <InputLabel for="emergency_contact_phone" value="เบอร์โทรศัพท์ผู้ติดต่อ" />
-                                <TextInput id="emergency_contact_phone" v-model="registerForm.emergency_contact_phone" class="mt-1 block w-full" />
+                                <TextInput id="emergency_contact_phone" v-model="registerForm.emergency_contact_phone" class="mt-1 block w-full" placeholder="0xx-xxx-xxxx" />
                             </div>
                         </div>
                     </div>
@@ -320,6 +331,7 @@ const submitRegister = () => {
                                     v-model="registerForm.drug_allergy"
                                     class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                                     rows="2"
+                                    placeholder="ระบุถ้ามี (เช่น แพ้เพนิซิลลิน, แพ้อาหารทะเล)"
                                 ></textarea>
                             </div>
                              <div>
@@ -329,6 +341,7 @@ const submitRegister = () => {
                                     v-model="registerForm.underlying_disease"
                                     class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                                     rows="2"
+                                    placeholder="ระบุถ้ามี (เช่น ความดันโลหิตสูง, เบาหวาน)"
                                 ></textarea>
                             </div>
                              <div>
@@ -338,6 +351,7 @@ const submitRegister = () => {
                                     v-model="registerForm.surgery_history"
                                     class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                                     rows="2"
+                                    placeholder="ระบุถ้ามี (เช่น ผ่าตัดไส้ติ่ง)"
                                 ></textarea>
                             </div>
                              <div>
@@ -347,6 +361,7 @@ const submitRegister = () => {
                                     v-model="registerForm.accident_history"
                                     class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                                     rows="2"
+                                    placeholder="ระบุถ้ามี (เช่น รถล้ม)"
                                 ></textarea>
                             </div>
                         </div>
