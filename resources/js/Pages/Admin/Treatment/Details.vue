@@ -26,6 +26,7 @@ const form = useForm({
     pain_level_before: props.treatmentRecord.pain_level_before || '',
     pain_level_after: props.treatmentRecord.pain_level_after || '',
     price: props.entity.price || '',
+    doctor_commission: props.entity.doctor_commission || '',
     notes: props.treatmentRecord.notes || '',
     save_action: 'exit',
 });
@@ -236,6 +237,20 @@ const submitForm = () => {
                                             </div>
                                         </div>
                                         <InputError class="mt-2" :message="form.errors.price" />
+
+                                        <div class="mt-4 pt-4 border-t border-indigo-100">
+                                            <label class="block text-sm font-bold text-indigo-900 mb-2">Doctor Fee (ค่ามือหมอ)</label>
+                                            <div class="relative">
+                                                <input type="number" step="0.01" v-model="form.doctor_commission" class="w-full rounded-xl border-indigo-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-4 pr-12 text-lg font-bold text-indigo-700 tracking-tight" placeholder="ระบุหากต้องการกำหนดเอง">
+                                                <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                                    <span class="text-indigo-400 font-bold">THB</span>
+                                                </div>
+                                            </div>
+                                            <InputError class="mt-2" :message="form.errors.doctor_commission" />
+                                            <p class="text-xs text-indigo-500 mt-1">
+                                                * ถ้าไม่ระบุ จะคิด 50%
+                                            </p>
+                                        </div>
                                     </div>
 
                                     <div>

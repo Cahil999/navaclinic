@@ -196,6 +196,9 @@ class OwnerDashboardController extends Controller
         $calculateMetrics = function ($visitsCollection) {
             $revenue = $visitsCollection->sum('price');
             $doctorFee = $visitsCollection->reduce(function ($carry, $visit) {
+                if ($visit->doctor_commission !== null) {
+                    return $carry + $visit->doctor_commission;
+                }
                 $rate = $visit->doctor ? $visit->doctor->commission_rate : 50; // Default 50%
                 return $carry + ($visit->price * $rate / 100);
             }, 0);

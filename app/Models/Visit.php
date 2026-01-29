@@ -15,12 +15,14 @@ class Visit extends Model
         'notes',
         'status',
         'price',
+        'doctor_commission',
         'duration_minutes',
     ];
 
     protected $casts = [
         'visit_date' => 'datetime',
         'price' => 'decimal:2',
+        'doctor_commission' => 'decimal:2',
     ];
 
     public function patient()

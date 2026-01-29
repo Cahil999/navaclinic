@@ -165,6 +165,7 @@ class TreatmentController extends Controller
             'pain_level_after' => 'nullable|integer|between:0,10',
             'notes' => 'nullable|string',
             'price' => 'nullable|numeric|min:0',
+            'doctor_commission' => 'nullable|numeric|min:0',
         ]);
 
         // Update Price if present
@@ -173,6 +174,18 @@ class TreatmentController extends Controller
                 $treatmentRecord->visit->update(['price' => $request->price]);
             } elseif ($treatmentRecord->booking) {
                 $treatmentRecord->booking->update(['price' => $request->price]);
+            }
+        }
+
+        if ($request->has('doctor_commission')) {
+            $visit = $treatmentRecord->visit;
+            if (!$visit && $treatmentRecord->booking_id) {
+                // Try to find visit associated with this booking
+                $visit = \App\Models\Visit::where('booking_id', $treatmentRecord->booking_id)->first();
+            }
+
+            if ($visit) {
+                $visit->update(['doctor_commission' => $request->doctor_commission]);
             }
         }
 
