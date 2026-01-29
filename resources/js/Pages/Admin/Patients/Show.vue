@@ -142,12 +142,7 @@ const patientAge = computed(() => {
                         </svg>
                         ลงทะเบียนหรือแก้ไขข้อมูลคนไข้
                     </button>
-                    <Link :href="route('admin.bookings.create', { user_id: patient.id })" class="inline-flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 shadow-md shadow-indigo-200 transition-all">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        นัดหมายใหม่
-                    </Link>
+
                 </div>
             </div>
         </template>
@@ -698,6 +693,15 @@ const patientAge = computed(() => {
                          <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                              <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
                                 <h3 class="font-bold text-slate-800 text-lg">ประวัติการนัดหมาย (Booking History)</h3>
+                                <Link 
+                                    :href="route('admin.bookings.create', { user_id: patient.id })" 
+                                    class="text-sm font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-3 py-1.5 rounded-lg transition-colors flex items-center"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    นัดหมายใหม่
+                                </Link>
                             </div>
                              <div class="overflow-x-auto">
                                 <table class="w-full text-sm text-left text-slate-600">
