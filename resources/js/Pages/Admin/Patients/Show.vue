@@ -238,7 +238,7 @@ const formatDate = (dateString) => {
                                 <!-- 1. Drug Allergies -->
                                 <div>
                                     <div class="flex items-center gap-2 mb-2">
-                                        <div class="w-1.5 h-1.5 rounded-full" :class="patient.drug_allergy ? 'bg-red-500' : 'bg-emerald-400'"></div>
+                                        <div class="w-1.5 h-1.5 rounded-full" :class="patient.drug_allergy ? 'bg-red-500' : 'bg-slate-300'"></div>
                                         <p class="text-xs font-bold uppercase tracking-wider" :class="patient.drug_allergy ? 'text-red-500' : 'text-slate-400'">
                                             Drug Allergies (แพ้ยา)
                                         </p>
@@ -252,7 +252,7 @@ const formatDate = (dateString) => {
 
                                         <p class="font-bold text-sm leading-relaxed relative z-10 break-words" 
                                            :class="patient.drug_allergy ? 'text-red-700' : 'text-slate-500 italic'">
-                                           {{ patient.drug_allergy || 'No known allergies' }}
+                                           {{ patient.drug_allergy || '-' }}
                                         </p>
                                     </div>
                                 </div>
@@ -260,7 +260,7 @@ const formatDate = (dateString) => {
                                 <!-- 2. Underlying Diseases -->
                                 <div>
                                      <div class="flex items-center gap-2 mb-2">
-                                        <div class="w-1.5 h-1.5 rounded-full" :class="patient.underlying_disease ? 'bg-indigo-500' : 'bg-emerald-400'"></div>
+                                        <div class="w-1.5 h-1.5 rounded-full" :class="patient.underlying_disease ? 'bg-indigo-500' : 'bg-slate-300'"></div>
                                         <p class="text-xs font-bold uppercase tracking-wider" :class="patient.underlying_disease ? 'text-indigo-500' : 'text-slate-400'">
                                             Underlying Diseases (โรคประจำตัว)
                                         </p>
@@ -274,7 +274,7 @@ const formatDate = (dateString) => {
 
                                         <p class="font-medium text-sm leading-relaxed relative z-10 break-words"
                                            :class="patient.underlying_disease ? 'text-indigo-900' : 'text-slate-500 italic'">
-                                           {{ patient.underlying_disease || 'None' }}
+                                           {{ patient.underlying_disease || '-' }}
                                         </p>
                                     </div>
                                 </div>
