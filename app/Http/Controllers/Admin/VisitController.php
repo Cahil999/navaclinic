@@ -68,7 +68,7 @@ class VisitController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        DB::transaction(function () use ($validated, $request) {
+        $finalPatientId = DB::transaction(function () use ($validated, $request) {
             $patientId = $validated['patient_id'];
 
             // Handle Guest Registration if needed
@@ -151,14 +151,11 @@ class VisitController extends Controller
                     'duration_minutes' => $request->integer('duration_minutes', 30),
                 ]);
             }
+
+            return $patientId;
         });
 
-        // We can't redirect to the OLD guest ID, we must redirect to the NEW user ID if migrated.
-        // Re-calculate ID
-        $redirectId = $validated['patient_id'];
-
-        // Note: The logic for redirecting appropriately is implied to be handled by the frontend knowing the patient path or simple redirect index.
-        return redirect()->route('admin.patients.index')->with('success', 'Visit started successfully.');
+        return redirect()->route('admin.patients.show', $finalPatientId)->with('success', 'Visit started successfully.');
     }
 
     public function checkAvailability(Request $request)
