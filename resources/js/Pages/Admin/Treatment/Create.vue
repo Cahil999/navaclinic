@@ -157,31 +157,6 @@ const updateParts = (newParts) => {
     });
 };
 
-const submit = () => {
-    Swal.fire({
-        title: 'ยืนยันข้อมูล',
-        text: 'ต้องการดำเนินการอย่างไรต่อ?',
-        icon: 'question',
-        showDenyButton: true,
-        showCancelButton: true,
-        confirmButtonText: 'บันทึกและกลับ',
-        denyButtonText: 'บันทึกและอยู่ที่เดิม',
-        cancelButtonText: 'ยกเลิก',
-        confirmButtonColor: '#4f46e5',
-        denyButtonColor: '#0891b2',
-        cancelButtonColor: '#94a3b8',
-        reverseButtons: true
-    }).then((result) => {
-        if (result.isConfirmed) {
-            form.save_action = 'exit';
-            submitForm();
-        } else if (result.isDenied) {
-            form.save_action = 'stay';
-            submitForm();
-        }
-    });
-};
-
 const submitForm = () => {
     const routeName = props.isVisit ? 'admin.visits.treatment.store' : 'admin.treatment.store';
     const routeParam = entity.id;
@@ -201,12 +176,34 @@ const submitForm = () => {
     });
 };
 
-const saveRow = () => {
-    form.save_action = 'stay';
+const handleSave = (action) => {
+    form.save_action = action;
     submitForm();
 };
 
-// saveRow function removed as per instructions.
+const getPainColor = (level) => {
+    const val = parseInt(level) || 0;
+    if (val <= 3) return 'bg-emerald-100 text-emerald-700';
+    if (val <= 6) return 'bg-amber-100 text-amber-700';
+    return 'bg-rose-100 text-rose-700';
+};
+
+const bmi = computed(() => {
+    if (form.weight && form.height) {
+        const h_m = form.height / 100;
+        return (form.weight / (h_m * h_m)).toFixed(1);
+    }
+    return null;
+});
+
+const bmiColor = computed(() => {
+    const val = parseFloat(bmi.value);
+    if (!val) return '';
+    if (val < 18.5) return 'text-blue-500'; // Underweight
+    if (val < 23) return 'text-emerald-500'; // Normal
+    if (val < 25) return 'text-amber-500'; // Overweight
+    return 'text-rose-500'; // Obese
+});
 </script>
 
 <template>
@@ -284,6 +281,12 @@ const saveRow = () => {
                                     <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-1">ส่วนสูง (cm)</label>
                                     <input type="number" step="0.1" v-model="form.height" class="w-full rounded-lg border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-indigo-500 text-sm font-semibold text-slate-700 transition-all text-center">
                                     <InputError class="mt-1" :message="form.errors.height" />
+                                </div>
+                                <div v-if="bmi" class="flex flex-col justify-end pb-1">
+                                    <span class="text-[10px] uppercase font-bold text-slate-400">BMI</span>
+                                    <div class="text-lg font-bold" :class="bmiColor">
+                                        {{ bmi }}
+                                    </div>
                                 </div>
                                 <div class="col-span-2 md:col-span-1">
                                     <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-1">ความดันโลหิต (mmHg)</label>
@@ -370,12 +373,18 @@ const saveRow = () => {
                                                     <input type="text" v-model="item.symptom" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" placeholder="Ex. ปวดตึง, ร้าวลงขา...">
                                                 </div>
                                                 <div>
-                                                    <label class="block text-xs font-medium text-slate-600 mb-1">ความปวด (ก่อน)</label>
-                                                    <input type="number" min="0" max="10" v-model="item.pain_level" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" placeholder="Before">
+                                                    <div class="flex justify-between items-center mb-1">
+                                                        <label class="block text-xs font-medium text-slate-600">ความปวด (ก่อน)</label>
+                                                        <span class="text-xs font-bold px-2 py-0.5 rounded" :class="getPainColor(item.pain_level)">{{ item.pain_level || 0 }}</span>
+                                                    </div>
+                                                    <input type="range" min="0" max="10" v-model="item.pain_level" class="w-full accent-indigo-600 cursor-pointer">
                                                 </div>
                                                 <div>
-                                                    <label class="block text-xs font-medium text-slate-600 mb-1">ความปวด (หลัง)</label>
-                                                    <input type="number" min="0" max="10" v-model="item.pain_level_after" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm bg-emerald-50 border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500" placeholder="After">
+                                                    <div class="flex justify-between items-center mb-1">
+                                                        <label class="block text-xs font-medium text-slate-600">ความปวด (หลัง)</label>
+                                                        <span class="text-xs font-bold px-2 py-0.5 rounded" :class="getPainColor(item.pain_level_after)">{{ item.pain_level_after || 0 }}</span>
+                                                    </div>
+                                                    <input type="range" min="0" max="10" v-model="item.pain_level_after" class="w-full accent-emerald-600 cursor-pointer">
                                                 </div>
                                             </div>
                                         </div>
@@ -410,16 +419,30 @@ const saveRow = () => {
                         </div>
 
 
-                        <div class="pt-8 border-t border-slate-100 flex justify-end gap-3 sticky bottom-0 bg-white p-4 -mx-4 -mb-4 shadow-lg sm:static sm:shadow-none sm:p-0 sm:m-0">
+                        <div class="pt-8 border-t border-slate-100 flex justify-end gap-3 sticky bottom-0 bg-white p-4 -mx-4 -mb-4 shadow-lg sm:static sm:shadow-none sm:p-0 sm:m-0 z-10">
                             <Link :href="isVisit ? route('admin.visits.show', entity.id) : route('admin.bookings.show', entity.id)" class="px-6 py-2.5 bg-white text-slate-700 border border-slate-300 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors">
                                 ยกเลิก
                             </Link>
+
                             <button 
-                                type="submit" 
+                                type="button" 
+                                @click="handleSave('stay')"
+                                :disabled="form.processing"
+                                class="px-6 py-2.5 bg-white text-indigo-600 border border-indigo-200 rounded-xl text-sm font-bold shadow-sm hover:bg-indigo-50 hover:border-indigo-300 transition-all disabled:opacity-50 flex items-center gap-2"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
+                                </svg>
+                                บันทึก (อยู่หน้านี้)
+                            </button>
+                            
+                            <button 
+                                type="button" 
+                                @click="handleSave('next')"
                                 :disabled="form.processing"
                                 class="px-8 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all disabled:opacity-50 flex items-center gap-2"
                             >
-                                บันทึกและดำเนินการต่อ
+                                บันทึกและไปต่อ
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                                 </svg>
