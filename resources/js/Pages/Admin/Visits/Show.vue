@@ -113,6 +113,12 @@ const deletePayment = (id) => {
                                 <Link :href="route('admin.patients.show', visit.patient.id)" class="text-xs font-normal text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 transition-colors">
                                     ดูประวัติ
                                 </Link>
+                                <span v-if="!visit.booking" class="text-emerald-600 font-medium flex items-center text-xs gap-1 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-100 ml-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    </svg>
+                                    Visit แบบ Walk-in
+                                </span>
                             </h3>
                         </div>
                         <div class="text-right">
@@ -177,17 +183,9 @@ const deletePayment = (id) => {
                                 </Link>
                             </div>
                          </div>
-                         <div v-else class="pt-6 border-t border-slate-100">
-                             <p class="text-emerald-600 font-medium flex items-center text-sm gap-2 bg-emerald-50 w-fit px-4 py-2 rounded-xl border border-emerald-100">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
-                                Visit แบบ Walk-in (ไม่ได้จองล่วงหน้า)
-                             </p>
-                         </div>
 
                          <!-- Management Actions -->
-                         <div class="pt-6 border-t border-slate-100">
+                         <div v-if="!visit.treatment_record" class="pt-6 border-t border-slate-100">
                             <h4 class="font-bold text-slate-800 mb-4">การจัดการ (Management)</h4>
                             <div class="flex flex-wrap gap-4">
                                 <Link
