@@ -244,20 +244,22 @@ const submitRegister = () => {
                                 <InputLabel for="phone_number">
                                     เบอร์โทรศัพท์ <span class="text-rose-500">*</span>
                                 </InputLabel>
-                                <TextInput id="phone_number" v-model="registerForm.phone_number" class="mt-1 block w-full" placeholder="0967543214" />
+                                <TextInput id="phone_number" v-model="registerForm.phone_number" class="mt-1 block w-full" placeholder="0967543214" required />
                                 <InputError :message="registerForm.errors.phone_number" class="mt-2" />
                             </div>
                             <div>
                                 <InputLabel for="id_card_number">
                                     เลขบัตรประชาชน <span class="text-rose-500">*</span>
                                 </InputLabel>
-                                <TextInput id="id_card_number" v-model="registerForm.id_card_number" class="mt-1 block w-full" placeholder="1-xxxx-xxxxx-xx-x" />
+                                <TextInput id="id_card_number" v-model="registerForm.id_card_number" class="mt-1 block w-full" placeholder="1-xxxx-xxxxx-xx-x" required />
+                                <InputError :message="registerForm.errors.id_card_number" class="mt-2" />
                             </div>
                             <div>
                                 <InputLabel for="date_of_birth">
                                     วันเกิด <span class="text-rose-500">*</span>
                                 </InputLabel>
-                                <TextInput id="date_of_birth" type="date" v-model="registerForm.date_of_birth" class="mt-1 block w-full" placeholder="dd/mm/yyyy" />
+                                <TextInput id="date_of_birth" type="date" v-model="registerForm.date_of_birth" class="mt-1 block w-full" placeholder="dd/mm/yyyy" required />
+                                <InputError :message="registerForm.errors.date_of_birth" class="mt-2" />
                             </div>
                             <div>
                                 <InputLabel for="gender">
@@ -267,12 +269,14 @@ const submitRegister = () => {
                                     id="gender" 
                                     v-model="registerForm.gender"
                                     class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                    required
                                 >
                                     <option value="">ระบุเพศ</option>
                                     <option value="Male">ชาย</option>
                                     <option value="Female">หญิง</option>
                                     <option value="Other">อื่นๆ</option>
                                 </select>
+                                <InputError :message="registerForm.errors.gender" class="mt-2" />
                             </div>
                            <div>
                                 <InputLabel for="occupation" value="อาชีพ" />

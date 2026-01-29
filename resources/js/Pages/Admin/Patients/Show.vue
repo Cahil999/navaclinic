@@ -785,24 +785,27 @@ const formatDate = (dateString) => {
                             </div>
                              <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">เบอร์โทรศัพท์ <span class="text-rose-500">*</span></label>
-                                <input type="text" v-model="form.phone_number" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="0967543214">
+                                <input type="text" v-model="form.phone_number" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="0967543214" required>
                                 <InputError :message="form.errors.phone_number" class="mt-2" />
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">เลขบัตรประชาชน <span class="text-rose-500">*</span></label>
-                                <input type="text" v-model="form.id_card_number" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="1-xxxx-xxxxx-xx-x">
+                                <input type="text" v-model="form.id_card_number" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="1-xxxx-xxxxx-xx-x" required>
+                                <InputError :message="form.errors.id_card_number" class="mt-2" />
                             </div>
                              <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">วันเกิด <span class="text-rose-500">*</span></label>
-                                <input type="date" v-model="form.date_of_birth" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="dd/mm/yyyy">
+                                <input type="date" v-model="form.date_of_birth" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="dd/mm/yyyy" required>
+                                <InputError :message="form.errors.date_of_birth" class="mt-2" />
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">เพศ <span class="text-rose-500">*</span></label>
-                                <select v-model="form.gender" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <select v-model="form.gender" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
                                     <option value="male">ชาย (Male)</option>
                                     <option value="female">หญิง (Female)</option>
                                     <option value="other">อื่นๆ (Other)</option>
                                 </select>
+                                <InputError :message="form.errors.gender" class="mt-2" />
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">อาชีพ</label>

@@ -163,10 +163,10 @@ class PatientController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'phone_number' => 'nullable|string|max:20',
-            'id_card_number' => 'nullable|string|max:20',
-            'date_of_birth' => 'nullable|date',
-            'gender' => 'nullable|string',
+            'phone_number' => 'required|string|max:20',
+            'id_card_number' => 'required|string|max:20',
+            'date_of_birth' => 'required|date',
+            'gender' => 'required|string',
             'race' => 'nullable|string',
             'nationality' => 'nullable|string',
             'religion' => 'nullable|string',
@@ -226,10 +226,10 @@ class PatientController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'phone_number' => 'nullable|string|max:20',
-            'id_card_number' => 'nullable|string|max:20',
-            'date_of_birth' => 'nullable|date',
-            'gender' => 'nullable|string',
+            'phone_number' => 'required|string|max:20',
+            'id_card_number' => 'required|string|max:20',
+            'date_of_birth' => 'required|date',
+            'gender' => 'required|string',
             'race' => 'nullable|string',
             'nationality' => 'nullable|string',
             'religion' => 'nullable|string',
