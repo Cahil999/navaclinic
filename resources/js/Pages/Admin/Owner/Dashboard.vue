@@ -392,6 +392,7 @@ const peakHoursChartOptions = {
                                         <th class="px-6 py-3">ผู้ป่วย</th>
                                         <th class="px-6 py-3">ระยะเวลา</th>
                                         <th class="px-6 py-3 text-right">ค่ารักษา</th>
+                                        <th class="px-6 py-3 text-right">ค่ามือแพทย์</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100">
@@ -401,6 +402,7 @@ const peakHoursChartOptions = {
                                         <td class="px-6 py-4 font-medium text-slate-900">{{ visit.patient_name }}</td>
                                         <td class="px-6 py-4">{{ visit.duration_minutes }} นาที</td>
                                         <td class="px-6 py-4 text-right font-medium text-slate-900">{{ formatCurrency(visit.price) }}</td>
+                                        <td class="px-6 py-4 text-right font-medium text-emerald-600">{{ formatCurrency(visit.doctor_fee) }}</td>
                                     </tr>
                                 </tbody>
                             </table>

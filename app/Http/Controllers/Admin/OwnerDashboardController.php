@@ -127,6 +127,7 @@ class OwnerDashboardController extends Controller
                         'visit_time' => $visit->visit_date->format('H:i'),
                         'duration_minutes' => $visit->duration_minutes,
                         'price' => $visit->price,
+                        'doctor_fee' => $visit->doctor_commission ?? ($visit->price * ($visit->doctor->commission_rate ?? 50) / 100),
                     ];
                 })
             ];
