@@ -120,6 +120,9 @@ class OwnerDashboardController extends Controller
                 'doctor_name' => $doctor->name,
                 'total_revenue' => $doctorVisits->sum('price'),
                 'total_duration' => $doctorVisits->sum('duration_minutes'),
+                'total_doctor_fee' => $doctorVisits->sum(function ($visit) {
+                    return $visit->doctor_commission ?? ($visit->price * ($visit->doctor->commission_rate ?? 50) / 100);
+                }),
                 'visits' => $doctorVisits->map(function ($visit) {
                     return [
                         'patient_name' => $visit->patient ? $visit->patient->name : 'Unknown',

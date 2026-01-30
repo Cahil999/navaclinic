@@ -377,8 +377,12 @@ const peakHoursChartOptions = {
                                     <div class="font-bold text-indigo-600">{{ formatCurrency(doctor.total_revenue) }}</div>
                                 </div>
                                 <div class="text-right">
+                                    <div class="text-xs text-slate-500 uppercase tracking-wide">ค่ามือแพทย์</div>
+                                    <div class="font-bold text-emerald-600">{{ formatCurrency(doctor.total_doctor_fee) }}</div>
+                                </div>
+                                <div class="text-right">
                                     <div class="text-xs text-slate-500 uppercase tracking-wide">ระยะเวลารวม</div>
-                                    <div class="font-bold text-emerald-600">{{ formatDuration(doctor.total_duration) }}</div>
+                                    <div class="font-bold text-slate-700">{{ formatDuration(doctor.total_duration) }}</div>
                                 </div>
                             </div>
                         </div>
