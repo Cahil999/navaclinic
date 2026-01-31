@@ -46,6 +46,28 @@ const loadingSlots = ref(false);
 const confirmingVisit = ref(false);
 const step = ref(1);
 
+watch(mode, (newMode) => {
+    step.value = 1;
+    form.type = newMode;
+    // Reset relevant fields when switching modes
+    if (newMode === 'walk_in') {
+        form.booking_id = null;
+        selectedBooking.value = null;
+    }
+});
+
+watch(selectedBooking, (booking) => {
+    if (booking) {
+        form.booking_id = booking.id;
+        // Pre-fill symptoms if available and not already filled
+        if (booking.symptoms && !form.symptoms) {
+            form.symptoms = booking.symptoms;
+        }
+    } else {
+        form.booking_id = null;
+    }
+});
+
 const bmi = computed(() => {
     if (form.weight && form.height) {
         const h_m = form.height / 100;
@@ -278,6 +300,33 @@ const confirmVisit = () => {
     }
 };
 
+const stepLabels = computed(() => {
+    if (mode.value === 'booking') {
+        return ['Booking Selection', 'Medical Record'];
+    }
+    return ['Medical Record', 'Visit Details'];
+});
+
+const showMedicalRecord = computed(() => {
+    return (mode.value === 'walk_in' && step.value === 1) || (mode.value === 'booking' && step.value === 2);
+});
+
+const showBookingList = computed(() => {
+    return mode.value === 'booking' && step.value === 1;
+});
+
+const showWalkInDetails = computed(() => {
+    return mode.value === 'walk_in' && step.value === 2;
+});
+
+const handleMedicalNext = () => {
+    if (mode.value === 'walk_in') {
+        nextStep();
+    } else {
+        confirmVisit();
+    }
+};
+
 const confirmSubmit = () => {
 
 
@@ -338,7 +387,29 @@ const confirmSubmit = () => {
                         <form @submit.prevent="submit" class="space-y-8">
                             
                             <!-- MODE: EXISTING BOOKING -->
-                            <div v-if="mode === 'booking'" class="max-w-3xl mx-auto space-y-6">
+                            <!-- Step Indicators (Shared) -->
+                            <div class="max-w-3xl mx-auto mb-8">
+                                <div class="relative flex items-center justify-between w-full">
+                                    <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-100 rounded-full"></div>
+                                    <div 
+                                        class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-emerald-500 rounded-full transition-all duration-500 ease-out"
+                                        :style="{ width: step === 1 ? '0%' : '100%' }"
+                                    ></div>
+
+                                    <div @click="step > 1 && setStep(1)" class="relative z-10 flex flex-col items-center cursor-pointer group">
+                                        <div :class="{'bg-emerald-600 ring-4 ring-emerald-100 text-white transform scale-110': step >= 1, 'bg-white border-2 border-slate-200 text-slate-400': step < 1}" class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 shadow-sm">1</div>
+                                        <span :class="{'text-emerald-700 font-bold': step >= 1, 'text-slate-400 font-medium': step < 1}" class="text-xs mt-2 uppercase tracking-wide transition-colors">{{ stepLabels[0] }}</span>
+                                    </div>
+
+                                    <div @click="step > 2 && setStep(2)" class="relative z-10 flex flex-col items-center cursor-pointer group">
+                                        <div :class="{'bg-emerald-600 ring-4 ring-emerald-100 text-white transform scale-110': step >= 2, 'bg-white border-2 border-slate-200 text-slate-400': step < 2}" class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 shadow-sm">2</div>
+                                        <span :class="{'text-emerald-700 font-bold': step >= 2, 'text-slate-400 font-medium': step < 2}" class="text-xs mt-2 uppercase tracking-wide transition-colors">{{ stepLabels[1] }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- MODE: EXISTING BOOKING (Step 1) -->
+                            <div v-if="showBookingList" class="max-w-3xl mx-auto space-y-6 animate-fadeIn">
                                 <div>
                                     <label class="block text-sm font-bold text-slate-700 mb-3">Select Booking (เลือกรายการจอง)</label>
                                     <div v-if="bookings.length > 0" class="space-y-3">
@@ -382,34 +453,21 @@ const confirmSubmit = () => {
                                     </div>
                                     <InputError :message="form.errors.booking_id" class="mt-2" />
                                 </div>
+                                <div class="flex justify-end pt-4 border-t border-slate-100">
+                                    <button type="button" @click="nextStep" :disabled="!selectedBooking" class="px-6 py-2 bg-indigo-600 text-white rounded-lg font-bold shadow hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2">
+                                        ถัดไป (Next)
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
 
-                            <!-- MODE: WALK-IN -->
-                            <div v-if="mode === 'walk_in'" class="space-y-8">
-                                
-                                <!-- Step Indicators -->
-                                <div class="max-w-3xl mx-auto mb-8">
-                                    <div class="relative flex items-center justify-between w-full">
-                                        <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-100 rounded-full"></div>
-                                        <div 
-                                            class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-emerald-500 rounded-full transition-all duration-500 ease-out"
-                                            :style="{ width: step === 1 ? '0%' : '100%' }"
-                                        ></div>
 
-                                        <div @click="setStep(1)" class="relative z-10 flex flex-col items-center cursor-pointer group">
-                                            <div :class="{'bg-emerald-600 ring-4 ring-emerald-100 text-white transform scale-110': step >= 1, 'bg-white border-2 border-slate-200 text-slate-400': step < 1}" class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 shadow-sm">1</div>
-                                            <span :class="{'text-emerald-700 font-bold': step >= 1, 'text-slate-400 font-medium': step < 1}" class="text-xs mt-2 uppercase tracking-wide transition-colors">Medical Record</span>
-                                        </div>
-
-                                        <div @click="setStep(2)" class="relative z-10 flex flex-col items-center cursor-pointer group">
-                                            <div :class="{'bg-emerald-600 ring-4 ring-emerald-100 text-white transform scale-110': step >= 2, 'bg-white border-2 border-slate-200 text-slate-400': step < 2}" class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 shadow-sm">2</div>
-                                            <span :class="{'text-emerald-700 font-bold': step >= 2, 'text-slate-400 font-medium': step < 2}" class="text-xs mt-2 uppercase tracking-wide transition-colors">Visit Details</span>
-                                        </div>
-                                    </div>
-                                </div>
 
                                 <!-- Step 1: Medical Record (History Taking & Physical Exam) -->
-                                <div v-show="step === 1" class="animate-fadeIn space-y-6">
+                                <!-- Step 1: Medical Record (History Taking & Physical Exam) -->
+                                <div v-if="showMedicalRecord" class="animate-fadeIn space-y-6">
                                     
                                     <!-- 1. Vital Signs -->
                                     <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
@@ -554,12 +612,22 @@ const confirmSubmit = () => {
                                                 <textarea v-model="form.physical_exam" rows="5" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-indigo-500 transition-colors" placeholder="ระบุผลการตรวจ..."></textarea>
                                                 <InputError class="mt-2" :message="form.errors.physical_exam" />
                                             </div>
+                                            <!-- Additional Notes (Generic for Booking/Walk-in at this step) -->
+                                             <div v-if="mode === 'booking'">
+                                                <label class="block text-sm font-bold text-slate-700 mb-2">Additional Notes (บันทึกเพิ่มเติม)</label>
+                                                <textarea v-model="form.notes" rows="3" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-indigo-500 transition-colors" placeholder="ระบุข้อความเพิ่มเติม..."></textarea>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <div class="flex justify-end pt-4">
-                                        <button type="button" @click="nextStep" class="px-6 py-2 bg-indigo-600 text-white rounded-lg font-bold shadow hover:bg-indigo-700 transition-all flex items-center gap-2">
-                                            ถัดไป (Next)
+                                    <div class="flex justify-between pt-4">
+                                         <button v-if="mode === 'booking'" type="button" @click="prevStep" class="px-6 py-2 text-slate-500 hover:text-slate-800 font-bold text-sm bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-all">
+                                            ย้อนกลับ (Back)
+                                        </button>
+                                        <div v-else></div>
+
+                                        <button type="button" @click="handleMedicalNext" class="px-6 py-2 bg-indigo-600 text-white rounded-lg font-bold shadow hover:bg-indigo-700 transition-all flex items-center gap-2">
+                                            {{ mode === 'booking' ? 'ยืนยันและเริ่มงาน (Confirm Visit)' : 'ถัดไป (Next)' }}
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                                             </svg>
@@ -567,8 +635,8 @@ const confirmSubmit = () => {
                                     </div>
                                 </div>
 
-                                <!-- Step 2: Visit Time & Doctor -->
-                                <div v-show="step === 2" class="animate-fadeIn">
+                            <!-- Step 2: Details (Walk-in Only - Visit Time & Doctor) -->
+                            <div v-if="showWalkInDetails" class="animate-fadeIn">
                                     <div class="max-w-5xl mx-auto space-y-8">
                                         
                                         <!-- Section 1: Duration & Time -->
@@ -719,30 +787,6 @@ const confirmSubmit = () => {
                                 </div>
 
 
-
-                            </div>
-                            
-                            <!-- COMMON: NOTES & BUTTONS (Only for Booking Mode) -->
-                            <div v-if="mode === 'booking'" class="space-y-6 pt-4 border-t border-slate-100">
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Additional Notes (บันทึกเพิ่มเติม)</label>
-                                    <textarea v-model="form.notes" rows="2" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500"></textarea>
-                                </div>
-
-                                <div class="flex items-center justify-end gap-4">
-                                    <Link :href="patientRoute" class="text-slate-500 hover:text-slate-700 font-medium text-sm">
-                                        Cancel
-                                    </Link>
-                                    <button 
-                                        type="submit" 
-                                        :disabled="form.processing || !form.booking_id" 
-                                        class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200 text-white rounded-lg font-bold shadow-lg transition-all"
-                                        :class="{'opacity-50 cursor-not-allowed': form.processing || !form.booking_id}"
-                                    >
-                                        Confirm Visit
-                                    </button>
-                                </div>
-                            </div>
                         </form>
                     </div>
                 </div>
