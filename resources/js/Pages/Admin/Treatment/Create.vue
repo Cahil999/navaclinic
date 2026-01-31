@@ -172,6 +172,15 @@ const submitForm = () => {
                     showConfirmButton: false
                 });
             }
+        },
+        onError: (errors) => {
+            console.error('Validation errors:', errors);
+            Swal.fire({
+                title: 'บันทึกไม่สำเร็จ',
+                text: 'กรุณาตรวจสอบข้อมูลที่กรอกอีกครั้ง (มีข้อมูลบางอย่างไม่ถูกต้อง)',
+                icon: 'error',
+                confirmButtonText: 'ตกลง'
+            });
         }
     });
 };
@@ -389,20 +398,23 @@ const bmiColor = computed(() => {
                                                 <div class="col-span-2">
                                                     <label class="block text-xs font-medium text-slate-600 mb-1">อาการ</label>
                                                     <input type="text" v-model="item.symptom" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" placeholder="Ex. ปวดตึง, ร้าวลงขา...">
+                                                    <InputError :message="form.errors[`pain_areas.${index}.symptom`]" class="mt-1" />
                                                 </div>
                                                 <div>
                                                     <div class="flex justify-between items-center mb-1">
                                                         <label class="block text-xs font-medium text-slate-600">ความปวด (ก่อน)</label>
                                                         <span class="text-xs font-bold px-2 py-0.5 rounded" :class="getPainColor(item.pain_level)">{{ item.pain_level || 0 }}</span>
                                                     </div>
-                                                    <input type="range" min="0" max="10" v-model="item.pain_level" class="w-full accent-indigo-600 cursor-pointer">
+                                                    <input type="range" min="0" max="10" step="1" v-model="item.pain_level" class="w-full accent-indigo-600 cursor-pointer">
+                                                    <InputError :message="form.errors[`pain_areas.${index}.pain_level`]" class="mt-1" />
                                                 </div>
                                                 <div>
                                                     <div class="flex justify-between items-center mb-1">
                                                         <label class="block text-xs font-medium text-slate-600">ความปวด (หลัง)</label>
                                                         <span class="text-xs font-bold px-2 py-0.5 rounded" :class="getPainColor(item.pain_level_after)">{{ item.pain_level_after || 0 }}</span>
                                                     </div>
-                                                    <input type="range" min="0" max="10" v-model="item.pain_level_after" class="w-full accent-emerald-600 cursor-pointer">
+                                                    <input type="range" min="0" max="10" step="1" v-model="item.pain_level_after" class="w-full accent-emerald-600 cursor-pointer">
+                                                    <InputError :message="form.errors[`pain_areas.${index}.pain_level_after`]" class="mt-1" />
                                                 </div>
                                             </div>
                                         </div>

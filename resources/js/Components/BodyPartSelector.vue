@@ -344,18 +344,8 @@ const removeItem = (item) => {
              So to avoid duplication, we should probably hide the built-in list if readonly, or let parent handle it.
              The previous implementation showed tags at bottom if !readonly.
         -->
-        <div v-if="!readonly && modelValue.length > 0" class="flex flex-wrap gap-2 justify-center mt-2">
-            <span v-for="(item, idx) in modelValue" :key="idx" 
-                class="px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-bold border border-indigo-100 flex items-center gap-2 shadow-sm animate-fadeIn">
-                {{ formatLabel(item) }}
-                <button @click.prevent="removeItem(item)" class="text-indigo-400 hover:text-rose-500 transition-colors bg-white rounded-full p-0.5 hover:bg-rose-50">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3">
-                        <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
-                    </svg>
-                </button>
-            </span>
-        </div>
-        <div v-else-if="!readonly" class="text-center text-slate-400 text-xs italic mt-2">
+
+        <div v-if="!readonly" class="text-center text-slate-400 text-xs italic mt-2">
             Click on body parts to select
         </div>
     </div>
