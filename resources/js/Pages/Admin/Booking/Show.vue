@@ -14,27 +14,68 @@ const form = useForm({
     status: '',
 });
 
-const updateStatus = (status) => {
-    let confirmMessage = '';
-    switch (status) {
-        case 'confirmed':
-            confirmMessage = 'คุณแน่ใจหรือไม่ที่จะยืนยันการจองนี้?';
-            break;
-        case 'completed':
-            confirmMessage = 'คุณแน่ใจหรือไม่ที่จะระบุว่าการจองนี้เสร็จสิ้นแล้ว?';
-            break;
-        case 'cancelled':
-            confirmMessage = 'คุณแน่ใจหรือไม่ที่จะยกเลิกการจองนี้?';
-            break;
-        default:
-            confirmMessage = `คุณแน่ใจหรือไม่ที่จะเปลี่ยนสถานะเป็น ${status}?`;
-    }
-    
-    if (confirm(confirmMessage)) {
-        form.status = status;
-        form.patch(route('admin.bookings.update-status', props.booking.id));
+import { computed, ref } from 'vue';
+import Modal from '@/Components/Modal.vue';
+
+const showConfirmModal = ref(false);
+const pendingStatus = ref(null);
+
+const openConfirmModal = (status) => {
+    pendingStatus.value = status;
+    showConfirmModal.value = true;
+};
+
+const closeConfirmModal = () => {
+    showConfirmModal.value = false;
+    pendingStatus.value = null;
+};
+
+const confirmAction = () => {
+    if (pendingStatus.value) {
+        form.status = pendingStatus.value;
+        form.patch(route('admin.bookings.update-status', props.booking.id), {
+            onSuccess: () => closeConfirmModal(),
+            onFinish: () => closeConfirmModal(),
+        });
     }
 };
+
+const modalContent = computed(() => {
+    switch (pendingStatus.value) {
+        case 'confirmed':
+            return {
+                title: 'ยืนยันการจอง',
+                message: 'คุณต้องการยืนยันการจองนี้ใช่หรือไม่?',
+                description: 'การยืนยันการจองจะแจ้งเตือนผู้ป่วยว่าการจองได้รับการอนุมัติแล้ว',
+                color: 'emerald',
+                icon: 'check'
+            };
+        case 'completed':
+            return {
+                title: 'เสร็จสิ้นการรักษา',
+                message: 'คุณต้องการบันทึกว่าการรักษานี้เสร็จสิ้นแล้วใช่หรือไม่?',
+                description: 'สถานะการจองจะเปลี่ยนเป็น "เสร็จสิ้น" และบันทึกประวัติการรักษา',
+                color: 'blue',
+                icon: 'check-circle'
+            };
+        case 'cancelled':
+            return {
+                title: 'ยกเลิกการจอง',
+                message: 'คุณต้องการยกเลิกการจองนี้ใช่หรือไม่?',
+                description: 'การยกเลิกการจองไม่สามารถย้อนกลับได้ โปรดตรวจสอบความถูกต้อง',
+                color: 'rose',
+                icon: 'x-circle'
+            };
+        default:
+            return {
+                title: 'ยืนยันการเปลี่ยนสถานะ',
+                message: `คุณต้องการเปลี่ยนสถานะเป็น ${pendingStatus.value} ใช่หรือไม่?`,
+                description: '',
+                color: 'slate',
+                icon: 'question-mark-circle'
+            };
+    }
+});
 
 const getStatusClass = (status) => {
     switch (status) {
@@ -61,7 +102,6 @@ const getStatusLabel = (status) => {
         default: return status;
     }
 };
-import { computed } from 'vue';
 
 const getPainAreaNames = (areas) => {
     if (!Array.isArray(areas)) return [];
@@ -151,7 +191,7 @@ const isDetailedPainArea = (areas) => {
                             <div class="flex flex-wrap gap-4">
                                 <button
                                     v-if="booking.status !== 'confirmed' && booking.status !== 'completed' && booking.status !== 'cancelled'"
-                                    @click="updateStatus('confirmed')"
+                                    @click="openConfirmModal('confirmed')"
                                     class="btn bg-emerald-600 hover:bg-emerald-700 text-white border-none shadow-md hover:shadow-lg transition-all"
                                     :disabled="form.processing"
                                 >
@@ -159,7 +199,7 @@ const isDetailedPainArea = (areas) => {
                                 </button>
                                 <button
                                     v-if="booking.status !== 'completed' && booking.status !== 'pending' && booking.status !== 'cancelled'"
-                                    @click="updateStatus('completed')"
+                                    @click="openConfirmModal('completed')"
                                     class="btn bg-blue-600 hover:bg-blue-700 text-white border-none shadow-md hover:shadow-lg transition-all"
                                     :disabled="form.processing"
                                 >
@@ -167,7 +207,7 @@ const isDetailedPainArea = (areas) => {
                                 </button>
                                 <button
                                     v-if="booking.status !== 'cancelled' && booking.status !== 'completed'"
-                                    @click="updateStatus('cancelled')"
+                                    @click="openConfirmModal('cancelled')"
                                     class="btn bg-rose-600 hover:bg-rose-700 text-white border-none shadow-md hover:shadow-lg transition-all"
                                     :disabled="form.processing"
                                 >
@@ -393,5 +433,93 @@ const isDetailedPainArea = (areas) => {
 
             </div>
         </div>
+
+        <Modal :show="showConfirmModal" @close="closeConfirmModal" maxWidth="md">
+            <div class="p-6">
+                <!-- Icon -->
+                <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-full transition-colors"
+                    :class="{
+                        'bg-emerald-100 text-emerald-600': modalContent.color === 'emerald',
+                        'bg-blue-100 text-blue-600': modalContent.color === 'blue',
+                        'bg-rose-100 text-rose-600': modalContent.color === 'rose',
+                        'bg-slate-100 text-slate-600': modalContent.color === 'slate'
+                    }"
+                >
+                    <svg v-if="modalContent.icon === 'check'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9.135-9.135" />
+                    </svg>
+                    <svg v-else-if="modalContent.icon === 'check-circle'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    <svg v-else-if="modalContent.icon === 'x-circle'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-6">
+                         <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
+                    </svg>
+                </div>
+
+                <!-- Text Content -->
+                <div class="text-center mb-6">
+                    <h3 class="text-lg font-bold text-slate-900 mb-2">{{ modalContent.title }}</h3>
+                    <p class="text-sm text-slate-500 leading-relaxed">{{ modalContent.message }}</p>
+                    <p class="text-xs text-slate-400 mt-1" v-if="modalContent.description">{{ modalContent.description }}</p>
+                </div>
+
+                <!-- Booking Summary Card -->
+                <div class="bg-slate-50 rounded-xl p-4 mb-6 border border-slate-100 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-white rounded-bl-full opacity-50"></div>
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3 text-center border-b border-slate-200 pb-2">รายละเอียดการจอง</h4>
+                    <div class="space-y-2.5 text-sm">
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-500 text-xs">ผู้ป่วย</span>
+                            <span class="font-bold text-slate-800">{{ booking.user ? booking.user.name : (booking.customer_name || 'Guest') }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-500 text-xs">วันที่นัดหมาย</span>
+                            <span class="font-medium text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md">{{ booking.appointment_date }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-500 text-xs">เวลานัดหมาย</span>
+                            <span class="font-medium text-slate-800">{{ booking.start_time }}</span>
+                        </div>
+                         <div class="flex justify-between items-center">
+                            <span class="text-slate-500 text-xs">แพทย์ผู้รักษา</span>
+                            <span class="font-medium text-slate-800">{{ booking.doctor?.name || '-' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex gap-3">
+                    <button
+                        @click="closeConfirmModal"
+                        class="flex-1 w-full justify-center rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-bold text-slate-600 shadow-sm hover:bg-slate-50 hover:text-slate-800 transition-all sm:w-auto"
+                    >
+                        ยกเลิก
+                    </button>
+                    <button
+                        @click="confirmAction"
+                        :class="{
+                            'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200': modalContent.color === 'emerald',
+                            'bg-blue-600 hover:bg-blue-700 shadow-blue-200': modalContent.color === 'blue',
+                            'bg-rose-600 hover:bg-rose-700 shadow-rose-200': modalContent.color === 'rose',
+                            'bg-slate-600 hover:bg-slate-700 shadow-slate-200': modalContent.color === 'slate'
+                        }"
+                        class="flex-1 w-full justify-center rounded-xl px-3 py-2.5 text-sm font-bold text-white shadow-lg transition-all transform hover:scale-[1.02] sm:w-auto"
+                        :disabled="form.processing"
+                    >
+                        <span v-if="form.processing" class="flex items-center gap-2 justify-center">
+                            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            กำลังดำเนินการ...
+                        </span>
+                        <span v-else>ยืนยันดำเนินการ</span>
+                    </button>
+                </div>
+            </div>
+        </Modal>
     </AuthenticatedLayout>
 </template>
