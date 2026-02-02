@@ -31,15 +31,37 @@ Route::get('/dashboard', function () {
 
     if ($user->doctor) {
         // For doctors, we want to see upcoming and recent bookings
-        $query = $user->doctor->bookings()->with('user');
+        $bookingsQuery = $user->doctor->bookings()->with('user');
 
-        // Calculate Today's Stats
+        // Fetch Walk-in Visits (visits without booking_id)
+        $visitsQuery = $user->doctor->visits()
+            ->whereNull('booking_id')
+            ->with(['patient', 'doctor']);
+
+        // Calculate Today's Stats (Bookings + Walk-ins)
         $today = now()->format('Y-m-d');
-        $todayStats = [
+
+        // Stats from Bookings
+        $bookingStats = [
             'total' => $user->doctor->bookings()->whereDate('appointment_date', $today)->count(),
             'pending' => $user->doctor->bookings()->whereDate('appointment_date', $today)->whereIn('status', ['pending', 'confirmed'])->count(),
             'completed' => $user->doctor->bookings()->whereDate('appointment_date', $today)->where('status', 'completed')->count(),
             'revenue' => $user->doctor->bookings()->whereDate('appointment_date', $today)->where('status', '!=', 'cancelled')->sum('price'),
+        ];
+
+        // Stats from Walk-ins
+        $visitStats = [
+            'total' => $user->doctor->visits()->whereDate('visit_date', $today)->whereNull('booking_id')->count(),
+            'pending' => $user->doctor->visits()->whereDate('visit_date', $today)->whereNull('booking_id')->whereIn('status', ['ongoing', 'pending'])->count(),
+            'completed' => $user->doctor->visits()->whereDate('visit_date', $today)->whereNull('booking_id')->where('status', 'completed')->count(),
+            'revenue' => $user->doctor->visits()->whereDate('visit_date', $today)->whereNull('booking_id')->where('status', '!=', 'cancelled')->sum('price'),
+        ];
+
+        $todayStats = [
+            'total' => $bookingStats['total'] + $visitStats['total'],
+            'pending' => $bookingStats['pending'] + $visitStats['pending'],
+            'completed' => $bookingStats['completed'] + $visitStats['completed'],
+            'revenue' => $bookingStats['revenue'] + $visitStats['revenue'],
         ];
 
         // Weekly Workload Chart Data (Last 7 Days)
@@ -47,19 +69,21 @@ Route::get('/dashboard', function () {
             return now()->subDays($days)->format('Y-m-d');
         });
 
-        $workloadCounts = $user->doctor->bookings()
-            ->whereIn('appointment_date', $dates)
-            ->selectRaw('DATE(appointment_date) as date, count(*) as count')
-            ->groupBy('date')
-            ->pluck('count', 'date');
+        // Calculate Workload for each day
+        $chartDataValues = $dates->map(function ($date) use ($user) {
+            $bCount = $user->doctor->bookings()->whereDate('appointment_date', $date)->count();
+            $vCount = $user->doctor->visits()->whereDate('visit_date', $date)->whereNull('booking_id')->count();
+            return $bCount + $vCount;
+        })->toArray();
 
         $chartData = [
             'labels' => $dates->map(fn($date) => \Carbon\Carbon::parse($date)->format('D d'))->toArray(),
-            'data' => $dates->map(fn($date) => $workloadCounts->get($date, 0))->toArray(),
+            'data' => $chartDataValues,
         ];
 
-        // Find Next Booking (Earliest upcoming today or in future)
-        $nextBooking = $user->doctor->bookings()
+        // Find Next Booking or Visit
+        // Check Bookings
+        $nextBookingItem = $user->doctor->bookings()
             ->with('user')
             ->where('status', 'confirmed')
             ->where(function ($q) use ($today) {
@@ -73,16 +97,75 @@ Route::get('/dashboard', function () {
             ->orderBy('start_time', 'asc')
             ->first();
 
-        // Main List: Sort by date descending (newest/future first)
-        $bookings = $query->orderBy('appointment_date', 'desc')
-            ->orderBy('start_time', 'asc')
-            ->get();
+        // Check Visits (Ongoing is Priority)
+        $currentVisit = $user->doctor->visits()
+            ->whereNull('booking_id')
+            ->whereIn('status', ['ongoing', 'pending'])
+            ->with('patient')
+            ->orderBy('visit_date', 'asc') // Oldest ongoing first
+            ->first();
+
+        $nextItem = null;
+        if ($currentVisit) {
+            $nextItem = [
+                'id' => $currentVisit->id,
+                'type' => 'visit',
+                'user' => $currentVisit->patient,
+                'customer_name' => $currentVisit->patient->name ?? 'Walk-in Guest',
+                'customer_phone' => $currentVisit->patient->phone_number ?? null,
+                'symptoms' => $currentVisit->symptoms,
+                'start_time' => $currentVisit->visit_date->setTimezone('Asia/Bangkok')->format('H:i:s'),
+                'appointment_date' => $currentVisit->visit_date->setTimezone('Asia/Bangkok')->format('Y-m-d'),
+                'status' => 'confirmed', // Map ongoing to confirmed for color
+            ];
+        } elseif ($nextBookingItem) {
+            $nextItem = $nextBookingItem;
+            $nextItem['type'] = 'booking';
+        }
+
+        // Main List: Fetch and Merge
+        $bookings = $bookingsQuery->orderBy('appointment_date', 'desc')->orderBy('start_time', 'asc')->get();
+        $visits = $visitsQuery->orderBy('visit_date', 'desc')->get();
+
+        $combinedList = collect();
+
+        foreach ($bookings as $booking) {
+            $booking->type = 'booking';
+            $combinedList->push($booking);
+        }
+
+        foreach ($visits as $visit) {
+            // Normalize Visit to Booking structure
+            $combinedList->push([
+                'id' => $visit->id,
+                'type' => 'visit',
+                'doctor_id' => $visit->doctor_id,
+                'user_id' => $visit->patient_id,
+                'appointment_date' => $visit->visit_date->setTimezone('Asia/Bangkok')->format('Y-m-d'),
+                'start_time' => $visit->visit_date->setTimezone('Asia/Bangkok')->format('H:i:s'),
+                'duration_minutes' => $visit->duration_minutes ?? 30,
+                'symptoms' => $visit->symptoms,
+                'status' => $visit->status === 'ongoing' ? 'confirmed' : $visit->status,
+                'customer_name' => $visit->patient->name ?? 'Walk-in Guest',
+                'customer_phone' => $visit->patient->phone_number ?? null,
+                'price' => $visit->price,
+                'user' => $visit->patient,
+                'is_walk_in' => true,
+            ]);
+        }
+
+        // Sort combined list by date desc, time desc
+        $sortedList = $combinedList->sort(function ($a, $b) {
+            $dateA = $a['appointment_date'] . ' ' . $a['start_time'];
+            $dateB = $b['appointment_date'] . ' ' . $b['start_time'];
+            return strcmp($dateB, $dateA); // Descending
+        })->values();
 
         return Inertia::render('Dashboard', [
-            'bookings' => $bookings,
+            'bookings' => $sortedList,
             'isDoctor' => true,
             'todayStats' => $todayStats,
-            'nextBooking' => $nextBooking,
+            'nextBooking' => $nextItem,
             'workloadChart' => $chartData,
         ]);
     } else {

@@ -127,8 +127,18 @@ const getStatusText = (status) => {
     }
 };
 
-const navigateToBooking = (id) => {
-    router.get(route('booking.show', id));
+const navigateToBooking = (id, type) => {
+    if (type === 'visit') {
+        router.get(route('admin.visits.show', id));
+    } else {
+        // Fallback or explicit booking route
+        // If booking.show exists, use it. If not, try admin.bookings.show
+        try {
+             router.get(route('booking.show', id));
+        } catch (e) {
+             router.get(route('admin.bookings.show', id));
+        }
+    }
 };
 </script>
 
@@ -279,7 +289,7 @@ const navigateToBooking = (id) => {
                             </div>
 
                             <div class="w-full md:w-auto">
-                                <button @click="navigateToBooking(nextBooking.id)" class="w-full md:w-auto group relative flex items-center justify-center gap-2 bg-white text-indigo-600 font-bold py-4 px-8 rounded-2xl shadow-xl hover:bg-indigo-50 transition-all duration-300 transform hover:scale-105 active:scale-95">
+                                <button @click="navigateToBooking(nextBooking.id, nextBooking.type)" class="w-full md:w-auto group relative flex items-center justify-center gap-2 bg-white text-indigo-600 font-bold py-4 px-8 rounded-2xl shadow-xl hover:bg-indigo-50 transition-all duration-300 transform hover:scale-105 active:scale-95">
                                     <span>เริ่มการรักษา</span>
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-5 group-hover:translate-x-1 transition-transform">
                                       <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
@@ -362,7 +372,7 @@ const navigateToBooking = (id) => {
                                 <tr v-for="(booking, index) in bookings" :key="booking.id" 
                                     class="hover:bg-white transition-all duration-300 group border-b border-slate-50 last:border-none hover:shadow-md hover:scale-[1.01] relative z-0 hover:z-10 cursor-pointer"
                                     :style="{ animationDelay: `${index * 100}ms` }"
-                                    @click="navigateToBooking(booking.id)">
+                                    @click="navigateToBooking(booking.id, booking.type)">
                                     <td class="px-6 py-5">
                                         <div class="flex items-center gap-4">
                                             <div class="avatar placeholder">
@@ -415,7 +425,7 @@ const navigateToBooking = (id) => {
                         <div v-for="(booking, index) in bookings" :key="booking.id" 
                              class="bg-white/80 backdrop-blur-xl p-5 rounded-3xl shadow-sm border border-slate-100 active:scale-[0.98] transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative overflow-hidden cursor-pointer"
                              :style="{ animationDelay: `${index * 100}ms` }"
-                             @click="navigateToBooking(booking.id)">
+                             @click="navigateToBooking(booking.id, booking.type)">
                             
                             <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-blue-500/5 to-transparent rounded-bl-full -mr-4 -mt-4"></div>
 
