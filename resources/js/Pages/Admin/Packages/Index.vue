@@ -84,16 +84,16 @@ const deletePackage = () => {
 </script>
 
 <template>
-    <Head title="Service Packages" />
+    <Head title="แพ็คเกจบริการ" />
 
     <AuthenticatedLayout>
         <template #header>
             <div class="flex justify-between items-center">
                 <h2 class="font-semibold text-xl text-black leading-tight">
-                    Service Packages
+                    แพ็คเกจบริการ
                 </h2>
                 <PrimaryButton @click="openModal()">
-                    Add Package
+                    เพิ่มแพ็คเกจ
                 </PrimaryButton>
             </div>
         </template>
@@ -107,37 +107,37 @@ const deletePackage = () => {
                             <div class="flex justify-between items-start mb-4">
                                 <h3 class="text-xl font-bold text-slate-800 group-hover:text-blue-700 transition-colors">{{ pkg.name }}</h3>
                                 <div class="px-2 py-1 rounded text-xs font-bold" :class="pkg.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
-                                    {{ pkg.is_active ? 'Active' : 'Inactive' }}
+                                    {{ pkg.is_active ? 'เปิดใช้งาน' : 'ปิดใช้งาน' }}
                                 </div>
                             </div>
                             
-                            <p class="text-slate-600 mb-4 text-sm min-h-[40px]">{{ pkg.description || 'No description' }}</p>
+                            <p class="text-slate-600 mb-4 text-sm min-h-[40px]">{{ pkg.description || 'ไม่มีคำอธิบาย' }}</p>
                             
                             <div class="space-y-2 mb-4 text-sm">
                                 <div class="flex justify-between">
-                                    <span class="text-slate-500">Price:</span>
-                                    <span class="font-bold text-slate-900">{{ Number(pkg.price).toLocaleString() }} THB</span>
+                                    <span class="text-slate-500">ราคา:</span>
+                                    <span class="font-bold text-slate-900">{{ Number(pkg.price).toLocaleString() }} บาท</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-slate-500">Sessions:</span>
+                                    <span class="text-slate-500">จำนวนครั้ง:</span>
                                     <span class="font-bold text-slate-900">{{ pkg.total_sessions }}</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-slate-500">Validity:</span>
-                                    <span class="font-bold text-slate-900">{{ pkg.validity_days }} Days</span>
+                                    <span class="text-slate-500">อายุการใช้งาน:</span>
+                                    <span class="font-bold text-slate-900">{{ pkg.validity_days }} วัน</span>
                                 </div>
                             </div>
 
                             <div class="flex justify-end gap-2 pt-4 border-t border-slate-50">
-                                <button @click="openModal(pkg)" class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">Edit</button>
-                                <button @click="confirmDelete(pkg)" class="text-red-600 hover:text-red-900 text-sm font-medium">Delete</button>
+                                <button @click="openModal(pkg)" class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">แก้ไข</button>
+                                <button @click="confirmDelete(pkg)" class="text-red-600 hover:text-red-900 text-sm font-medium">ลบ</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div v-if="packages.length === 0" class="text-center py-12 text-slate-500">
-                    No packages found. Click "Add Package" to create one.
+                    ไม่พบแพ็คเกจ คลิก "เพิ่มแพ็คเกจ" เพื่อสร้างใหม่
                 </div>
             </div>
         </div>
@@ -146,37 +146,37 @@ const deletePackage = () => {
         <Modal :show="showModal" @close="closeModal">
             <div class="p-6">
                 <h2 class="text-lg font-medium text-gray-900">
-                    {{ editingPackage ? 'Edit Package' : 'Add New Package' }}
+                    {{ editingPackage ? 'แก้ไขแพ็คเกจ' : 'เพิ่มแพ็คเกจใหม่' }}
                 </h2>
 
                 <div class="mt-6">
                     <div class="mb-4">
-                        <InputLabel for="name" value="Package Name" />
+                        <InputLabel for="name" value="ชื่อแพ็คเกจ" />
                         <TextInput
                             id="name"
                             v-model="form.name"
                             type="text"
                             class="mt-1 block w-full"
-                            placeholder="e.g. 10 Physio Sessions"
+                            placeholder="เช่น คอร์สกายภาพบำบัด 10 ครั้ง"
                         />
                         <InputError :message="form.errors.name" class="mt-2" />
                     </div>
 
                     <div class="mb-4">
-                        <InputLabel for="description" value="Description" />
+                        <InputLabel for="description" value="คำอธิบาย" />
                         <TextInput
                             id="description"
                             v-model="form.description"
                             type="text"
                             class="mt-1 block w-full"
-                            placeholder="Short description..."
+                            placeholder="รายละเอียดแพ็คเกจ..."
                         />
                         <InputError :message="form.errors.description" class="mt-2" />
                     </div>
 
                     <div class="flex gap-4">
                         <div class="mb-4 flex-1">
-                            <InputLabel for="price" value="Price (THB)" />
+                            <InputLabel for="price" value="ราคา (บาท)" />
                             <TextInput
                                 id="price"
                                 v-model="form.price"
@@ -188,7 +188,7 @@ const deletePackage = () => {
                         </div>
 
                         <div class="mb-4 flex-1">
-                            <InputLabel for="total_sessions" value="Total Sessions" />
+                            <InputLabel for="total_sessions" value="จำนวนครั้ง" />
                             <TextInput
                                 id="total_sessions"
                                 v-model="form.total_sessions"
@@ -200,7 +200,7 @@ const deletePackage = () => {
                     </div>
 
                     <div class="mb-4">
-                        <InputLabel for="validity_days" value="Validity (Days)" />
+                        <InputLabel for="validity_days" value="อายุการใช้งาน (วัน)" />
                         <TextInput
                             id="validity_days"
                             v-model="form.validity_days"
@@ -213,14 +213,14 @@ const deletePackage = () => {
                     <div class="block mt-4">
                         <label class="flex items-center">
                             <Checkbox name="is_active" v-model:checked="form.is_active" />
-                            <span class="ml-2 text-sm text-gray-600">Active</span>
+                            <span class="ml-2 text-sm text-gray-600">เปิดใช้งาน</span>
                         </label>
                     </div>
 
                     <div class="flex justify-end mt-6">
-                        <SecondaryButton @click="closeModal"> Cancel </SecondaryButton>
+                        <SecondaryButton @click="closeModal"> ยกเลิก </SecondaryButton>
                         <PrimaryButton class="ml-3" @click="savePackage" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                            {{ editingPackage ? 'Update' : 'Save' }}
+                            {{ editingPackage ? 'บันทึกการแก้ไข' : 'บันทึก' }}
                         </PrimaryButton>
                     </div>
                 </div>
@@ -231,22 +231,22 @@ const deletePackage = () => {
         <Modal :show="showDeleteModal" @close="closeDeleteModal">
             <div class="p-6">
                 <h2 class="text-lg font-medium text-gray-900">
-                    Delete Package
+                    ลบแพ็คเกจ
                 </h2>
 
                 <p class="mt-1 text-sm text-gray-600">
-                    Are you sure you want to delete {{ packageToDelete?.name }}? This action cannot be undone.
+                    คุณแน่ใจหรือไม่ที่ต้องการลบ {{ packageToDelete?.name }}? การกระทำนี้ไม่สามารถย้อนกลับได้
                 </p>
 
                 <div class="mt-6 flex justify-end">
-                    <SecondaryButton @click="closeDeleteModal"> Cancel </SecondaryButton>
+                    <SecondaryButton @click="closeDeleteModal"> ยกเลิก </SecondaryButton>
                     <DangerButton
                         class="ml-3"
                         :class="{ 'opacity-25': form.processing }"
                         :disabled="form.processing"
                         @click="deletePackage"
                     >
-                        Delete Package
+                        ลบแพ็คเกจ
                     </DangerButton>
                 </div>
             </div>
