@@ -4,6 +4,9 @@ import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import BodyPartSelector from '@/Components/BodyPartSelector.vue';
 import Modal from '@/Components/Modal.vue';
 import InputError from '@/Components/InputError.vue';
+import ThaiAddressInput from '@/Components/ThaiAddressInput.vue';
+import TextInput from '@/Components/TextInput.vue';
+import InputLabel from '@/Components/InputLabel.vue';
 import { ref, computed } from 'vue';
 import { 
     UserIcon, 
@@ -91,6 +94,10 @@ const form = useForm({
     religion: props.patient.religion,
     occupation: props.patient.occupation,
     address: props.patient.address,
+    sub_district: '',
+    district: '',
+    province: '',
+    postal_code: '',
     emergency_contact_name: props.patient.emergency_contact_name,
     emergency_contact_phone: props.patient.emergency_contact_phone,
     
@@ -102,7 +109,34 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.put(route('admin.patients.update', props.patient.id), {
+    // Construct Full Address
+    const formToSubmit = form.data();
+    
+    // Only construct if user actually used the new address fields, otherwise keep original address
+    // Or we can just concatenate if fields are present. 
+    // If the user didn't touch the dropdowns, sub_district etc might be empty.
+    // However, the address textarea is bound to form.address.
+    // If we use the new component, users might expect it to override.
+    // Let's adopt the same logic: Address part 1 + sub + district + province + zip
+    const fullAddress = [
+        form.address, // "Detailed Address"
+        form.sub_district ? `ต.${form.sub_district}` : '',
+        form.district ? `อ.${form.district}` : '',
+        form.province ? `จ.${form.province}` : '',
+        form.postal_code
+    ].filter(Boolean).join(' ');
+
+    // Transform before submit
+    form.transform((data) => ({
+        ...data,
+        address: [
+            data.address,
+            data.sub_district ? `ต.${data.sub_district}` : '',
+            data.district ? `อ.${data.district}` : '',
+            data.province ? `จ.${data.province}` : '',
+            data.postal_code
+        ].filter(Boolean).join(' ')
+    })).put(route('admin.patients.update', props.patient.id), {
         onSuccess: () => {
             showEditModal.value = false;
         }
@@ -883,9 +917,25 @@ const formatDate = (dateString) => {
                                 <label class="block text-sm font-medium text-slate-700 mb-1">ศาสนา</label>
                                 <input type="text" v-model="form.religion" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="พุทธ">
                             </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-slate-700 mb-1">ที่อยู่</label>
-                                <textarea v-model="form.address" rows="2" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="ที่อยู่ปัจจุบัน..."></textarea>
+                            <div class="md:col-span-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                                <label class="block text-sm font-medium text-slate-700 mb-3">ที่อยู่ (Address)</label>
+                                
+                                <div class="mb-3">
+                                    <label class="block text-xs font-medium text-slate-500 mb-1">รายละเอียดที่อยู่ (บ้านเลขที่, หมู่, ซอย, ถนน) - เดิม: {{ patient.address }}</label>
+                                    <input 
+                                        type="text" 
+                                        v-model="form.address" 
+                                        class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" 
+                                        placeholder="เช่น 123/4 หมู่ 5"
+                                    >
+                                </div>
+
+                                <ThaiAddressInput
+                                    v-model:subDistrict="form.sub_district"
+                                    v-model:district="form.district"
+                                    v-model:province="form.province"
+                                    v-model:postalCode="form.postal_code"
+                                />
                             </div>
                              <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">ผู้ติดต่อฉุกเฉิน</label>

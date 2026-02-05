@@ -10,6 +10,7 @@ import SecondaryButton from '@/Components/SecondaryButton.vue'; // Added Seconda
 import PrimaryButton from '@/Components/PrimaryButton.vue'; // Added PrimaryButton
 import InputError from '@/Components/InputError.vue'; // Added InputError
 import TextInput from '@/Components/TextInput.vue'; // Added TextInput
+import ThaiAddressInput from '@/Components/ThaiAddressInput.vue'; // Added ThaiAddressInput
 
 const props = defineProps({
     patients: {
@@ -84,7 +85,11 @@ const registerForm = useForm({
     nationality: '',
     religion: '',
     occupation: '',
-    address: '',
+    address: '', // This will serve as "Detailed Address" (House no, Moo, Soi)
+    sub_district: '',
+    district: '',
+    province: '',
+    postal_code: '',
     emergency_contact_name: '',
     emergency_contact_phone: '',
     underlying_disease: '',
@@ -163,14 +168,40 @@ const closeConfirmRegisterModal = () => {
 };
 
 const submitRegister = () => {
-    registerForm.post(route('admin.patients.store'), {
+    // Concatenate full address before submitting
+    // Format: Address + SubDistrict + District + Province + PostalCode
+    const fullAddress = [
+        registerForm.address,
+        registerForm.sub_district ? `ต.${registerForm.sub_district}` : '',
+        registerForm.district ? `อ.${registerForm.district}` : '',
+        registerForm.province ? `จ.${registerForm.province}` : '',
+        registerForm.postal_code
+    ].filter(Boolean).join(' ');
+
+    // Clone the form data to modify address
+    const formToSubmit = registerForm.data();
+    formToSubmit.address = fullAddress; // Override address with full string
+
+    // Use inertia manual post since we modified data outside useForm binding directly or use transform()
+    // But useForm transform() is cleaner.
+    
+    registerForm.transform((data) => ({
+        ...data,
+        address: [
+            data.address,
+            data.sub_district ? `ต.${data.sub_district}` : '',
+            data.district ? `อ.${data.district}` : '',
+            data.province ? `จ.${data.province}` : '',
+            data.postal_code
+        ].filter(Boolean).join(' ')
+    })).post(route('admin.patients.store'), {
         onSuccess: () => {
             closeConfirmRegisterModal();
             closeRegisterModal();
         },
         onError: () => {
-            closeConfirmRegisterModal(); 
-            // Keep the main form open so they can fix errors
+             closeConfirmRegisterModal(); 
+             // Keep the main form open
         }
     });
 };
@@ -455,15 +486,27 @@ const submitRegister = () => {
                                 <TextInput id="religion" v-model="registerForm.religion" class="mt-1 block w-full" placeholder="พุทธ" />
                             </div>
                         </div>
-                        <div class="mt-4">
-                            <InputLabel for="address" value="ที่อยู่" />
-                            <textarea 
-                                id="address" 
-                                v-model="registerForm.address"
-                                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                                rows="2"
-                                placeholder="ที่อยู่ปัจจุบัน..."
-                            ></textarea>
+                        <div class="mt-4 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                            <h4 class="text-sm font-medium text-gray-900 mb-3">ที่อยู่ตามทะเบียนบ้าน / ที่อยู่ปัจจุบัน</h4>
+                            
+                            <!-- Address Details (House No, etc.) -->
+                            <div class="mb-4">
+                                <InputLabel for="address_details" value="รายละเอียดที่อยู่ (บ้านเลขที่, หมู่, ซอย, ถนน)" />
+                                <TextInput 
+                                    id="address_details" 
+                                    v-model="registerForm.address"
+                                    class="mt-1 block w-full"
+                                    placeholder="เช่น 123/45 หมู่ 6 ถ.สุขาภิบาล 5" 
+                                />
+                            </div>
+
+                            <!-- Thai Address Auto-complete -->
+                            <ThaiAddressInput
+                                v-model:subDistrict="registerForm.sub_district"
+                                v-model:district="registerForm.district"
+                                v-model:province="registerForm.province"
+                                v-model:postalCode="registerForm.postal_code"
+                            />
                         </div>
                     </div>
 
