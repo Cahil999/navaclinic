@@ -244,6 +244,31 @@ const onSearchInput = () => {
                         <p class="text-indigo-100 text-sm mt-1">Step {{ currentStep }} of {{ steps.length }}</p>
                     </div>
 
+                    <!-- Progress Summary -->
+                    <div v-if="currentStep > 1" class="bg-indigo-50 border-b border-indigo-100 px-6 py-3">
+                        <div class="flex flex-wrap gap-4 justify-center text-sm">
+                            <div class="flex items-center text-gray-600 bg-white px-3 py-1 rounded-full border border-indigo-200 shadow-sm">
+                                <span class="font-bold text-indigo-600 mr-2">Patient:</span>
+                                <span class="font-medium text-gray-800">{{ selectedPatient ? selectedPatient.name : form.customer_name }}</span>
+                            </div>
+
+                            <div v-if="currentStep > 2" class="flex items-center text-gray-600 bg-white px-3 py-1 rounded-full border border-indigo-200 shadow-sm">
+                                <span class="font-bold text-indigo-600 mr-2">Date:</span>
+                                <span class="font-medium text-gray-800">{{ form.appointment_date }}</span>
+                            </div>
+
+                            <div v-if="currentStep > 3" class="flex items-center text-gray-600 bg-white px-3 py-1 rounded-full border border-indigo-200 shadow-sm">
+                                <span class="font-bold text-indigo-600 mr-2">Time:</span>
+                                <span class="font-medium text-gray-800">{{ formatTime(form.start_time) }}</span>
+                            </div>
+
+                            <div v-if="currentStep > 4" class="flex items-center text-gray-600 bg-white px-3 py-1 rounded-full border border-indigo-200 shadow-sm">
+                                <span class="font-bold text-indigo-600 mr-2">Doctor:</span>
+                                <span class="font-medium text-gray-800">{{ form.doctor_id ? selectedDoctorName : 'Assigned Later' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="p-8 min-h-[400px] flex flex-col items-center justify-center">
 
                         <!-- Step 1: Patient Selection -->
