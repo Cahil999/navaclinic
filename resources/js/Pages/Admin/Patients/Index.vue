@@ -144,7 +144,7 @@ const submitRegister = () => {
                         <input
                             v-model="search"
                             type="text"
-                            placeholder="ค้นหาด้วยรหัส, ชื่อ, อีเมล หรือเบอร์โทร..."
+                            placeholder="ค้นหาด้วยรหัส, ชื่อ, บัตรปชช. หรือเบอร์โทร..."
                             class="w-full md:w-1/3 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-sm bg-white text-slate-700"
                         />
                         <PrimaryButton @click="openRegisterModal" class="bg-blue-600 hover:bg-blue-700">

@@ -24,6 +24,7 @@ class PatientController extends Controller
                     'email' => $user->email,
                     'phone_number' => $user->phone_number,
                     'patient_id' => $user->patient_id,
+                    'id_card_number' => $user->id_card_number,
                     'created_at' => $user->created_at,
                     'type' => 'user',
                 ];
@@ -72,7 +73,8 @@ class PatientController extends Controller
                 return str_contains(strtolower($item['name']), $search) ||
                     str_contains(strtolower($item['email']), $search) ||
                     str_contains(strtolower($item['phone_number']), $search) ||
-                    str_contains(strtolower($item['patient_id']), $search);
+                    str_contains(strtolower($item['patient_id']), $search) ||
+                    str_contains(strtolower($item['id_card_number'] ?? ''), $search);
             });
         }
 
