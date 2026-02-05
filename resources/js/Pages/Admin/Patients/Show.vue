@@ -7,7 +7,7 @@ import InputError from '@/Components/InputError.vue';
 import ThaiAddressInput from '@/Components/ThaiAddressInput.vue';
 import TextInput from '@/Components/TextInput.vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { 
     UserIcon, 
     PhoneIcon, 
@@ -65,6 +65,16 @@ const getStatusClass = (status) => {
 
 const showEditModal = ref(false);
 const showBodyMapModal = ref(false);
+const showMedicalAlertModal = ref(false);
+
+onMounted(() => {
+    if (props.patient.drug_allergy || 
+        props.patient.underlying_disease || 
+        props.patient.surgery_history || 
+        props.patient.accident_history) {
+        showMedicalAlertModal.value = true;
+    }
+});
 
 // Magnifier Lens Logic
 const mapContainer = ref(null);
@@ -1014,6 +1024,68 @@ const formatDate = (dateString) => {
                 <div class="mt-6 flex justify-end">
                     <button @click="showBodyMapModal = false" class="px-5 py-2 bg-slate-800 text-white rounded-lg text-sm font-bold hover:bg-slate-700 transition-colors shadow-lg">
                         Close
+                    </button>
+                </div>
+            </div>
+        </Modal>
+        <Modal :show="showMedicalAlertModal" @close="showMedicalAlertModal = false" maxWidth="lg">
+            <div class="p-6 text-center">
+                <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-red-100 mb-6 animate-pulse">
+                     <ExclamationTriangleIcon class="h-10 w-10 text-red-600" />
+                </div>
+                
+                <h3 class="text-2xl font-bold text-slate-900 mb-2">ข้อมูลสำคัญทางการแพทย์</h3>
+                <p class="text-sm text-slate-500 mb-6">Medical Alert Warning</p>
+
+                <div class="text-left space-y-4 mb-8 bg-red-50/50 p-5 rounded-2xl border border-red-100">
+                    <div v-if="patient.drug_allergy" class="flex gap-3">
+                         <div class="flex-shrink-0 mt-0.5">
+                            <ExclamationTriangleIcon class="w-5 h-5 text-red-600" />
+                         </div>
+                         <div>
+                             <p class="text-xs font-bold text-red-500 uppercase tracking-wider mb-1">แพ้ยา (Drug Allergy)</p>
+                             <p class="text-slate-800 font-semibold">{{ patient.drug_allergy }}</p>
+                         </div>
+                    </div>
+                    
+                    <div v-if="patient.underlying_disease" class="flex gap-3">
+                        <div class="flex-shrink-0 mt-0.5">
+                            <HeartIcon class="w-5 h-5 text-indigo-600" />
+                         </div>
+                         <div>
+                             <p class="text-xs font-bold text-indigo-500 uppercase tracking-wider mb-1">โรคประจำตัว (Underlying Disease)</p>
+                             <p class="text-slate-800 font-semibold">{{ patient.underlying_disease }}</p>
+                         </div>
+                    </div>
+                    
+                    <div v-if="patient.surgery_history" class="flex gap-3">
+                        <div class="flex-shrink-0 mt-0.5">
+                            <ExclamationTriangleIcon class="w-5 h-5 text-blue-600" />
+                         </div>
+                         <div>
+                             <p class="text-xs font-bold text-blue-500 uppercase tracking-wider mb-1">ประวัติผ่าตัด (Surgery)</p>
+                             <p class="text-slate-800 font-semibold">{{ patient.surgery_history }}</p>
+                         </div>
+                    </div>
+
+                    <div v-if="patient.accident_history" class="flex gap-3">
+                        <div class="flex-shrink-0 mt-0.5">
+                            <ExclamationTriangleIcon class="w-5 h-5 text-amber-600" />
+                         </div>
+                         <div>
+                             <p class="text-xs font-bold text-amber-500 uppercase tracking-wider mb-1">ประวัติอุบัติเหตุ (Accident)</p>
+                             <p class="text-slate-800 font-semibold">{{ patient.accident_history }}</p>
+                         </div>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <button 
+                        type="button" 
+                        class="w-full inline-flex justify-center rounded-lg border border-transparent bg-slate-800 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-slate-200 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-all"
+                        @click="showMedicalAlertModal = false"
+                    >
+                        รับทราบ (Acknowledge)
                     </button>
                 </div>
             </div>
