@@ -29,6 +29,7 @@ const form = useForm({
     // Financials
     // Financials
     treatment_fee: Number(props.entity.treatment_fee || props.entity.price) > 0 ? (props.entity.treatment_fee || props.entity.price) : '', 
+    doctor_commission: Number(props.entity.doctor_commission) > 0 ? props.entity.doctor_commission : '',
     discount_type: props.entity.discount_type || 'amount',
     discount_value: Number(props.entity.discount_value) > 0 ? props.entity.discount_value : '',
     price: props.entity.price || 0, // Final Price (Net)
@@ -54,6 +55,23 @@ watch(() => [form.treatment_fee, form.discount_type, form.discount_value], () =>
     }
 
     form.price = Math.max(0, finalPrice).toFixed(2);
+});
+
+watch(() => form.treatment_fee, (newFee) => {
+    let fee = parseFloat(newFee) || 0;
+    let commission = 0;
+    
+    if (fee < 1200) {
+        commission = 300;
+    } else if (fee < 1800) { // 1200 - 1799
+        commission = 600;
+    } else if (fee < 2400) { // 1800 - 2399
+        commission = 900;
+    } else { // >= 2400
+        commission = 1200;
+    }
+    
+    form.doctor_commission = commission;
 });
 
 const submit = () => {
@@ -269,6 +287,20 @@ const submitForm = () => {
                                                 <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                                     <span class="text-xs text-slate-400 font-bold">THB</span>
                                                 </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Doctor Fee (Auto-calculated) -->
+                                        <div>
+                                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">ค่ามือหมอ (Doctor Fee)</label>
+                                            <div class="relative">
+                                                <input type="number" step="0.01" v-model="form.doctor_commission" class="w-full rounded-lg border-indigo-200 bg-indigo-50/50 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-3 pr-10 font-bold text-slate-600" placeholder="0.00">
+                                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                    <span class="text-xs text-slate-400 font-bold">THB</span>
+                                                </div>
+                                            </div>
+                                            <div class="mt-1 text-[10px] text-slate-400">
+                                                *คำนวณอัตโนมัติตามยอดค่ารักษา
                                             </div>
                                         </div>
 

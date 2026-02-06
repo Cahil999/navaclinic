@@ -168,6 +168,7 @@ class TreatmentController extends Controller
             'treatment_fee' => 'nullable|numeric|min:0', // Base Price
             'discount_type' => 'nullable|string|in:amount,percent',
             'discount_value' => 'nullable|numeric|min:0',
+            'doctor_commission' => 'nullable|numeric|min:0',
             'tip' => 'nullable|numeric|min:0',
 
         ]);
@@ -177,6 +178,7 @@ class TreatmentController extends Controller
             $treatmentRecord->visit->update([
                 'price' => $request->input('price', 0),
                 'treatment_fee' => $request->input('treatment_fee', 0),
+                'doctor_commission' => $request->input('doctor_commission', 0),
                 'discount_type' => $request->input('discount_type', 'amount'),
                 'discount_value' => $request->input('discount_value', 0),
                 'tip' => $request->input('tip', 0),
