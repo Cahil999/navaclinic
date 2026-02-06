@@ -3,35 +3,171 @@ import { Head, Link } from '@inertiajs/vue3';
 import { ref, computed, onMounted } from 'vue';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import Modal from '@/Components/Modal.vue';
+import SecondaryButton from '@/Components/SecondaryButton.vue';
 
 const services = [
-    { name: 'กลุ่มอาการออฟฟิศซินโดรม (Office Syndrome) ต่อตำแหน่ง', price: '700' },
-    { name: 'ปวดศีรษะ (Tension Headache)', price: '700' },
-    { name: 'ปวดคอ บ่า (Text Neck Syndrome)', price: '700' },
-    { name: 'ปวดแขน ปวดข้อศอก ปวดข้อมือ (Arm Pain / Elbow Pain / Wrist Pain)', price: '700' },
-    { name: 'คอตกหมอน (Neck Sprain)', price: '700' },
-    { name: 'ปวดน่อง ตะคริวน่อง (Leg Cramp)', price: '700' },
-    { name: 'ปวดข้อเท้า ปวดส้นเท้า รองช้ำ (Ankle Pain / Plantar Fasciitis)', price: '700' },
-    { name: 'ข้อเท้าแพลง (Ankle Sprain)', price: '700' },
-    { name: 'นวดป้องกันการปวดประจำเดือน (Dysmenorrhea)', price: '700' },
-    { name: 'นวดสตรีตั้งครรภ์ (Prenatal Massage)', price: '700' },
-    { name: 'ท้องผูก จุกเสียด (Constipation / Heartburn)', price: '700' },
-    { name: 'นวดปรับสมดุลร่างกาย (Body Balance Massage)', price: '800' },
-    { name: 'ปวดหลัง ปวดเอว (Lower Back Pain / Back Strain)', price: '800' },
-    { name: 'ปวดศีรษะ ปวดหัวไมเกรน (Headache/Migraine)', price: '900' },
-    { name: 'ปวดสะโพกสลักเพชร (Piriformis Syndrome)', price: '900' },
-    { name: 'ปวดขาหนีบ (Groin Pain)', price: '900' },
-    { name: 'ปวดขา ปวดเข่า (Leg-Knee Pain)', price: '900' },
-    { name: 'นิ้วล็อก/นิ้วไกปืน (Trigger Finger)', price: '900' },
-    { name: 'ไหล่ติด (Frozen Shoulder)', price: '900' },
-    { name: 'นวดทางการกีฬา (Sport Massage)', price: '1,000' },
-    { name: 'นวดบำบัดการนอนไม่หลับ (Nuad Thai for Sleep Disorder)', price: '1,000' },
-    { name: 'ปัสสาวะขัด กลั้นปัสสาวะไม่ได้ (Urinary Incontinence)', price: '1,000' },
-    { name: 'นวดรักษาภาวะมีบุตรยาก (Fertility and Infertility Massage)', price: '1,200' },
-    { name: 'Erectile Dysfunction with Thai Kasai Massage', price: '1,500' },
+    { 
+        name: 'กลุ่มอาการออฟฟิศซินโดรม (Office Syndrome) ต่อตำแหน่ง', 
+        price: '700',
+        symptoms: 'ปวดตึงคอ บ่า ไหล่ และสะบัก จากการนั่งทำงานท่าเดิมเป็นเวลานาน',
+        treatment: 'เน้นการนวดคลายกล้ามเนื้อบริเวณคอ บ่า ไหล่ และสะบัก ผสมผสานกับการยืดเหยียดเพื่อเพิ่มความยืดหยุ่นและลดอาการปวดตึง เฉพาะจุดที่เป็นปัญหา'
+    },
+    { 
+        name: 'ปวดศีรษะ (Tension Headache)', 
+        price: '700',
+        symptoms: 'ปวดศีรษะตื้อๆ มึนงง รู้สึกเหมือนมีอะไรมารัดศีรษะ อาจร้าวลงมาที่คอและบ่า',
+        treatment: 'นวดกดจุดสัญญาณศีรษะ คลายกล้ามเนื้อรอบฐานกะโหลกศีรษะและคอ เพื่อกระตุ้นการไหลเวียนเลือดไปเลี้ยงสมอง'
+    },
+    { 
+        name: 'ปวดคอ บ่า (Text Neck Syndrome)', 
+        price: '700',
+        symptoms: 'ปวดเมื่อยต้นคอ บ่า ไหล่ จากการก้มหน้าเล่นมือถือหรือใช้งานคอมพิวเตอร์',
+        treatment: 'นวดคลายกล้ามเนื้อคอและบ่า ปรับสมดุลโครงสร้างกระดูกคออย่างนุ่มนวล'
+    },
+    { 
+        name: 'ปวดแขน ปวดข้อศอก ปวดข้อมือ (Arm Pain / Elbow Pain / Wrist Pain)', 
+        price: '700',
+        symptoms: 'ปวดเมื่อยแขน ชาปลายมือ ปวดเจ็บตามข้อศอกหรือข้อมือ',
+        treatment: 'นวดรีดเส้นแนวแขน กดจุดสัญญาณแขน และบริหารข้อต่อเพื่อลดอาการปวดและชา'
+    },
+    { 
+        name: 'คอตกหมอน (Neck Sprain)', 
+        price: '700',
+        symptoms: 'เจ็บคอ หันคอไม่ได้ หรือหันได้ลำบาก มีอาการเกร็งของกล้ามเนื้อคอเฉียบพลัน',
+        treatment: 'ประคบอุ่นเพื่อคลายกล้ามเนื้อ นวดเบาๆ เพื่อลดการหดเกร็ง และยืดกล้ามเนื้อคออย่างระมัดระวัง'
+    },
+    { 
+        name: 'ปวดน่อง ตะคริวน่อง (Leg Cramp)', 
+        price: '700',
+        symptoms: 'ปวดตึงน่อง เป็นตะคริวบ่อย โดยเฉพาะเวลานอน หรือยืนเดินจเป็นเวลานาน',
+        treatment: 'นวดคลายกล้ามเนื้อน่อง กดจุดแก้ตะคริว และรีดเส้นเพื่อกระตุ้นการไหลเวียนเลือด'
+    },
+    { 
+        name: 'ปวดข้อเท้า ปวดส้นเท้า รองช้ำ (Ankle Pain / Plantar Fasciitis)', 
+        price: '700',
+        symptoms: 'เจ็บส้นเท้าเวลาเดินลงน้ำหนัก โดยเฉพาะก้าวแรกหลังตื่นนอน ปวดข้อเท้า',
+        treatment: 'นวดคลายเอ็นร้อยหวายและผังผืดใต้ฝ่าเท้า กดจุดสัญญาณเท้า แช่เท้าบำบัด'
+    },
+    { 
+        name: 'ข้อเท้าแพลง (Ankle Sprain)', 
+        price: '700',
+        symptoms: 'เจ็บ บวม บริเวณข้อเท้า จากการพลิก หรือกระแทก (ระยะเรื้อรัง ไม่บวมแดงร้อน)',
+        treatment: 'จัดปรับข้อเท้า นวดคลายเอ็นรอบข้อเท้า เพื่อฟื้นฟูการเคลื่อนไหว'
+    },
+    { 
+        name: 'นวดป้องกันการปวดประจำเดือน (Dysmenorrhea)', 
+        price: '700',
+        symptoms: 'ปวดท้องน้อย ปวดเอว ก่อนหรือระหว่างมีประจำเดือน',
+        treatment: 'นวดโกยท้อง คลายกล้ามเนื้อหลังและสะโพก เพื่อปรับสมดุลมดลูก (ควรนวดก่อนมีประจำเดือน 1 สัปดาห์)'
+    },
+    { 
+        name: 'นวดสตรีตั้งครรภ์ (Prenatal Massage)', 
+        price: '700',
+        symptoms: 'ปวดเมื่อยตามร่างกาย ขาบวม ตะคริว ปวดหลัง จากการตั้งครรภ์',
+        treatment: 'นวดผ่อนคลายด้วยท่าทางที่ปลอดภัยสำหรับสตรีมีครรภ์ เน้นขา หลัง และไหล่ ช่วยลดอาการบวมและปวดเมื่อย'
+    },
+    { 
+        name: 'ท้องผูก จุกเสียด (Constipation / Heartburn)', 
+        price: '700',
+        symptoms: 'ถ่ายยาก ท้องอืด แน่นท้อง อาหารไม่ย่อย',
+        treatment: 'นวดโกยท้อง นวดตามแนวลำไส้ เพื่อกระตุ้นการทำงานของระบบขับถ่ายและย่อยอาหาร'
+    },
+    { 
+        name: 'นวดปรับสมดุลร่างกาย (Body Balance Massage)', 
+        price: '800',
+        symptoms: 'รู้สึกไม่สบายตัว อ่อนเพลีย ร่างกายขาดสมดุล',
+        treatment: 'นวดไทยทั่วตัวเพื่อปรับโครงสร้างและสมดุลธาตุทั้ง 4 ในร่างกาย ให้รู้สึกเบาสบาย'
+    },
+    { 
+        name: 'ปวดหลัง ปวดเอว (Lower Back Pain / Back Strain)', 
+        price: '800',
+        symptoms: 'ปวดตึงแผ่นหลัง เอว จนถึงสะโพก ก้มเงยลำบาก',
+        treatment: 'นวดคลายกล้ามเนื้อหลังแนวชิดกระดูกสันหลัง กดจุดสัญญาณหลัง และยืดเหยียด'
+    },
+    { 
+        name: 'ปวดศีรษะ ปวดหัวไมเกรน (Headache/Migraine)', 
+        price: '900',
+        symptoms: 'ปวดศีรษะข้างเดียว หรือสองข้าง ปวดตุ้บๆ ตาพร่ามัว แพ้แสง',
+        treatment: 'นวดกดจุดแก้ไมเกรน เคลียร์จุดสัญญาณศีรษะ โค้งคอ และกดจุดฐานกะโหลก'
+    },
+    { 
+        name: 'ปวดสะโพกสลักเพชร (Piriformis Syndrome)', 
+        price: '900',
+        symptoms: 'ปวดลึกๆ ในแก้มก้น อาจร้าวลงขา นั่งนานไม่ได้',
+        treatment: 'นวดคลายกล้ามเนื้อสะโพกชั้นลึก (Piriformis) ยืดเหยียดสะโพกและขา'
+    },
+    { 
+        name: 'ปวดขาหนีบ (Groin Pain)', 
+        price: '900',
+        symptoms: 'เจ็บขาหนีบ เดินลำบาก ขยับขาแล้วเจ็บ',
+        treatment: 'นวดคลายเส้นขาหนีบ จัดปรับข้อสะโพก เพื่อลดอาการตึงรั้ง'
+    },
+    { 
+        name: 'ปวดขา ปวดเข่า (Leg-Knee Pain)', 
+        price: '900',
+        symptoms: 'ปวดเมื่อยขา เจ็บเข่า งอเข่าไม่สุด หรือตึงข้อพับเข่า',
+        treatment: 'นวดคลายกล้ามเนื้อต้นขา น่อง และรอบเข่า บริหารข้อเข่าเพื่อเพิ่มมุมการเคลื่อนไหว'
+    },
+    { 
+        name: 'นิ้วล็อก/นิ้วไกปืน (Trigger Finger)', 
+        price: '900',
+        symptoms: 'งอนิ้วแล้วเหยียดไม่ออก เจ็บโคนนิ้ว กำมือไม่สุด',
+        treatment: 'นวดคลายปลอกหุ้มเอ็นนิ้วมือ รีดเส้นแขนและฝ่ามือ แช่น้ำสมุนไพร'
+    },
+    { 
+        name: 'ไหล่ติด (Frozen Shoulder)', 
+        price: '900',
+        symptoms: 'ยกแขนไม่ขึ้น ไขว้หลังไม่ได้ เจ็บไหล่มาก เคลื่อนไหวไหล่ได้จำกัด',
+        treatment: 'นวดคลายกล้ามเนื้อรอบข้อไหล่ ดัดดึงข้อไหล่อย่างค่อยเป็นค่อยไป (ต้องทำต่อเนื่อง)'
+    },
+    { 
+        name: 'นวดทางการกีฬา (Sport Massage)', 
+        price: '1,000',
+        symptoms: 'กล้ามเนื้อตึงตัวจากการออกกำลังกาย หรือต้องการเตรียมกล้ามเนื้อก่อนแข่ง',
+        treatment: 'นวดกระตุ้นหรือผ่อนคลายกล้ามเนื้อตามประเภทกีฬา เพิ่มความยืดหยุ่นและลดการบาดเจ็บ'
+    },
+    { 
+        name: 'นวดบำบัดการนอนไม่หลับ (Nuad Thai for Sleep Disorder)', 
+        price: '1,000',
+        symptoms: 'นอนไม่หลับ หลับยาก ตื่นกลางดึก อ่อนเพลีย',
+        treatment: 'นวดผ่อนคลายทั่วตัว เน้นศีรษะ ใบหน้า และฝ่าเท้า เพื่อปรับคลื่นสมองให้เข้าสู่โหมดพักผ่อน'
+    },
+    { 
+        name: 'ปัสสาวะขัด กลั้นปัสสาวะไม่ได้ (Urinary Incontinence)', 
+        price: '1,000',
+        symptoms: 'ปัสสาวะกะปริดกะปรอย หรือกลั้นไม่อยู่',
+        treatment: 'นวดท้องน้อย กดจุดสัญญาณท้อง เพื่อกระตุ้นหูรูดกระเพาะปัสสาวะ'
+    },
+    { 
+        name: 'นวดรักษาภาวะมีบุตรยาก (Fertility and Infertility Massage)', 
+        price: '1,200',
+        symptoms: 'ต้องการเตรียมความพร้อมของมดลูกและรังไข่สำหรับการมีบุตร',
+        treatment: 'นวดกระตุ้นการไหลเวียนเลือดสู่มดลูกและรังไข่ ปรับสมดุลฮอร์โมน (สำหรับสตรี)'
+    },
+    { 
+        name: 'Erectile Dysfunction with Thai Kasai Massage', 
+        price: '1,500',
+        symptoms: 'สมรรถภาพทางเพศลดลง ไม่แข็งตัว หรือหลั่งเร็ว',
+        treatment: 'นวดกาสัย (นวดอัณฑะและบริเวณรอบๆ) เพื่อกระตุ้นการไหลเวียนเลือดและฟื้นฟูสมรรถภาพ'
+    },
 ];
 
 const searchQuery = ref('');
+const showingServiceDetails = ref(false);
+const selectedService = ref(null);
+
+const openServiceDetails = (service) => {
+    selectedService.value = service;
+    showingServiceDetails.value = true;
+};
+
+const closeServiceDetails = () => {
+    showingServiceDetails.value = false;
+    setTimeout(() => {
+        selectedService.value = null;
+    }, 300);
+};
 
 const filteredServices = computed(() => {
     if (!searchQuery.value) return services;
@@ -172,11 +308,15 @@ onMounted(() => {
                                     <tr 
                                         v-for="(service, index) in filteredServices" 
                                         :key="index" 
-                                        class="hover:bg-blue-50/50 transition-colors duration-200 group cursor-default"
+                                        class="hover:bg-blue-50/50 transition-colors duration-200 group cursor-pointer"
+                                        @click="openServiceDetails(service)"
                                     >
                                         <td class="py-5 pl-10 text-lg text-slate-600 font-medium group-hover:text-blue-700 transition-colors flex items-center gap-3">
                                             <span class="w-2 h-2 rounded-full bg-slate-300 group-hover:bg-blue-500 transition-colors"></span>
-                                            {{ service.name }}
+                                            <div>
+                                                {{ service.name }}
+                                                <div class="text-xs text-slate-400 font-normal mt-0.5">กดเพื่อดูรายละเอียด</div>
+                                            </div>
                                         </td>
                                         <td class="py-5 text-right pr-10">
                                             <span class="inline-block font-bold text-xl text-slate-700 bg-slate-100 px-3 py-1 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
@@ -270,5 +410,74 @@ onMounted(() => {
                 </div>
             </div>
         </footer>
+
+
+        <!-- Service Details Modal -->
+        <Modal :show="showingServiceDetails" @close="closeServiceDetails">
+            <div class="p-6 bg-white rounded-lg">
+                <template v-if="selectedService">
+                    <div class="flex items-start justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-slate-800 leading-tight pr-4 border-l-4 border-blue-500 pl-4">
+                            {{ selectedService.name }}
+                        </h2>
+                        <button @click="closeServiceDetails" class="text-slate-400 hover:text-slate-600 focus:outline-none transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="space-y-6">
+                         <!-- Price Section -->
+                         <div class="flex items-center gap-3 bg-blue-50 p-4 rounded-xl">
+                            <div class="p-2 bg-blue-100 rounded-lg text-blue-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm text-blue-800 font-medium">ค่ารักษาเริ่มต้น</p>
+                                <p class="text-xl font-bold text-blue-700">{{ selectedService.price }} <span class="text-sm font-normal">บาท</span></p>
+                            </div>
+                        </div>
+
+                        <!-- Symptoms Section -->
+                        <div class="bg-white border border-slate-100 rounded-xl p-5 shadow-sm">
+                            <h3 class="flex items-center gap-2 text-lg font-bold text-slate-700 mb-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                อาการ (Symptoms)
+                            </h3>
+                            <p class="text-slate-600 leading-relaxed pl-1">
+                                {{ selectedService.symptoms }}
+                            </p>
+                        </div>
+
+                        <!-- Treatment Section -->
+                        <div class="bg-white border border-slate-100 rounded-xl p-5 shadow-sm">
+                            <h3 class="flex items-center gap-2 text-lg font-bold text-slate-700 mb-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                วิธีการรักษา (Treatment)
+                            </h3>
+                            <p class="text-slate-600 leading-relaxed pl-1">
+                                {{ selectedService.treatment }}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 flex justify-end gap-3">
+                        <SecondaryButton @click="closeServiceDetails">
+                            ปิดหน้าต่าง
+                        </SecondaryButton>
+                        <Link :href="route('booking.create')" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            จองคิวรักษา
+                        </Link>
+                    </div>
+                </template>
+            </div>
+        </Modal>
     </div>
 </template>
