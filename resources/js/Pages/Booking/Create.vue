@@ -158,6 +158,21 @@ const formatTime = (time) => {
     return `${hour}:${minute} น.`;
 };
 
+const formatTimeRange = (startTime, duration = 90) => {
+    if (!startTime) return '-';
+    const [h, m] = startTime.split(':').map(Number);
+    const startMin = h * 60 + m;
+    const endMin = startMin + duration;
+    
+    const format = (min) => {
+        const hh = Math.floor(min / 60);
+        const mm = min % 60;
+        return `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+    };
+    
+    return `${format(startMin)} - ${format(endMin)} น.`;
+};
+
 // Get selected doctor details for review
 const selectedDoctorName = computed(() => {
     const doc = availableDoctors.value.find(d => d.id === form.doctor_id) 
@@ -210,7 +225,7 @@ const selectedDoctorName = computed(() => {
 
                     <div v-if="currentStep > 2" class="flex items-center text-gray-600 bg-white px-3 py-1 rounded-full border border-indigo-200 shadow-sm">
                         <span class="font-bold text-indigo-600 mr-2">เวลา:</span>
-                        <span class="font-medium text-gray-800">{{ formatTime(form.start_time) }}</span>
+                        <span class="font-medium text-gray-800">{{ formatTimeRange(form.start_time, form.duration_minutes) }}</span>
                     </div>
 
                     <div v-if="currentStep > 3" class="flex items-center text-gray-600 bg-white px-3 py-1 rounded-full border border-indigo-200 shadow-sm">
@@ -270,16 +285,7 @@ const selectedDoctorName = computed(() => {
                             ยืนยันเวลา (Select Time)
                         </button>
                          <p v-if="form.start_time" class="mt-2 text-sm text-gray-500">
-                            เวลาที่เลือก: {{ formatTime(form.start_time) }} - 
-                            {{ 
-                                (() => {
-                                     const [h,m] = form.start_time.split(':').map(Number);
-                                     const endMin = m + 90;
-                                     const endH = h + Math.floor(endMin/60);
-                                     const endM = endMin % 60;
-                                     return `${String(endH).padStart(2,'0')}:${String(endM).padStart(2,'0')} น.`;
-                                })()
-                            }}
+                            เวลาที่เลือก: {{ formatTimeRange(form.start_time, form.duration_minutes) }}
                         </p>
                     </div>
                 </div>
@@ -365,7 +371,7 @@ const selectedDoctorName = computed(() => {
                         </div>
                          <div class="flex justify-between py-1 border-b border-gray-200">
                             <span class="text-gray-500">เวลา:</span>
-                            <span class="font-medium">{{ form.start_time }}</span>
+                            <span class="font-medium">{{ formatTimeRange(form.start_time, form.duration_minutes) }}</span>
                         </div>
                         <div class="flex justify-between py-1 border-b border-gray-200">
                             <span class="text-gray-500">ระยะเวลา:</span>

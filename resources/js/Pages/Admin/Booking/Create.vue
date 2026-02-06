@@ -205,6 +205,21 @@ const formatTime = (time) => {
     return `${hour}:${minute}`;
 };
 
+const formatTimeRange = (startTime, duration = 90) => {
+    if (!startTime) return '-';
+    const [h, m] = startTime.split(':').map(Number);
+    const startMin = h * 60 + m;
+    const endMin = startMin + duration;
+    
+    const format = (min) => {
+        const hh = Math.floor(min / 60);
+        const mm = min % 60;
+        return `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+    };
+    
+    return `${format(startMin)} - ${format(endMin)}`;
+};
+
 const selectedDoctorName = computed(() => {
     const doc = availableDoctors.value.find(d => d.id === form.doctor_id) || props.doctors.find(d => d.id === form.doctor_id);
     return doc ? doc.name : '-';
@@ -259,7 +274,7 @@ const onSearchInput = () => {
 
                             <div v-if="currentStep > 3" class="flex items-center text-gray-600 bg-white px-3 py-1 rounded-full border border-indigo-200 shadow-sm">
                                 <span class="font-bold text-indigo-600 mr-2">Time:</span>
-                                <span class="font-medium text-gray-800">{{ formatTime(form.start_time) }}</span>
+                                <span class="font-medium text-gray-800">{{ formatTimeRange(form.start_time, form.duration_minutes) }}</span>
                             </div>
 
                             <div v-if="currentStep > 4" class="flex items-center text-gray-600 bg-white px-3 py-1 rounded-full border border-indigo-200 shadow-sm">
@@ -390,15 +405,7 @@ const onSearchInput = () => {
                                     Select Time
                                 </button>
                                 <p v-if="form.start_time" class="mt-2 text-sm text-gray-500">
-                                    Selected: {{ formatTime(form.start_time) }} - {{ formatTime(availableSlots.find(s=>s.time===form.start_time) ? 
-                                        (() => {
-                                             const [h,m] = form.start_time.split(':').map(Number);
-                                             const endMin = m + 90;
-                                             const endH = h + Math.floor(endMin/60);
-                                             const endM = endMin % 60;
-                                             return `${String(endH).padStart(2,'0')}:${String(endM).padStart(2,'0')}`;
-                                        })()
-                                    : '') }}
+                                    Selected: {{ formatTimeRange(form.start_time, form.duration_minutes) }}
                                 </p>
                             </div>
                         </div>
@@ -470,7 +477,7 @@ const onSearchInput = () => {
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-gray-500">Time:</span>
-                                        <span class="font-medium">{{ form.start_time }} ({{ form.duration_minutes }}m)</span>
+                                        <span class="font-medium">{{ formatTimeRange(form.start_time, form.duration_minutes) }} ({{ form.duration_minutes }}m)</span>
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-gray-500">Doctor:</span>
