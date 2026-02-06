@@ -24,6 +24,7 @@ class BookingController extends Controller
             'start_time' => 'required',
             'duration_minutes' => 'required|in:30,60,90',
             'symptoms' => 'required|string',
+            'payment_proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ];
 
         if (!auth()->check()) {
@@ -58,6 +59,10 @@ class BookingController extends Controller
             'symptoms' => $validated['symptoms'],
             'status' => 'pending',
         ];
+
+        if ($request->hasFile('payment_proof')) {
+            $bookingData['payment_proof'] = $request->file('payment_proof')->store('payment_proofs', 'public');
+        }
 
         if (auth()->check()) {
             $bookingData['user_id'] = auth()->id();

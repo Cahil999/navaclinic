@@ -17,6 +17,7 @@ const form = useForm({
     symptoms: '',
     customer_name: '',
     customer_phone: '',
+    payment_proof: null,
 });
 
 const page = usePage();
@@ -125,9 +126,22 @@ const prevStep = () => {
 };
 
 const submit = () => {
-    // Show confirmation dialog before submitting
     import('sweetalert2').then((module) => {
         const Swal = module.default;
+
+        // Check for payment proof first
+        if (!form.payment_proof) {
+            Swal.fire({
+                title: 'กรุณาแนบสลิปโอนเงิน',
+                text: 'โปรดแนบหลักฐานการโอนเงินเพื่อยืนยันการจอง (Please attach payment slip)',
+                icon: 'warning',
+                confirmButtonText: 'ตกลง (OK)',
+                confirmButtonColor: '#F59E0B', // Amber for warning
+            });
+            return;
+        }
+
+        // Confirmation Dialog
         Swal.fire({
             title: 'ยืนยันการจองคิวของท่าน',
             text: "คุณต้องการยืนยันการจองคิวใช่หรือไม่?",
@@ -145,6 +159,13 @@ const submit = () => {
                             'สำเร็จ!',
                             'การจองคิวของคุณเสร็จสมบูรณ์',
                             'success'
+                        );
+                    },
+                    onError: () => {
+                         Swal.fire(
+                            'เกิดข้อผิดพลาด',
+                            'กรุณาตรวจสอบข้อมูลอีกครั้ง หรือลองใหม่อีกครั้ง',
+                            'error'
                         );
                     }
                 });
@@ -393,6 +414,50 @@ const selectedDoctorName = computed(() => {
                             required
                         ></textarea>
                         <div v-if="form.errors.symptoms" class="text-red-500 text-sm mt-1">{{ form.errors.symptoms }}</div>
+                    </div>
+
+                    <!-- Payment Section -->
+                    <div class="mb-6 bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                        <h4 class="font-semibold text-gray-900 mb-4 flex items-center">
+                            <span class="bg-indigo-100 text-indigo-600 p-1 rounded mr-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                            </span>
+                            ชำระเงินมัดจำ (Deposit Payment)
+                        </h4>
+                        
+                        <div class="text-center mb-6">
+                             <!-- QR Code Placeholder -->
+                             <div class="mx-auto w-48 h-48 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center mb-4 overflow-hidden relative">
+                                <span class="text-gray-400 font-medium z-10">QR Code</span>
+                                <!-- <img src="/images/qrcode.png" class="absolute inset-0 w-full h-full object-cover opacity-50" /> -->
+                             </div>
+                             
+                             <p class="text-gray-800 font-medium text-lg">200.00 THB</p>
+                             <div class="text-gray-600 mt-2 text-sm leading-relaxed bg-gray-50 p-3 rounded border border-gray-100">
+                                <p>กรุณา จ่ายค่ามัดจำการจอง 200 ที่บัญชี <b>xxxxxx</b></p>
+                                <p>ชื่อ <b>xxxxxxx</b></p>
+                                <p class="text-red-600 font-medium mt-1">** กรุณาตรวจสอบความถูกต้องก่อนโอนด้วย **</p>
+                             </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                แนบหลักฐานการโอนเงิน (Attach Slip) <span class="text-red-500">*</span>
+                            </label>
+                            <input 
+                                type="file" 
+                                @input="form.payment_proof = $event.target.files[0]"
+                                class="block w-full text-sm text-gray-500
+                                    file:mr-4 file:py-2 file:px-4
+                                    file:rounded-full file:border-0
+                                    file:text-sm file:font-semibold
+                                    file:bg-indigo-50 file:text-indigo-700
+                                    hover:file:bg-indigo-100
+                                "
+                                accept="image/*, application/pdf"
+                            />
+                            <div v-if="form.errors.payment_proof" class="text-red-500 text-sm mt-1">{{ form.errors.payment_proof }}</div>
+                        </div>
                     </div>
 
                     <div v-if="!user" class="mb-6 space-y-4">
