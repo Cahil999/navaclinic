@@ -412,7 +412,7 @@ const formatDate = (dateString) => {
                                 class="px-6 py-5 border-b border-slate-100 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors"
                              >
                                 <div class="flex items-center gap-2">
-                                    <h3 class="font-bold text-slate-800 text-lg">ประวัติการเข้าชม (Visits History)</h3>
+                                    <h3 class="font-bold text-slate-800 text-lg">ประวัติการรักษา (Visits History)</h3>
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <button 
@@ -422,7 +422,7 @@ const formatDate = (dateString) => {
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                         </svg>
-                                        เพิ่มการเข้าชม
+                                        เพิ่มการเข้ารักษา
                                     </button>
                                     <ChevronDownIcon 
                                         class="w-5 h-5 text-slate-400 transition-transform duration-200"
@@ -475,7 +475,7 @@ const formatDate = (dateString) => {
                                         </tr>
                                         <tr v-if="visits.length === 0">
                                             <td colspan="4" class="px-6 py-12 text-center text-slate-500">
-                                                ไม่พบประวัติการเข้าชม
+                                                ไม่พบประวัติการรักษา
                                             </td>
                                         </tr>
                                     </tbody>
@@ -712,7 +712,7 @@ const formatDate = (dateString) => {
                                 </div>
                                 <h4 class="text-slate-800 font-bold text-lg mb-1">ยังไม่มีประวัติการรักษา</h4>
                                 <p class="text-slate-500 text-sm max-w-xs mx-auto">
-                                    สัญญาณชีพ, การวินิจฉัย และบริเวณที่รักษาจะปรากฏที่นี่หลังจากมีการบันทึกการเข้าชมครั้งแรก
+                                    สัญญาณชีพ, การวินิจฉัย และบริเวณที่รักษาจะปรากฏที่นี่หลังจากมีการบันทึกการรักษาครั้งแรก
                                 </p>
                             </div>
                         </div>
