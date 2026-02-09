@@ -113,7 +113,7 @@ const print = () => {
             </div>
 
             <!-- Signatures -->
-             <div class="flex justify-between mt-32 px-16 items-end">
+             <div class="flex justify-between mt-32 px-16 items-start">
                 <div class="text-center w-64">
                      <div class="border-b border-dotted border-black/50 mb-2 h-10 w-full"></div>
                      <p class="text-sm">ผู้รับการตรวจ</p>
