@@ -239,6 +239,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::post('/visits', [\App\Http\Controllers\Admin\VisitController::class, 'store'])->name('admin.visits.store');
     Route::get('/visits/{visit}', [\App\Http\Controllers\Admin\VisitController::class, 'show'])->name('admin.visits.show');
 
+    // Visit Documents (Printable)
+    Route::get('/visits/{visit}/documents/receipt', [\App\Http\Controllers\Admin\DocumentController::class, 'receipt'])->name('admin.documents.receipt');
+    Route::get('/visits/{visit}/documents/medical-certificate', [\App\Http\Controllers\Admin\DocumentController::class, 'medicalCertificate'])->name('admin.documents.medical-certificate');
+
     // Visit Treatment Records
     Route::get('/visits/{visit}/treatment/create', [\App\Http\Controllers\Admin\TreatmentController::class, 'createForVisit'])->name('admin.visits.treatment.create');
     Route::post('/visits/{visit}/treatment', [\App\Http\Controllers\Admin\TreatmentController::class, 'storeForVisit'])->name('admin.visits.treatment.store');
