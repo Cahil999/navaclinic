@@ -26,6 +26,10 @@ const props = defineProps({
     thumbnail: {
         type: Boolean,
         default: false
+    },
+    overview: {
+        type: Boolean,
+        default: false
     }
 });
 
@@ -202,6 +206,43 @@ const removeItem = (item) => {
                           />
                       </div>
                       <span class="text-[8px] text-slate-400 font-bold uppercase mb-0.5 leading-none">{{ view.label }}</span>
+                 </div>
+             </div>
+        </div>
+
+        <!-- Overview Mode (Medium size for Dashboard) -->
+        <div v-else-if="overview" class="flex flex-col gap-6 w-full px-2 py-4 animate-fadeIn">
+             <!-- Row 1: Body & Head (3 items) -->
+             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                 <div v-for="view in viewGroups[0].options" :key="view.id" 
+                      class="relative flex flex-col items-center justify-center bg-white/50 rounded-xl border border-slate-100 p-2 shadow-sm hover:border-indigo-200 transition-colors h-[320px]">
+                      <div class="absolute top-2 right-2 z-10">
+                          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ view.label }}</span>
+                      </div>
+                      <div class="w-full h-full flex items-center justify-center p-1 pointer-events-none">
+                          <InteractiveSvg 
+                             :src="view.file"
+                             :selected-parts="getPartsForView(view)"
+                             class="max-w-full max-h-full w-auto h-auto"
+                          />
+                      </div>
+                 </div>
+             </div>
+             
+             <!-- Row 2: Hands & Feet (4 items) -->
+             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div v-for="view in [...viewGroups[1].options, ...viewGroups[2].options]" :key="view.id" 
+                      class="relative flex flex-col items-center justify-center bg-white/50 rounded-xl border border-slate-100 p-2 shadow-sm hover:border-indigo-200 transition-colors h-[220px]">
+                      <div class="absolute top-2 right-2 z-10">
+                          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ view.label }}</span>
+                      </div>
+                      <div class="w-full h-full flex items-center justify-center p-1 pointer-events-none">
+                          <InteractiveSvg 
+                             :src="view.file"
+                             :selected-parts="getPartsForView(view)"
+                             class="max-w-full max-h-full w-auto h-auto"
+                          />
+                      </div>
                  </div>
              </div>
         </div>

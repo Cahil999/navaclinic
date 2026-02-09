@@ -19,7 +19,9 @@ import {
     ExclamationTriangleIcon,
     ClockIcon,
     ClipboardDocumentListIcon,
-    ChevronDownIcon
+    ChevronDownIcon,
+    ArrowsPointingOutIcon,
+    ArrowsPointingInIcon
 } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
@@ -90,6 +92,9 @@ const isVisitsHistoryExpanded = ref(true);
 const isMedicalOverviewExpanded = ref(true);
 const isAppointmentHistoryExpanded = ref(true);
 const isQueueHistoryExpanded = ref(true);
+
+// View Modes
+const isFullBodyView = ref(false);
 
 const handleMouseMove = (e) => {
     if (!mapContainer.value) return;
@@ -500,6 +505,17 @@ const formatDate = (dateString) => {
                                             {{ new Date(medicalSummary.last_updated).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }) }}
                                         </span>
                                     </div>
+                                    
+                                    <!-- View Toggle Button -->
+                                    <button 
+                                        @click.stop="isFullBodyView = !isFullBodyView"
+                                        class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                                        title="เปลี่ยนรูปแบบการแสดงผล"
+                                    >
+                                        <ArrowsPointingOutIcon v-if="!isFullBodyView" class="w-5 h-5" />
+                                        <ArrowsPointingInIcon v-else class="w-5 h-5" />
+                                    </button>
+
                                     <ChevronDownIcon 
                                         class="w-5 h-5 text-slate-400 transition-transform duration-200"
                                         :class="{ 'rotate-180': !isMedicalOverviewExpanded }"
@@ -509,10 +525,10 @@ const formatDate = (dateString) => {
                             
                             <div v-show="isMedicalOverviewExpanded" v-if="medicalSummary" class="p-6 transition-all duration-300">
                                 <!-- Premium Dashboard Layout -->
-                                <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+                                <div class="grid grid-cols-1 gap-6 items-start" :class="isFullBodyView ? '' : 'xl:grid-cols-12'">
                                     
                                     <!-- LEFT: Interactive Body Map (Visual Centerpiece) -->
-                                    <div class="xl:col-span-5 bg-gradient-to-b from-slate-50/50 to-white rounded-3xl border border-slate-100 relative min-h-[500px] flex flex-col shadow-sm overflow-hidden group/map">
+                                    <div :class="isFullBodyView ? 'w-full' : 'xl:col-span-5'" class="bg-gradient-to-b from-slate-50/50 to-white rounded-3xl border border-slate-100 relative min-h-[500px] flex flex-col shadow-sm overflow-hidden group/map transition-all duration-500">
                                         
                                         <!-- Header within Map -->
                                         <div class="absolute top-4 left-4 z-10 flex items-center justify-between w-[calc(100%-32px)] pointer-events-none">
@@ -523,7 +539,7 @@ const formatDate = (dateString) => {
                                                 </h4>
                                                 <span class="text-[10px] text-slate-400 font-medium ml-4">{{ medicalSummary.pain_areas?.length || 0 }} Areas Marked</span>
                                             </div>
-                                            <button @click="showBodyMapModal = true" class="pointer-events-auto p-2 bg-white/80 backdrop-blur text-indigo-600 rounded-xl shadow-sm border border-slate-200/60 hover:border-indigo-300 hover:shadow-md hover:text-indigo-700 transition-all duration-300">
+                                            <button v-if="!isFullBodyView" @click="showBodyMapModal = true" class="pointer-events-auto p-2 bg-white/80 backdrop-blur text-indigo-600 rounded-xl shadow-sm border border-slate-200/60 hover:border-indigo-300 hover:shadow-md hover:text-indigo-700 transition-all duration-300">
                                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM10.5 7.5v6m3-3h-6" />
                                                 </svg>
@@ -531,23 +547,25 @@ const formatDate = (dateString) => {
                                         </div>
 
                                         <!-- The Map -->
-                                        <div class="flex-1 flex items-center justify-center p-4 cursor-pointer relative" 
+                                        <div class="flex-1 flex items-center justify-center p-4 relative" 
+                                             :class="isFullBodyView ? '' : 'cursor-pointer'"
                                              ref="mapContainer"
-                                             @mousemove="handleMouseMove"
-                                             @mouseenter="showLens = true"
-                                             @mouseleave="handleMouseLeave"
-                                             @click="showBodyMapModal = true">
+                                             @mousemove="!isFullBodyView && handleMouseMove($event)"
+                                             @mouseenter="!isFullBodyView && (showLens = true)"
+                                             @mouseleave="!isFullBodyView && handleMouseLeave()"
+                                             @click="!isFullBodyView && (showBodyMapModal = true)">
                                              
-                                             <div class="w-full h-full max-h-[500px] transition-transform duration-500 group-hover/map:scale-105">
+                                             <div :class="isFullBodyView ? 'w-full h-auto' : 'w-full h-full max-h-[500px] transition-transform duration-500 group-hover/map:scale-105'">
                                                   <BodyPartSelector 
                                                     :modelValue="medicalSummary.pain_areas" 
                                                     :readonly="true" 
-                                                    :thumbnail="true"
+                                                    :thumbnail="!isFullBodyView"
+                                                    :overview="isFullBodyView"
                                                 />
                                              </div>
 
                                             <!-- Magnifying Lens -->
-                                            <div v-show="showLens" 
+                                            <div v-show="showLens && !isFullBodyView" 
                                                  class="absolute z-20 w-32 h-32 rounded-full border-2 border-indigo-500 bg-white shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] overflow-hidden pointer-events-none transition-opacity duration-200"
                                                  :style="{ 
                                                      left: (lensX - 64) + 'px', 
@@ -581,15 +599,16 @@ const formatDate = (dateString) => {
                                         </div>
                                         
                                         <div class="pb-3 text-center">
-                                            <p class="text-[10px] text-slate-400 font-medium uppercase tracking-widest opacity-60">Click to Expand</p>
+                                            <p v-if="!isFullBodyView" class="text-[10px] text-slate-400 font-medium uppercase tracking-widest opacity-60">Click to Expand</p>
+                                            <p v-else class="text-[10px] text-slate-400 font-medium uppercase tracking-widest opacity-60">Full Body View Enabled</p>
                                         </div>
                                     </div>
 
                                     <!-- RIGHT: Medical Data Console -->
-                                    <div class="xl:col-span-7 space-y-5">
+                                    <div :class="isFullBodyView ? 'w-full grid grid-cols-1 md:grid-cols-2 gap-5' : 'xl:col-span-7 space-y-5'">
                                         
                                         <!-- 1. Vitals Strip (Compact) -->
-                                        <div class="bg-white rounded-2xl border border-slate-100 p-1 shadow-sm grid grid-cols-3 divide-x divide-slate-100">
+                                        <div :class="isFullBodyView ? 'md:col-span-2' : ''" class="bg-white rounded-2xl border border-slate-100 p-1 shadow-sm grid grid-cols-3 divide-x divide-slate-100">
                                             <!-- BP -->
                                             <div class="py-3 px-4 flex flex-col justify-center items-center text-center group">
                                                 <div class="flex items-center gap-1.5 mb-1 text-slate-400 group-hover:text-indigo-500 transition-colors">
@@ -638,7 +657,7 @@ const formatDate = (dateString) => {
                                                     </svg>
                                                 </div>
                                                 <h5 class="text-[10px] font-bold text-amber-500 uppercase tracking-wider mb-2">Chief Complaint</h5>
-                                                <p class="text-sm text-slate-700 font-semibold line-clamp-2">{{ medicalSummary.chief_complaint || '-' }}</p>
+                                                <p class="text-sm text-slate-700 font-semibold line-clamp-2" :class="{'line-clamp-none': isFullBodyView}">{{ medicalSummary.chief_complaint || '-' }}</p>
                                             </div>
                                             
                                             <div class="p-4 bg-indigo-50/30 rounded-2xl border border-indigo-100/60 relative group hover:bg-indigo-50/50 transition-colors">
@@ -648,12 +667,12 @@ const formatDate = (dateString) => {
                                                     </svg>
                                                 </div>
                                                 <h5 class="text-[10px] font-bold text-indigo-500 uppercase tracking-wider mb-2">Diagnosis</h5>
-                                                <p class="text-sm text-slate-700 font-semibold line-clamp-2">{{ medicalSummary.diagnosis || '-' }}</p>
+                                                <p class="text-sm text-slate-700 font-semibold line-clamp-2" :class="{'line-clamp-none': isFullBodyView}">{{ medicalSummary.diagnosis || '-' }}</p>
                                             </div>
                                         </div>
 
                                         <!-- 3. Scrollable Symptom List -->
-                                        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm flex flex-col overflow-hidden max-h-[300px]">
+                                        <div :class="[isFullBodyView ? 'md:col-span-2' : '', isFullBodyView ? 'max-h-[500px]' : 'max-h-[300px]']" class="bg-white rounded-2xl border border-slate-100 shadow-sm flex flex-col overflow-hidden transition-all duration-300">
                                             <div class="px-4 py-3 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between">
                                                 <h5 class="font-bold text-slate-700 text-xs flex items-center gap-2">
                                                     <ClipboardDocumentListIcon class="w-4 h-4 text-slate-400" />
