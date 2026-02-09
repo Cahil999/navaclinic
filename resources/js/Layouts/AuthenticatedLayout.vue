@@ -118,37 +118,66 @@ const isMobileMenuOpen = ref(false);
 
 
                     <!-- Notification Bell -->
-                    <div class="dropdown dropdown-end ml-2" v-if="$page.props.unreadBookingsCount > 0">
-                        <div tabindex="0" role="button" class="btn btn-ghost btn-circle text-slate-500 hover:bg-slate-100">
+                    <div class="dropdown dropdown-end ml-2" v-if="$page.props.unreadBookingsCount > 0 && $page.props.latestUnreadBookings && $page.props.latestUnreadBookings.length > 0">
+                        <div tabindex="0" role="button" class="btn btn-ghost btn-circle text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 relative group">
                             <div class="indicator">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 group-hover:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                                 </svg>
-                                <span class="badge badge-sm badge-error indicator-item text-white border-none">{{ $page.props.unreadBookingsCount }}</span>
+                                <span class="badge badge-sm badge-error indicator-item text-white border-2 border-slate-50 shadow-sm animate-pulse">{{ $page.props.unreadBookingsCount }}</span>
                             </div>
                         </div>
-                        <div tabindex="0" class="mt-3 z-[1] card card-compact dropdown-content w-80 bg-white shadow-xl border border-slate-100">
-                            <div class="card-body">
-                                <span class="font-bold text-lg text-slate-800">{{ $page.props.unreadBookingsCount }} การจองใหม่</span>
-                                <div class="divider my-0"></div>
-                                <ul class="menu p-0 max-h-60 overflow-y-auto">
-                                    <li v-for="booking in $page.props.latestUnreadBookings" :key="booking.id">
-                                        <Link :href="route('admin.bookings.show', booking.id)" class="py-3 px-2 hover:bg-slate-50 border-b border-slate-50 last:border-none flex flex-col items-start gap-1">
-                                            <div class="flex justify-between w-full">
-                                                <span class="font-semibold text-slate-700 text-sm">
-                                                    {{ booking.user ? booking.user.name : (booking.customer_name || 'Walk-in') }}
-                                                </span>
-                                                <span class="text-xs text-slate-400">{{ new Date(booking.created_at).toLocaleDateString('th-TH') }}</span>
-                                            </div>
-                                            <div class="text-xs text-slate-500 w-full truncate">
-                                                นัด: {{ new Date(booking.appointment_date).toLocaleDateString('th-TH') }} {{ booking.start_time }}
+                        <div tabindex="0" class="mt-4 z-[100] card card-compact dropdown-content w-96 bg-white shadow-2xl rounded-2xl border border-slate-100 overflow-hidden ring-1 ring-slate-900/5 origin-top-right transform transition-all">
+                            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white relative overflow-hidden">
+                                <div class="absolute top-0 right-0 -mt-2 -mr-2 w-16 h-16 bg-white opacity-10 rounded-full blur-xl"></div>
+                                <div class="relative z-10 flex justify-between items-center">
+                                    <h3 class="font-bold text-lg">การแจ้งเตือน</h3>
+                                    <span class="bg-white/20 px-2 py-1 rounded-lg text-xs font-medium backdrop-blur-sm">{{ $page.props.unreadBookingsCount }} ใหม่</span>
+                                </div>
+                            </div>
+                            <div class="max-h-[28rem] overflow-y-auto custom-scrollbar">
+                                <ul class="menu p-0">
+                                    <li v-for="booking in $page.props.latestUnreadBookings" :key="booking.id" class="border-b border-slate-50 last:border-none">
+                                        <Link :href="route('admin.bookings.show', booking.id)" class="p-4 hover:bg-slate-50 active:bg-slate-100 transition-colors gap-3 block group">
+                                            <div class="flex items-start gap-3">
+                                                 <div class="mt-1 flex-shrink-0 w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                    </svg>
+                                                </div>
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="flex justify-between items-baseline mb-1">
+                                                        <span class="font-bold text-slate-800 text-sm truncate pr-2 group-hover:text-blue-700 transition-colors">
+                                                            {{ booking.user ? booking.user.name : (booking.customer_name || 'ลูกค้า Walk-in') }}
+                                                        </span>
+                                                        <span class="text-[10px] text-slate-400 font-medium whitespace-nowrap bg-slate-50 px-1.5 py-0.5 rounded-full border border-slate-100">
+                                                            {{ new Date(booking.created_at).toLocaleDateString('th-TH') }}
+                                                        </span>
+                                                    </div>
+                                                    <p class="text-xs text-slate-500 mb-1">
+                                                        จองคิว: <span class="font-medium text-slate-700">{{ new Date(booking.appointment_date).toLocaleDateString('th-TH') }}</span> เวลา <span class="font-medium text-slate-700">{{ booking.start_time }}</span>
+                                                    </p>
+                                                    <p class="text-xs text-slate-400 truncate" v-if="booking.symptoms">
+                                                        อาการ: {{ booking.symptoms }}
+                                                    </p>
+                                                </div>
+                                                <div class="flex-shrink-0 self-center opacity-0 group-hover:opacity-100 transition-opacity -ml-2">
+                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400 transform translate-x-1 group-hover:translate-x-0 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                                    </svg>
+                                                </div>
                                             </div>
                                         </Link>
                                     </li>
                                 </ul>
-                                <div v-if="$page.props.unreadBookingsCount > 5" class="text-center pt-2">
-                                    <Link :href="route('admin.dashboard')" class="text-xs text-blue-600 hover:underline">ดูทั้งหมด</Link>
-                                </div>
+                            </div>
+                            <div class="p-3 bg-slate-50 text-center border-t border-slate-100">
+                                <Link :href="route('admin.dashboard')" class="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline transition-colors flex items-center justify-center gap-1">
+                                    ดูรายการทั้งหมด
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                    </svg>
+                                </Link>
                             </div>
                         </div>
                     </div>

@@ -22,6 +22,14 @@ class Booking extends Model
         'price',
         'is_admin_booked',
         'payment_proof',
+        'admin_acknowledged',
+    ];
+
+    protected $casts = [
+        'appointment_date' => 'date',
+        'is_admin_booked' => 'boolean',
+        'admin_acknowledged' => 'boolean',
+        'price' => 'decimal:2',
     ];
 
     protected $appends = ['payment_proof_url'];

@@ -229,7 +229,8 @@ class BookingController extends Controller
     public function show(Booking $booking)
     {
         if (!$booking->admin_acknowledged) {
-            $booking->update(['admin_acknowledged' => true]);
+            $booking->admin_acknowledged = true;
+            $booking->save();
         }
 
         $booking->load(['user', 'doctor', 'treatmentRecord', 'payments']);
