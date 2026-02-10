@@ -122,11 +122,253 @@ const deletePayment = (id) => {
             </div>
         </template>
 
-        <div :class="viewMode === 'compact' ? 'py-6' : 'py-12'">
+        <div v-if="viewMode === 'compact'" class="h-[calc(100vh-65px)] overflow-hidden bg-slate-50 flex flex-col font-sans">
+            <!-- Top Bar: Compact Patient & Status -->
+            <div class="bg-white border-b border-slate-200 px-4 py-2 shrink-0 flex items-center justify-between shadow-sm z-10">
+                <div class="flex items-center gap-3">
+                    <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-lg border border-indigo-200">
+                        {{ visit.patient.name.charAt(0) }}
+                    </div>
+                    <div>
+                        <h1 class="text-base font-bold text-slate-800 leading-tight flex items-center gap-2">
+                            {{ visit.patient.name }}
+                            <Link :href="route('admin.patients.show', visit.patient.id)" class="text-[10px] flex items-center px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
+                                ดูประวัติ
+                            </Link>
+                        </h1>
+                         <div class="flex items-center gap-3 text-xs text-slate-500 mt-0.5">
+                            <span class="flex items-center gap-1 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
+                                <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                {{ new Date(visit.visit_date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }) }}
+                            </span>
+                             <span class="flex items-center gap-1 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
+                                <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                {{ new Date(visit.visit_date).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'}) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                 <div class="flex items-center gap-4">
+                     <span class="px-3 py-1 text-xs rounded-full font-bold uppercase tracking-wide border"
+                        :class="{
+                            'bg-emerald-50 text-emerald-700 border-emerald-200': visit.status === 'completed', 
+                            'bg-blue-50 text-blue-700 border-blue-200': visit.status === 'ongoing', 
+                            'bg-slate-50 text-slate-700 border-slate-200': visit.status === 'pending'
+                        }">
+                        {{ getStatusLabel(visit.status) }}
+                    </span>
+                 </div>
+            </div>
+
+            <!-- Dashboard Grid -->
+            <div class="flex-1 min-h-0 p-3 grid grid-cols-12 gap-3">
+                
+                <!-- Col 1: Medical Summary (3 Cols) -->
+                <div class="col-span-3 flex flex-col gap-3 h-full overflow-hidden">
+                    <!-- Vitals -->
+                    <div class="bg-white rounded-xl border border-slate-200 p-3 shadow-sm shrink-0">
+                         <h3 class="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1 tracking-wider">
+                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            Vital Signs
+                         </h3>
+                         <div class="grid grid-cols-2 gap-2">
+                             <div class="bg-indigo-50/50 p-2 rounded-lg border border-indigo-100 text-center">
+                                 <div class="text-[9px] text-slate-400 uppercase font-bold">BP</div>
+                                 <div class="font-bold text-indigo-700 text-sm">{{ visit.treatment_record?.blood_pressure || '-' }}</div>
+                             </div>
+                              <div class="bg-rose-50/50 p-2 rounded-lg border border-rose-100 text-center">
+                                 <div class="text-[9px] text-slate-400 uppercase font-bold">Temp</div>
+                                 <div class="font-bold text-rose-700 text-sm">{{ visit.treatment_record?.temperature || '-' }}</div>
+                             </div>
+                             <div class="bg-blue-50/50 p-2 rounded-lg border border-blue-100 text-center">
+                                 <div class="text-[9px] text-slate-400 uppercase font-bold">Pulse</div>
+                                 <div class="font-bold text-blue-700 text-sm">{{ visit.treatment_record?.pulse_rate || '-' }}</div>
+                             </div>
+                             <div class="bg-emerald-50/50 p-2 rounded-lg border border-emerald-100 text-center">
+                                 <div class="text-[9px] text-slate-400 uppercase font-bold">Resp</div>
+                                 <div class="font-bold text-emerald-700 text-sm">{{ visit.treatment_record?.respiratory_rate || '-' }}</div>
+                             </div>
+                         </div>
+                    </div>
+
+                    <!-- Clinical -->
+                     <div class="bg-white rounded-xl border border-slate-200 shadow-sm flex-1 overflow-y-auto flex flex-col min-h-0">
+                        <div class="px-3 py-2 border-b border-slate-100 bg-slate-50 sticky top-0 z-10">
+                            <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">ข้อมูลคลินิก (Clinical)</h3>
+                        </div>
+                        <div class="p-3 space-y-3 text-sm">
+                            <div>
+                                <span class="text-[9px] font-bold text-amber-500 uppercase block mb-1 tracking-wider">Symptoms (CC)</span>
+                                <div class="text-slate-800 bg-amber-50/50 p-2.5 rounded-lg border border-amber-100 text-xs leading-relaxed font-medium min-h-[3rem]">{{ visit.symptoms || '-' }}</div>
+                            </div>
+                            <div v-if="visit.treatment_record">
+                                <span class="text-[9px] font-bold text-indigo-500 uppercase block mb-1 tracking-wider">Diagnosis (DX)</span>
+                                <div class="text-slate-800 bg-indigo-50/50 p-2.5 rounded-lg border border-indigo-100 text-xs leading-relaxed font-bold">{{ visit.treatment_record.diagnosis || '-' }}</div>
+                            </div>
+                            <div v-if="visit.treatment_record">
+                                <span class="text-[9px] font-bold text-slate-400 uppercase block mb-1 tracking-wider">Physical Exam (PE)</span>
+                                <div class="text-slate-600 text-[11px] whitespace-pre-wrap leading-relaxed">{{ visit.treatment_record.physical_exam || '-' }}</div>
+                            </div>
+                        </div>
+                     </div>
+                </div>
+
+                <!-- Col 2: Body Map (5 Cols) -->
+                <div class="col-span-5 flex flex-col gap-3 h-full overflow-hidden">
+                     <div class="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col h-full overflow-hidden relative">
+                        <div class="absolute top-3 left-3 z-10 pointer-events-none">
+                             <span class="bg-white/90 backdrop-blur px-2.5 py-1 rounded-md border border-slate-200 text-[10px] font-bold text-slate-600 shadow-sm uppercase tracking-wider">
+                                Body Map
+                            </span>
+                        </div>
+             
+                        <div class="flex-1 bg-slate-50/50 flex items-center justify-center overflow-hidden relative">
+                             <!-- Body Map Component -->
+                             <BodyPartSelector 
+                                v-if="visit.treatment_record?.pain_areas"
+                                :model-value="visit.treatment_record.pain_areas" 
+                                :readonly="true" 
+                                :thumbnail="true"
+                            />
+                             <div v-else class="text-slate-300 flex flex-col items-center">
+                                 <svg class="w-12 h-12 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                 <span class="text-xs mt-2 font-medium">ไม่มีข้อมูล Body Map</span>
+                             </div>
+                        </div>
+
+                        <!-- Mini Pain List at Bottom -->
+                        <div class="h-[35%] border-t border-slate-200 bg-white overflow-hidden flex flex-col">
+                             <div class="px-3 py-1.5 bg-slate-50 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                 รายการตำแหน่งปวด ({{ visit.treatment_record?.pain_areas?.length || 0 }})
+                             </div>
+                             <div class="overflow-y-auto flex-1 p-0">
+                                 <table class="w-full text-xs text-left">
+                                    <thead class="text-slate-400 font-bold bg-white sticky top-0 shadow-sm text-[10px]">
+                                        <tr>
+                                            <th class="pl-3 py-1">Area</th>
+                                            <th class="py-1">Symptom</th>
+                                            <th class="py-1 text-center">VAS (Pre)</th>
+                                            <th class="pr-3 py-1 text-center">VAS (Post)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-50">
+                                        <tr v-for="area in visit.treatment_record?.pain_areas || []" :key="area.area" class="hover:bg-slate-50">
+                                            <td class="pl-3 py-2 font-bold text-indigo-700">{{ area.area }}</td>
+                                            <td class="py-2 text-slate-600 truncate max-w-[100px]">{{ area.symptom }}</td>
+                                            <td class="py-2 text-center">
+                                                <span class="bg-rose-50 text-rose-600 px-1.5 py-0.5 rounded font-bold text-[10px] border border-rose-100">{{ area.pain_level }}</span>
+                                            </td>
+                                            <td class="pr-3 py-2 text-center">
+                                                <span class="bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded font-bold text-[10px] border border-emerald-100">{{ area.pain_level_after }}</span>
+                                            </td>
+                                        </tr>
+                                        <tr v-if="!visit.treatment_record?.pain_areas?.length">
+                                            <td colspan="4" class="py-6 text-center text-slate-400 italic text-[11px]">ไม่มีรายการตำแหน่งปวด</td>
+                                        </tr>
+                                    </tbody>
+                                 </table>
+                             </div>
+                        </div>
+                     </div>
+                </div>
+
+                <!-- Col 3: Plan & Payment (4 Cols) -->
+                <div class="col-span-4 flex flex-col gap-3 h-full overflow-hidden">
+                    
+                    <!-- Treatment Plan -->
+                     <div class="bg-white rounded-xl border border-slate-200 shadow-sm flex-1 flex flex-col min-h-0 overflow-hidden">
+                        <div class="px-3 py-2 border-b border-slate-100 bg-slate-50 flex justify-between items-center sticky top-0 shrink-0">
+                            <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">แผนการรักษา (Plan)</h3>
+                             <Link
+                                v-if="!visit.treatment_record"
+                                :href="route('admin.visits.treatment.create', visit.id)"
+                                class="text-[10px] bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-0.5 rounded shadow transition-colors font-bold"
+                            >
+                                + เพิ่มบันทึก
+                            </Link>
+                             <Link
+                                v-else
+                                :href="route('admin.visits.treatment.create', visit.id)"
+                                class="text-[10px] text-indigo-600 hover:text-indigo-800 font-bold bg-indigo-50 px-2 py-0.5 rounded hover:bg-indigo-100 transition-colors"
+                            >
+                                แก้ไข
+                            </Link>
+                        </div>
+                        <div class="p-3 flex-1 overflow-y-auto text-xs text-slate-700 leading-relaxed space-y-3">
+                             <div v-if="visit.treatment_record?.treatment_details" class="whitespace-pre-wrap">
+                                {{ visit.treatment_record.treatment_details }}
+                             </div>
+                             <div v-else class="text-slate-400 italic text-center py-4">ยังไม่ได้ระบุรายละเอียด</div>
+
+                             <!-- Plan Attributes -->
+                             <div v-if="visit.treatment_record" class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-slate-50">
+                                <div class="bg-slate-50 p-2 rounded border border-slate-100">
+                                    <div class="text-[9px] text-slate-400 uppercase tracking-wider mb-0.5">น้ำหนักมือ</div>
+                                    <div class="font-bold text-slate-700">{{ visit.treatment_record.massage_weight || '-' }}</div>
+                                </div>
+                                <div class="bg-slate-50 p-2 rounded border border-slate-100">
+                                    <div class="text-[9px] text-slate-400 uppercase tracking-wider mb-0.5">VAS (Pre <span class="text-slate-300">→</span> Post)</div>
+                                    <div class="font-bold text-indigo-600">
+                                        {{ visit.treatment_record.pain_level_before || '-' }} <span class="text-slate-300 mx-1">→</span> {{ visit.treatment_record.pain_level_after || '-' }}
+                                    </div>
+                                </div>
+                             </div>
+                        </div>
+                     </div>
+
+                     <!-- Payment & Docs -->
+                     <div class="bg-white rounded-xl border border-emerald-100 shadow-sm shrink-0 p-3 ring-1 ring-emerald-50">
+                         <div class="flex justify-between items-end border-b border-slate-100 pb-2 mb-2">
+                            <div>
+                                <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">ยอดสุทธิ (Total)</div>
+                                <div class="text-xl font-black text-emerald-700 tracking-tight">{{ Number(visit.price).toLocaleString() }} ฿</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">ค้างชำระ (Due)</div>
+                                <div :class="remainingAmount > 0 ? 'text-rose-600' : 'text-slate-400'" class="text-sm font-bold">
+                                    {{ remainingAmount.toLocaleString() }} ฿
+                                </div>
+                            </div>
+                         </div>
+                         
+                         <!-- Payment Form (Compact) -->
+                         <div v-if="remainingAmount > 0" class="mt-2">
+                             <form @submit.prevent="submitPayment" class="flex gap-2">
+                                 <div class="flex-1">
+                                    <input type="number" v-model="paymentForm.amount" class="w-full text-xs rounded-lg border-slate-200 py-1.5 px-2 bg-slate-50 focus:bg-white transition-colors" placeholder="ระบุยอดเงิน">
+                                 </div>
+                                 <button type="submit" class="bg-emerald-600 text-white text-xs font-bold px-3 rounded-lg hover:bg-emerald-700 shadow-sm transition-all whitespace-nowrap">รับเงิน</button>
+                             </form>
+                             <div class="mt-2 flex gap-2">
+                                 <select v-model="paymentForm.payment_method" class="text-xs rounded-lg border-slate-200 py-1.5 px-2 w-full bg-slate-50 text-slate-600">
+                                    <option value="cash">เงินสด</option>
+                                    <option value="transfer">โอน</option>
+                                    <option value="credit_card">บัตรเครดิต</option>
+                                 </select>
+                             </div>
+                         </div>
+                         <div v-else class="text-center text-xs text-emerald-600 font-bold bg-emerald-50 py-2 rounded-lg border border-emerald-100 flex items-center justify-center gap-1">
+                             <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                             ชำระครบถ้วนแล้ว
+                         </div>
+
+                         <!-- Docs Links -->
+                         <div class="flex gap-2 mt-3 pt-2 border-t border-slate-100">
+                             <a :href="route('admin.documents.receipt', visit.id)" target="_blank" class="flex-1 text-center py-1.5 text-[10px] font-bold bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-lg text-slate-600 hover:text-indigo-600 transition-all uppercase tracking-wide">ใบเสร็จ</a>
+                             <a :href="route('admin.documents.medical-certificate', visit.id)" target="_blank" class="flex-1 text-center py-1.5 text-[10px] font-bold bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-lg text-slate-600 hover:text-indigo-600 transition-all uppercase tracking-wide">ใบรับรองแพทย์</a>
+                         </div>
+                     </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div v-else class="py-12">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 
                 <!-- Main Card -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden" :class="viewMode === 'compact' ? 'mb-0 shrink-0' : 'mb-6'">
                     <div :class="viewMode === 'compact' ? 'px-4 py-3' : 'px-6 py-5'" class="border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                          <div>
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">ผู้ป่วย (Patient)</p>
@@ -235,8 +477,11 @@ const deletePayment = (id) => {
                     </div>
                 </div>
 
-                <!-- Treatment Record Section -->
-                <div v-if="visit.treatment_record" class="mt-8 bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-indigo-100">
+                <div :class="viewMode === 'compact' ? 'grid grid-cols-12 gap-4 min-h-0' : 'contents'">
+                    <!-- Left: Medical Record -->
+                    <div :class="viewMode === 'compact' ? 'col-span-8 h-full overflow-y-auto pr-1 pb-2' : 'contents'">
+                        <!-- Treatment Record Section -->
+                        <div v-if="visit.treatment_record" :class="viewMode === 'compact' ? 'mt-0' : 'mt-8'" class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-indigo-100">
                     <div :class="viewMode === 'compact' ? 'px-4 py-3' : 'px-8 py-6'" class="bg-white border-b border-slate-100 flex justify-between items-center">
                         <div>
                             <h3 class="font-black text-slate-800 text-2xl flex items-center gap-3">
@@ -481,10 +726,13 @@ const deletePayment = (id) => {
 
                     </div>
 
-                </div>
+                    </div>
+                        </div>
 
-                <!-- Financial & Payments Section -->
-                <div class="mt-8 bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-emerald-100">
+                    <!-- Right: Financial & Docs -->
+                    <div :class="viewMode === 'compact' ? 'col-span-4 h-full overflow-y-auto pl-1 flex flex-col gap-4 pb-2' : 'contents'">
+                        <!-- Financial & Payments Section -->
+                        <div :class="viewMode === 'compact' ? 'mt-0' : 'mt-8'" class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-emerald-100">
                     <div :class="viewMode === 'compact' ? 'px-4 py-3' : 'px-8 py-6'" class="bg-gradient-to-r from-emerald-50 to-white border-b border-emerald-100 flex justify-between items-center">
                         <h3 class="font-bold text-emerald-900 text-xl flex items-center gap-3">
                             <div class="p-2 bg-emerald-100 rounded-lg text-emerald-600">
@@ -660,10 +908,10 @@ const deletePayment = (id) => {
                             </div>
                         </div>
                     </div>
-                </div>
+                    </div>
 
-                <!-- Documents Section -->
-                <div class="mt-8 bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-slate-100 mb-8">
+                        <!-- Documents Section -->
+                        <div :class="viewMode === 'compact' ? 'mt-0 mb-0' : 'mt-8 mb-8'" class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-slate-100">
                     <div :class="viewMode === 'compact' ? 'px-4 py-3' : 'px-8 py-6'" class="border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                         <h3 class="font-bold text-slate-800 text-xl flex items-center gap-3">
                             <div class="p-2 bg-indigo-100 rounded-lg text-indigo-600">
@@ -698,6 +946,8 @@ const deletePayment = (id) => {
                                  <div class="text-xs text-slate-400">Medical Certificate</div>
                              </div>
                         </a>
+                    </div>
+                </div>
                     </div>
                 </div>
 
