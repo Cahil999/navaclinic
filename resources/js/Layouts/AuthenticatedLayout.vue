@@ -81,6 +81,17 @@ const isMobileMenuOpen = ref(false);
                             </Link>
                         </li>
                         <li v-if="$page.props.auth.user.is_admin">
+                             <Link :href="route('admin.services.index')" 
+                                :class="{'bg-white text-blue-600 shadow-sm font-bold': route().current('admin.services.index*'), 'hover:bg-white/60 hover:text-blue-500': !route().current('admin.services.index*')}"
+                                class="rounded-full px-4 py-2 transition-all duration-200"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1.5">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                                </svg>
+                                บริการ
+                            </Link>
+                        </li>
+                        <li v-if="$page.props.auth.user.is_admin">
                              <Link :href="route('admin.packages.index')" 
                                 :class="{'bg-white text-blue-600 shadow-sm font-bold': route().current('admin.packages.index*'), 'hover:bg-white/60 hover:text-blue-500': !route().current('admin.packages.index*')}"
                                 class="rounded-full px-4 py-2 transition-all duration-200"
@@ -235,6 +246,7 @@ const isMobileMenuOpen = ref(false);
                     <Link v-if="$page.props.auth.user.is_admin" :href="route('admin.dashboard')" class="btn btn-ghost justify-start text-lg font-normal" :class="{'bg-blue-50 text-blue-600 font-bold': route().current('admin.dashboard')}" @click="isMobileMenuOpen = false">แดชบอร์ดแอดมิน</Link>
                     <Link v-if="$page.props.auth.user.is_admin" :href="route('admin.owner.dashboard')" class="btn btn-ghost justify-start text-lg font-normal" :class="{'bg-blue-50 text-blue-600 font-bold': route().current('admin.owner.dashboard')}" @click="isMobileMenuOpen = false">เจ้าของ</Link>
                     <Link v-if="$page.props.auth.user.is_admin" :href="route('admin.settings.index')" class="btn btn-ghost justify-start text-lg font-normal" :class="{'bg-blue-50 text-blue-600 font-bold': route().current('admin.settings.index')}" @click="isMobileMenuOpen = false">ตั้งค่าร้าน</Link>
+                    <Link v-if="$page.props.auth.user.is_admin" :href="route('admin.services.index')" class="btn btn-ghost justify-start text-lg font-normal" :class="{'bg-blue-50 text-blue-600 font-bold': route().current('admin.services.index')}" @click="isMobileMenuOpen = false">จัดการบริการ</Link>
                     <Link v-else :href="route('dashboard')" class="btn btn-ghost justify-start text-lg font-normal" :class="{'bg-blue-50 text-blue-600 font-bold': route().current('dashboard')}" @click="isMobileMenuOpen = false">ประวัติการจองคิว</Link>
 
                     

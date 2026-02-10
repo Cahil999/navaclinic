@@ -14,6 +14,7 @@ import {
 import { Bar, Pie } from 'vue-chartjs'
 import { computed, ref } from 'vue';
 import Pagination from '@/Components/Pagination.vue';
+import Modal from '@/Components/Modal.vue';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend)
 
@@ -245,6 +246,19 @@ const formatDateTime = (dateString) => {
         hour12: false
     }).format(date);
 };
+
+const showingSlip = ref(false);
+const selectedSlipUrl = ref(null);
+
+const openSlip = (url) => {
+    selectedSlipUrl.value = url;
+    showingSlip.value = true;
+};
+
+const closeSlip = () => {
+    showingSlip.value = false;
+    setTimeout(() => selectedSlipUrl.value = null, 300);
+};
 </script>
 
 <template>
@@ -459,9 +473,19 @@ const formatDateTime = (dateString) => {
                                             </span>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <Link :href="route('admin.bookings.show', booking.id)" class="inline-flex items-center px-3 py-1 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                                ดูรายละเอียด
-                                            </Link>
+                                            <div class="flex items-center gap-2">
+                                                <button v-if="booking.payment_proof_url" 
+                                                        @click="openSlip(booking.payment_proof_url)"
+                                                        class="inline-flex items-center p-1.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
+                                                        title="ดูสลิปโอนเงิน">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                    </svg>
+                                                </button>
+                                                <Link :href="route('admin.bookings.show', booking.id)" class="inline-flex items-center px-3 py-1 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                                    ดูรายละเอียด
+                                                </Link>
+                                            </div>
                                         </td>
                                     </tr>
                                     <tr v-if="bookings.data.length === 0">
@@ -534,5 +558,28 @@ const formatDateTime = (dateString) => {
                     </div>
                 </div>
             </div>
+
+            <!-- Payment Proof Modal -->
+            <Modal :show="showingSlip" @close="closeSlip" maxWidth="2xl">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-slate-800">หลักฐานการชำระเงิน</h3>
+                        <button @click="closeSlip" class="text-slate-400 hover:text-slate-500 transition-colors">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="mt-4 flex justify-center bg-slate-50 rounded-lg p-2 border border-slate-100">
+                        <img v-if="selectedSlipUrl" :src="selectedSlipUrl" alt="Payment Proof" class="max-h-[70vh] object-contain rounded shadow-sm" />
+                        <div v-else class="text-slate-400 py-10">ไม่พบรูปภาพ</div>
+                    </div>
+                    <div class="mt-6 flex justify-end">
+                        <button @click="closeSlip" class="inline-flex items-center px-4 py-2 bg-slate-200 border border-transparent rounded-md font-semibold text-xs text-slate-700 uppercase tracking-widest hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            ปิด
+                        </button>
+                    </div>
+                </div>
+            </Modal>
     </AuthenticatedLayout>
 </template>

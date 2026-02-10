@@ -6,6 +6,11 @@ import Modal from '@/Components/Modal.vue';
 import { computed, ref } from 'vue';
 
 const showBodyMapModal = ref(false);
+const viewMode = ref('default');
+
+const toggleViewMode = () => {
+    viewMode.value = viewMode.value === 'default' ? 'compact' : 'default';
+};
 
 const statusLabels = {
     pending: 'รอการรักษา',
@@ -81,32 +86,48 @@ const deletePayment = (id) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex items-center gap-4">
-                <Link :href="route('admin.patients.show', visit.patient.id)" class="text-slate-400 hover:text-slate-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            <div class="flex items-center gap-4 w-full">
+                <div class="flex items-center gap-4">
+                    <Link :href="route('admin.patients.show', visit.patient.id)" class="text-slate-400 hover:text-slate-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                    </Link>
+                    <h2 class="font-bold text-xl text-slate-800 leading-tight">
+                        รายละเอียดการเข้ารับบริการ <span class="text-slate-400 font-normal text-sm ml-2">#{{ visit.id }}</span>
+                    </h2>
+                    <span class="px-3 py-1 text-xs rounded-full font-bold uppercase tracking-wide ring-1 ring-inset"
+                        :class="{
+                            'bg-emerald-50 text-emerald-700 ring-emerald-600/20': visit.status === 'completed', 
+                            'bg-blue-50 text-blue-700 ring-blue-600/20': visit.status === 'ongoing', 
+                            'bg-slate-50 text-slate-700 ring-slate-600/20': visit.status === 'pending'
+                        }">
+                        {{ getStatusLabel(visit.status) }}
+                    </span>
+                </div>
+                
+                <button 
+                    @click="toggleViewMode" 
+                    class="ml-auto flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm font-medium transition-all shadow-sm"
+                    :class="viewMode === 'compact' ? 'bg-indigo-50 border-indigo-200 text-indigo-700 ring-1 ring-indigo-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'"
+                >
+                    <svg v-if="viewMode === 'default'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125Z" />
                     </svg>
-                </Link>
-                <h2 class="font-bold text-xl text-slate-800 leading-tight">
-                    รายละเอียดการเข้ารับบริการ <span class="text-slate-400 font-normal text-sm ml-2">#{{ visit.id }}</span>
-                </h2>
-                <span class="px-3 py-1 text-xs rounded-full font-bold uppercase tracking-wide ring-1 ring-inset"
-                    :class="{
-                        'bg-emerald-50 text-emerald-700 ring-emerald-600/20': visit.status === 'completed', 
-                        'bg-blue-50 text-blue-700 ring-blue-600/20': visit.status === 'ongoing', 
-                        'bg-slate-50 text-slate-700 ring-slate-600/20': visit.status === 'pending'
-                    }">
-                    {{ getStatusLabel(visit.status) }}
-                </span>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+                    </svg>
+                    <span>{{ viewMode === 'default' ? 'มุมมองแบบย่อ' : 'มุมมองปกติ' }}</span>
+                </button>
             </div>
         </template>
 
-        <div class="py-12">
+        <div :class="viewMode === 'compact' ? 'py-6' : 'py-12'">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 
                 <!-- Main Card -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-6">
-                    <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                    <div :class="viewMode === 'compact' ? 'px-4 py-3' : 'px-6 py-5'" class="border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                          <div>
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">ผู้ป่วย (Patient)</p>
                             <h3 class="font-bold text-slate-900 text-lg flex items-center gap-2">
@@ -142,7 +163,7 @@ const deletePayment = (id) => {
                         </div>
                     </div>
                     
-                    <div class="p-8 space-y-8">
+                    <div :class="viewMode === 'compact' ? 'p-4 space-y-4' : 'p-8 space-y-8'">
                         <!-- Clinical Info -->
                         <div>
                             <h4 class="font-bold text-slate-800 border-b border-slate-100 pb-2 mb-4 flex items-center gap-2 text-lg">
@@ -151,13 +172,13 @@ const deletePayment = (id) => {
                                 </svg>
                                 ข้อมูลทั่วไปทางคลินิก
                             </h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100">
+                            <div :class="viewMode === 'compact' ? 'grid grid-cols-1 md:grid-cols-4 gap-4' : 'grid grid-cols-1 md:grid-cols-2 gap-6'">
+                                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100" :class="viewMode === 'compact' ? 'md:col-span-2' : ''">
                                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">อาการเบื้องต้น (Symptoms / CC)</p>
                                     <p class="text-slate-900 font-medium leading-relaxed">{{ visit.symptoms || '-' }}</p>
                                 </div>
                                 
-                                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm" :class="viewMode === 'compact' ? 'md:col-span-2' : ''">
                                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">แพทย์ผู้ดูแล (Doctor)</p>
                                     <div class="flex items-center gap-3">
                                         <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
@@ -170,7 +191,7 @@ const deletePayment = (id) => {
                                     </div>
                                 </div>
 
-                                <div class="md:col-span-2" v-if="visit.notes">
+                                <div :class="viewMode === 'compact' ? 'md:col-span-4' : 'md:col-span-2'" v-if="visit.notes">
                                     <div class="bg-amber-50/50 p-4 rounded-xl border border-amber-100">
                                         <p class="text-[10px] font-bold text-amber-500 uppercase tracking-wider mb-1">บันทึกเพิ่มเติม (Notes)</p>
                                         <p class="text-slate-700 text-sm">{{ visit.notes }}</p>
@@ -216,7 +237,7 @@ const deletePayment = (id) => {
 
                 <!-- Treatment Record Section -->
                 <div v-if="visit.treatment_record" class="mt-8 bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-indigo-100">
-                    <div class="bg-white px-8 py-6 border-b border-slate-100 flex justify-between items-center">
+                    <div :class="viewMode === 'compact' ? 'px-4 py-3' : 'px-8 py-6'" class="bg-white border-b border-slate-100 flex justify-between items-center">
                         <div>
                             <h3 class="font-black text-slate-800 text-2xl flex items-center gap-3">
                                 <span>บันทึกเวชระเบียน</span>
@@ -232,9 +253,9 @@ const deletePayment = (id) => {
                         </Link>
                     </div>
                     
-                    <div class="p-6">
+                    <div :class="viewMode === 'compact' ? 'p-4' : 'p-6'">
                         <!-- 3-Column Grid: Left (Vitals, Clinical, PE) spans 2 | Right (Body Map) spans 1 -->
-                        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
+                        <div :class="viewMode === 'compact' ? 'mb-4 gap-4' : 'mb-8 gap-6'" class="grid grid-cols-1 xl:grid-cols-3">
                             
                             <!-- Column 1: Vitals, Clinical, PE (Spans 2) -->
                             <div class="space-y-6 xl:col-span-2">
@@ -246,7 +267,7 @@ const deletePayment = (id) => {
                                         </svg>
                                         สัญญาณชีพ (VITAL SIGNS)
                                     </h4>
-                                    <div class="grid grid-cols-2 gap-4">
+                                    <div :class="viewMode === 'compact' ? 'grid-cols-4 gap-2' : 'grid-cols-2 gap-4'" class="grid">
                                         <!-- BP -->
                                         <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-1 hover:border-indigo-200 transition-colors">
                                             <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">BP</span>
@@ -273,7 +294,7 @@ const deletePayment = (id) => {
                                         </div>
                                         
                                         <!-- W/H -->
-                                        <div class="col-span-2 bg-slate-50 p-3 rounded-xl border border-slate-100 flex justify-around items-center mt-2">
+                                        <div :class="viewMode === 'compact' ? 'col-span-4 mt-1 py-2' : 'col-span-2 mt-2 p-3'" class="bg-slate-50 rounded-xl border border-slate-100 flex justify-around items-center">
                                             <div class="flex flex-col items-center">
                                                 <span class="text-[9px] text-slate-400 uppercase font-bold">Weight</span>
                                                 <span class="font-bold text-slate-700">{{ visit.treatment_record.weight || '-' }} <span class="text-[10px] font-normal text-slate-400">kg</span></span>
@@ -332,7 +353,9 @@ const deletePayment = (id) => {
                                 </h4>
                                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-full">
                                     <!-- Body Selector (Preview) -->
-                                    <div class="relative group cursor-pointer bg-slate-50/30 flex items-center justify-center h-96 overflow-hidden" @click="showBodyMapModal = true">
+                                    <div class="relative group cursor-pointer bg-slate-50/30 flex items-center justify-center overflow-hidden" 
+                                        :class="viewMode === 'compact' ? 'h-64' : 'h-96'"
+                                        @click="showBodyMapModal = true">
                                          <div v-if="visit.treatment_record.pain_areas && visit.treatment_record.pain_areas.length > 0" class="w-full h-full p-4 pointer-events-none">
                                             <BodyPartSelector :model-value="visit.treatment_record.pain_areas" :readonly="true" :thumbnail="true" />
                                         </div>
@@ -462,7 +485,7 @@ const deletePayment = (id) => {
 
                 <!-- Financial & Payments Section -->
                 <div class="mt-8 bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-emerald-100">
-                    <div class="bg-gradient-to-r from-emerald-50 to-white px-8 py-6 border-b border-emerald-100 flex justify-between items-center">
+                    <div :class="viewMode === 'compact' ? 'px-4 py-3' : 'px-8 py-6'" class="bg-gradient-to-r from-emerald-50 to-white border-b border-emerald-100 flex justify-between items-center">
                         <h3 class="font-bold text-emerald-900 text-xl flex items-center gap-3">
                             <div class="p-2 bg-emerald-100 rounded-lg text-emerald-600">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -499,7 +522,7 @@ const deletePayment = (id) => {
                         </div>
                     </div>
                     
-                    <div class="p-8">
+                    <div :class="viewMode === 'compact' ? 'p-4' : 'p-8'">
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                             <!-- Payment History -->
                             <div class="lg:col-span-2 space-y-6">
@@ -641,7 +664,7 @@ const deletePayment = (id) => {
 
                 <!-- Documents Section -->
                 <div class="mt-8 bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-slate-100 mb-8">
-                    <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <div :class="viewMode === 'compact' ? 'px-4 py-3' : 'px-8 py-6'" class="border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                         <h3 class="font-bold text-slate-800 text-xl flex items-center gap-3">
                             <div class="p-2 bg-indigo-100 rounded-lg text-indigo-600">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -651,7 +674,7 @@ const deletePayment = (id) => {
                             เอกสาร (Documents)
                         </h3>
                     </div>
-                    <div class="p-8 flex flex-wrap gap-4">
+                    <div :class="viewMode === 'compact' ? 'p-4' : 'p-8'" class="flex flex-wrap gap-4">
                         <a :href="route('admin.documents.receipt', visit.id)" target="_blank" class="flex items-center gap-3 px-5 py-3 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-indigo-300 hover:shadow-md transition-all group min-w-[200px]">
                              <div class="p-2 bg-indigo-50 rounded-lg text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">

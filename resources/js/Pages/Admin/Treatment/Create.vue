@@ -2,6 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, useForm, Link } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
+import PainLevelSelector from '@/Components/PainLevelSelector.vue';
 import BodyPartSelector from '@/Components/BodyPartSelector.vue';
 
 const props = defineProps({
@@ -208,12 +209,7 @@ const handleSave = (action) => {
     });
 };
 
-const getPainColor = (level) => {
-    const val = parseInt(level) || 0;
-    if (val <= 3) return 'bg-emerald-100 text-emerald-700';
-    if (val <= 6) return 'bg-amber-100 text-amber-700';
-    return 'bg-rose-100 text-rose-700';
-};
+
 
 const bmi = computed(() => {
     if (form.weight && form.height) {
@@ -400,20 +396,18 @@ const bmiColor = computed(() => {
                                                     <input type="text" v-model="item.symptom" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" placeholder="Ex. ปวดตึง, ร้าวลงขา...">
                                                     <InputError :message="form.errors[`pain_areas.${index}.symptom`]" class="mt-1" />
                                                 </div>
-                                                <div>
-                                                    <div class="flex justify-between items-center mb-1">
-                                                        <label class="block text-xs font-medium text-slate-600">ความปวด (ก่อน)</label>
-                                                        <span class="text-xs font-bold px-2 py-0.5 rounded" :class="getPainColor(item.pain_level)">{{ item.pain_level || 0 }}</span>
-                                                    </div>
-                                                    <input type="range" min="0" max="10" step="1" v-model="item.pain_level" class="w-full accent-indigo-600 cursor-pointer">
+                                                <div class="col-span-2 sm:col-span-1">
+                                                    <PainLevelSelector 
+                                                        v-model="item.pain_level" 
+                                                        label="ความปวด (ก่อน)" 
+                                                    />
                                                     <InputError :message="form.errors[`pain_areas.${index}.pain_level`]" class="mt-1" />
                                                 </div>
-                                                <div>
-                                                    <div class="flex justify-between items-center mb-1">
-                                                        <label class="block text-xs font-medium text-slate-600">ความปวด (หลัง)</label>
-                                                        <span class="text-xs font-bold px-2 py-0.5 rounded" :class="getPainColor(item.pain_level_after)">{{ item.pain_level_after || 0 }}</span>
-                                                    </div>
-                                                    <input type="range" min="0" max="10" step="1" v-model="item.pain_level_after" class="w-full accent-emerald-600 cursor-pointer">
+                                                <div class="col-span-2 sm:col-span-1">
+                                                    <PainLevelSelector 
+                                                        v-model="item.pain_level_after" 
+                                                        label="ความปวด (หลัง)" 
+                                                    />
                                                     <InputError :message="form.errors[`pain_areas.${index}.pain_level_after`]" class="mt-1" />
                                                 </div>
                                             </div>

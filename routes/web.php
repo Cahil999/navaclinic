@@ -19,7 +19,9 @@ Route::get('/nava-clinic', function () {
 })->name('welcome');
 
 Route::get('/services', function () {
-    return Inertia::render('Services');
+    return Inertia::render('Services', [
+        'initialServices' => \App\Models\Service::where('is_active', true)->get()
+    ]);
 })->name('services');
 
 Route::get('/siam-retreat', function () {
@@ -259,6 +261,17 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         'edit' => 'admin.packages.edit',
         'update' => 'admin.packages.update',
         'destroy' => 'admin.packages.destroy',
+    ]);
+
+    // Services
+    Route::resource('services', \App\Http\Controllers\Admin\ServiceController::class)->names([
+        'index' => 'admin.services.index',
+        'create' => 'admin.services.create',
+        'store' => 'admin.services.store',
+        'show' => 'admin.services.show',
+        'edit' => 'admin.services.edit',
+        'update' => 'admin.services.update',
+        'destroy' => 'admin.services.destroy',
     ]);
 
     // Assign Package to Patient
