@@ -229,7 +229,7 @@ const deletePayment = (id) => {
                                 v-if="visit.treatment_record?.pain_areas"
                                 :model-value="visit.treatment_record.pain_areas" 
                                 :readonly="true" 
-                                :thumbnail="true"
+                                :compact-grid="true"
                             />
                              <div v-else class="text-slate-300 flex flex-col items-center">
                                  <svg class="w-12 h-12 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
@@ -274,10 +274,10 @@ const deletePayment = (id) => {
                 </div>
 
                 <!-- Col 3: Plan & Payment (4 Cols) -->
-                <div class="col-span-4 flex flex-col gap-3 h-full overflow-hidden">
+                <div class="col-span-4 flex flex-col gap-3 h-full overflow-y-auto custom-scrollbar pr-1">
                     
                     <!-- Treatment Plan -->
-                     <div class="bg-white rounded-xl border border-slate-200 shadow-sm flex-1 flex flex-col min-h-0 overflow-hidden">
+                     <div class="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col shrink-0 overflow-hidden">
                         <div class="px-3 py-2 border-b border-slate-100 bg-slate-50 flex justify-between items-center sticky top-0 shrink-0">
                             <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">แผนการรักษา (Plan)</h3>
                              <Link
@@ -295,7 +295,7 @@ const deletePayment = (id) => {
                                 แก้ไข
                             </Link>
                         </div>
-                        <div class="p-3 flex-1 overflow-y-auto text-xs text-slate-700 leading-relaxed space-y-3">
+                        <div class="p-3 text-xs text-slate-700 leading-relaxed space-y-3">
                              <div v-if="visit.treatment_record?.treatment_details" class="whitespace-pre-wrap">
                                 {{ visit.treatment_record.treatment_details }}
                              </div>

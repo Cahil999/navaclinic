@@ -23,6 +23,10 @@ const props = defineProps({
         type: Boolean,
         default: false
     },
+    compactGrid: {
+        type: Boolean,
+        default: false
+    },
     thumbnail: {
         type: Boolean,
         default: false
@@ -175,10 +179,97 @@ const removeItem = (item) => {
 </script>
 
 <template>
-    <div class="flex flex-col gap-4" :class="{ 'h-full': thumbnail }">
+    <div class="flex flex-col gap-4" :class="{ 'h-full': thumbnail || compactGrid }">
         
-        <!-- Thumbnail Mode (Tiny Preview for Dashboard) -->
-        <div v-if="thumbnail" class="flex flex-col gap-2 w-full h-full p-1">
+        <!-- Compact Grid Mode (Detailed Fixed Layout for Dashboard) -->
+        <div v-if="compactGrid" class="grid grid-cols-4 grid-rows-3 gap-2 w-full h-full p-2">
+            <!-- Front (Col 1, Row 1-3) -->
+            <div class="row-span-3 relative flex flex-col items-center justify-center bg-white rounded-lg border border-slate-100 p-2 shadow-sm hover:border-indigo-200 transition-colors">
+                <div class="w-full h-full flex items-center justify-center pointer-events-none">
+                     <InteractiveSvg 
+                        :src="viewGroups[0].options[0].file"
+                        :selected-parts="getPartsForView(viewGroups[0].options[0])"
+                        class="max-w-full max-h-full w-auto h-auto"
+                     />
+                 </div>
+                 <span class="text-[9px] text-slate-500 font-bold uppercase mt-1 leading-none">{{ viewGroups[0].options[0].label }}</span>
+            </div>
+
+            <!-- Back (Col 2, Row 1-3) -->
+            <div class="row-span-3 relative flex flex-col items-center justify-center bg-white rounded-lg border border-slate-100 p-2 shadow-sm hover:border-indigo-200 transition-colors">
+                <div class="w-full h-full flex items-center justify-center pointer-events-none">
+                     <InteractiveSvg 
+                        :src="viewGroups[0].options[1].file"
+                        :selected-parts="getPartsForView(viewGroups[0].options[1])"
+                        class="max-w-full max-h-full w-auto h-auto"
+                     />
+                 </div>
+                 <span class="text-[9px] text-slate-500 font-bold uppercase mt-1 leading-none">{{ viewGroups[0].options[1].label }}</span>
+            </div>
+
+            <!-- Head (Col 3-4, Row 1) -->
+            <div class="col-span-2 relative flex flex-col items-center justify-center bg-white rounded-lg border border-slate-100 p-2 shadow-sm hover:border-indigo-200 transition-colors">
+                 <div class="w-full h-full flex items-center justify-center pointer-events-none">
+                     <InteractiveSvg 
+                        :src="viewGroups[0].options[2].file"
+                        :selected-parts="getPartsForView(viewGroups[0].options[2])"
+                        class="max-w-full max-h-full w-auto h-auto"
+                     />
+                 </div>
+                 <span class="text-[9px] text-slate-500 font-bold uppercase mt-1 leading-none">{{ viewGroups[0].options[2].label }}</span>
+            </div>
+
+            <!-- Hand L (Col 3, Row 2) -->
+            <div class="relative flex flex-col items-center justify-center bg-white rounded-lg border border-slate-100 p-2 shadow-sm hover:border-indigo-200 transition-colors">
+                 <div class="w-full h-full flex items-center justify-center pointer-events-none">
+                     <InteractiveSvg 
+                        :src="viewGroups[1].options[0].file"
+                        :selected-parts="getPartsForView(viewGroups[1].options[0])"
+                        class="max-w-full max-h-full w-auto h-auto"
+                     />
+                 </div>
+                 <span class="text-[8px] text-slate-400 font-bold uppercase mt-1 leading-none">{{ viewGroups[1].options[0].label }}</span>
+            </div>
+
+            <!-- Hand R (Col 4, Row 2) -->
+            <div class="relative flex flex-col items-center justify-center bg-white rounded-lg border border-slate-100 p-2 shadow-sm hover:border-indigo-200 transition-colors">
+                 <div class="w-full h-full flex items-center justify-center pointer-events-none">
+                     <InteractiveSvg 
+                        :src="viewGroups[1].options[1].file"
+                        :selected-parts="getPartsForView(viewGroups[1].options[1])"
+                        class="max-w-full max-h-full w-auto h-auto"
+                     />
+                 </div>
+                 <span class="text-[8px] text-slate-400 font-bold uppercase mt-1 leading-none">{{ viewGroups[1].options[1].label }}</span>
+            </div>
+
+            <!-- Foot L (Col 3, Row 3) -->
+            <div class="relative flex flex-col items-center justify-center bg-white rounded-lg border border-slate-100 p-2 shadow-sm hover:border-indigo-200 transition-colors">
+                 <div class="w-full h-full flex items-center justify-center pointer-events-none">
+                     <InteractiveSvg 
+                        :src="viewGroups[2].options[0].file"
+                        :selected-parts="getPartsForView(viewGroups[2].options[0])"
+                        class="max-w-full max-h-full w-auto h-auto"
+                     />
+                 </div>
+                 <span class="text-[8px] text-slate-400 font-bold uppercase mt-1 leading-none">{{ viewGroups[2].options[0].label }}</span>
+            </div>
+
+            <!-- Foot R (Col 4, Row 3) -->
+            <div class="relative flex flex-col items-center justify-center bg-white rounded-lg border border-slate-100 p-2 shadow-sm hover:border-indigo-200 transition-colors">
+                 <div class="w-full h-full flex items-center justify-center pointer-events-none">
+                     <InteractiveSvg 
+                        :src="viewGroups[2].options[1].file"
+                        :selected-parts="getPartsForView(viewGroups[2].options[1])"
+                        class="max-w-full max-h-full w-auto h-auto"
+                     />
+                 </div>
+                 <span class="text-[8px] text-slate-400 font-bold uppercase mt-1 leading-none">{{ viewGroups[2].options[1].label }}</span>
+            </div>
+        </div>
+        
+        <!-- Thumbnail Mode (Tiny Preview - ORIGINAL) -->
+        <div v-else-if="thumbnail" class="flex flex-col gap-2 w-full h-full p-1">
              <!-- Row 1: Body & Head (3 items) -->
              <div class="grid grid-cols-3 gap-2 flex-1 min-h-0">
                  <div v-for="view in viewGroups[0].options" :key="view.id" 
