@@ -114,15 +114,15 @@ const props = defineProps({
             <!-- Dashboard Grid -->
             <div class="flex-1 min-h-0 p-3 grid grid-cols-12 gap-3">
                 
-                <!-- Col 1: Medical Summary (3 Cols) -->
-                <div class="col-span-3 flex flex-col gap-3 h-full overflow-hidden">
+                <!-- Col 1: Medical Summary (2 Cols) -->
+                <div class="col-span-2 flex flex-col gap-3 h-full overflow-hidden">
                     <!-- Vitals -->
                     <div class="bg-white rounded-xl border border-slate-200 p-3 shadow-sm shrink-0">
                          <h3 class="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1 tracking-wider">
                             <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                             Vital Signs
                          </h3>
-                         <div class="grid grid-cols-2 gap-2">
+                         <div class="grid grid-cols-1 xl:grid-cols-2 gap-2">
                              <div class="bg-indigo-50/50 p-2 rounded-lg border border-indigo-100 text-center">
                                  <div class="text-[9px] text-slate-400 uppercase font-bold">BP</div>
                                  <div class="font-bold text-indigo-700 text-sm">{{ visit.treatment_record?.blood_pressure || '-' }}</div>
@@ -164,8 +164,8 @@ const props = defineProps({
                      </div>
                 </div>
 
-                <!-- Col 2: Body Map (5 Cols) -->
-                <div class="col-span-5 flex flex-col gap-3 h-full overflow-hidden">
+                <!-- Col 2: Body Map (8 Cols) -->
+                <div class="col-span-8 flex flex-col gap-3 h-full overflow-hidden">
                      <div class="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col h-full overflow-hidden relative">
                         <div class="absolute top-3 left-3 z-10 pointer-events-none">
                              <span class="bg-white/90 backdrop-blur px-2.5 py-1 rounded-md border border-slate-200 text-[10px] font-bold text-slate-600 shadow-sm uppercase tracking-wider">
@@ -223,24 +223,24 @@ const props = defineProps({
                      </div>
                 </div>
 
-                <!-- Col 3: Plan & Payment (4 Cols) -->
-                <div class="col-span-4 flex flex-col gap-3 h-full overflow-y-auto custom-scrollbar pr-1">
+                <!-- Col 3: Plan & Payment (2 Cols) -->
+                <div class="col-span-2 flex flex-col gap-3 h-full overflow-y-auto custom-scrollbar pr-1">
                     
                     <!-- Treatment Plan -->
                      <div class="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col flex-1 min-h-0 overflow-hidden">
                         <div class="px-3 py-2 border-b border-slate-100 bg-slate-50 flex justify-between items-center sticky top-0 shrink-0">
-                            <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">แผนการรักษา (Treatment Plan)</h3>
+                            <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">แผน (Plan)</h3>
                              <Link
                                 v-if="!visit.treatment_record"
                                 :href="route('admin.visits.treatment.create', visit.id)"
-                                class="text-[10px] bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-0.5 rounded shadow transition-colors font-bold"
+                                class="text-[9px] bg-indigo-600 hover:bg-indigo-700 text-white px-1.5 py-0.5 rounded shadow transition-colors font-bold"
                             >
-                                + เพิ่มบันทึก
+                                + เพิ่ม
                             </Link>
                              <Link
                                 v-else
                                 :href="route('admin.visits.treatment.create', visit.id)"
-                                class="text-[10px] text-indigo-600 hover:text-indigo-800 font-bold bg-indigo-50 px-2 py-0.5 rounded hover:bg-indigo-100 transition-colors"
+                                class="text-[9px] text-indigo-600 hover:text-indigo-800 font-bold bg-indigo-50 px-1.5 py-0.5 rounded hover:bg-indigo-100 transition-colors"
                             >
                                 แก้ไข
                             </Link>
@@ -252,7 +252,7 @@ const props = defineProps({
                              <div v-else class="text-slate-400 italic text-center py-4">ยังไม่ได้ระบุรายละเอียด</div>
 
                              <!-- Plan Attributes -->
-                             <div v-if="visit.treatment_record" class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-slate-50">
+                             <div v-if="visit.treatment_record" class="grid grid-cols-1 gap-2 mt-2 pt-2 border-t border-slate-50">
                                 <div class="bg-slate-50 p-2 rounded border border-slate-100">
                                     <div class="text-[9px] text-slate-400 uppercase tracking-wider mb-0.5">น้ำหนักมือ</div>
                                     <div class="font-bold text-slate-700">{{ visit.treatment_record.massage_weight || '-' }}</div>
@@ -269,14 +269,14 @@ const props = defineProps({
 
                      <!-- Payment & Docs -->
                      <!-- Docs Only -->
-                     <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 shrink-0">
-                          <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">เอกสาร (Documents)</h3>
-                          <div class="flex gap-2">
-                              <a :href="route('admin.documents.receipt', visit.id)" target="_blank" class="flex-1 text-center py-2 text-[10px] font-bold bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-lg text-slate-600 hover:text-indigo-600 transition-all uppercase tracking-wide flex items-center justify-center gap-1">
+                     <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-3 shrink-0">
+                          <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">เอกสาร (Docs)</h3>
+                          <div class="flex flex-col gap-2">
+                              <a :href="route('admin.documents.receipt', visit.id)" target="_blank" class="w-full text-center py-1.5 text-[10px] font-bold bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-lg text-slate-600 hover:text-indigo-600 transition-all uppercase tracking-wide flex items-center justify-center gap-1">
                                 <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                                 ใบเสร็จ
                               </a>
-                              <a :href="route('admin.documents.medical-certificate', visit.id)" target="_blank" class="flex-1 text-center py-2 text-[10px] font-bold bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-lg text-slate-600 hover:text-indigo-600 transition-all uppercase tracking-wide">ใบรับรองแพทย์</a>
+                              <a :href="route('admin.documents.medical-certificate', visit.id)" target="_blank" class="w-full text-center py-1.5 text-[10px] font-bold bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-lg text-slate-600 hover:text-indigo-600 transition-all uppercase tracking-wide">ใบรับรองแพทย์</a>
                           </div>
                      </div>
                 </div>
