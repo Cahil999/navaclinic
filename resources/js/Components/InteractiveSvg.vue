@@ -81,7 +81,7 @@ const cleanName = (rawName) => {
 
 const handleSvgClick = (event) => {
     // Find closest interactive element
-    const interactiveClasses = ['.muscle', '.interactive-muscle', '.interactive-muscle-group', '.static-part']; 
+    const interactiveClasses = ['.muscle', '.interactive-muscle', '.interactive-muscle-group', '.interactive-part', '.outline-detail']; 
     
     let target = event.target;
     let interactiveElement = null;
@@ -178,6 +178,7 @@ watch(() => props.selectedParts, () => {
 <style>
 /* Global SVG Overrides when inside this container */
 /* Global SVG Overrides when inside this container */
+/* Global SVG Overrides when inside this container */
 .interactive-svg-container svg {
     max-height: 100%;
     width: 100%;
@@ -187,16 +188,21 @@ watch(() => props.selectedParts, () => {
     filter: none !important; /* Disable any filters */
     transform: scale(0.92); /* Shrink slightly to ensure strokes at edges aren't clipped */
     transform-origin: center;
+    /* CRITICAL: Default to no pointer events to prevent overlays from blocking clicks */
+    pointer-events: none; 
 }
 
 .interactive-svg-container.unconstrained svg {
     max-height: none;
 }
 
+/* Only enable pointer events on specific interactive elements */
 .interactive-svg-container .muscle, 
 .interactive-svg-container .interactive-muscle,
 .interactive-svg-container .interactive-muscle-group,
-.interactive-svg-container .static-part { 
+.interactive-svg-container .interactive-part,
+.interactive-svg-container .outline-detail { 
+    pointer-events: all !important; /* Re-enable clicks */
     cursor: pointer; 
     transition: fill 0.2s ease, stroke 0.2s ease;
     fill: #ffffff; /* Default fill */
@@ -207,6 +213,14 @@ watch(() => props.selectedParts, () => {
     vector-effect: non-scaling-stroke; /* Keep stroke constant on zoom so lines don't disappear */
 }
 
+/* Static parts should be overlays */
+.interactive-svg-container .static-part {
+    fill: none !important;
+    stroke: #101028;
+    stroke-width: 0.5px;
+    pointer-events: none !important;
+}
+
 /* Fix for internal detail lines in some SVGs (like hands/feet) that rely on opacity */
 .interactive-svg-container .detail-line {
     stroke: #475569 !important;
@@ -214,15 +228,18 @@ watch(() => props.selectedParts, () => {
     stroke-opacity: 1 !important;
     opacity: 1 !important;
     fill: none !important;
+    pointer-events: none !important;
 }
 
 /* Hover effects */
 .interactive-svg-container .muscle:hover,
 .interactive-svg-container .interactive-muscle:hover,
 .interactive-svg-container .interactive-muscle-group:hover,
-.interactive-svg-container .static-part:hover {
-    fill: #fecdd3 !important; /* Rose 200 */
-    opacity: 0.8;
+.interactive-svg-container .interactive-part:hover,
+.interactive-svg-container .outline-detail:hover {
+    fill: #86efac !important; /* Green 300 */
+    opacity: 0.8 !important;
+    stroke: #16a34a !important; /* Green 600 */
 }
 
 /* Selected state - Aggressive Red */
@@ -233,6 +250,7 @@ watch(() => props.selectedParts, () => {
     stroke: #7f1d1d !important; /* Red 900 - Darker border for selected */
     opacity: 1 !important;
     stroke-width: 1.5px !important;
+    pointer-events: all !important;
 }
 
 /* Ensure children inherit the red color if the group is selected */

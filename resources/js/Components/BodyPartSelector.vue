@@ -39,381 +39,262 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
-// View Management
-const currentView = ref('front');
-
-const viewGroups = [
-    {
-        label: 'ร่างกาย (Body)',
-        options: [
-            { id: 'front', label: 'หน้า', fullLabel: 'เต็มตัว (หน้า)', file: '/images/body/Front_body_interactive.svg', prefix: '' },
-            { id: 'back', label: 'หลัง', fullLabel: 'เต็มตัว (หลัง)', file: '/images/body/Interactive_Map_Final.svg', prefix: '' },
-            { id: 'head', label: 'ศีรษะ', fullLabel: 'ศีรษะ', file: '/images/body/head_interactive.svg', prefix: 'Head_' },
-        ]
-    },
-    {
-        label: 'มือ (Hands)',
-        options: [
-            { id: 'hand_l', label: 'ซ้าย', fullLabel: 'มือซ้าย', file: '/images/body/hand2_interactive_L.svg', prefix: 'Hand_L_' },
-            { id: 'hand_r', label: 'ขวา', fullLabel: 'มือขวา', file: '/images/body/hand2_interactive_R.svg', prefix: 'Hand_R_' },
-        ]
-    },
-    {
-        label: 'เท้า (Feet)',
-        options: [
-            { id: 'foot_l', label: 'ซ้าย', fullLabel: 'เท้าซ้าย', file: '/images/body/foot_interactive_L.svg', prefix: 'Foot_L_' },
-            { id: 'foot_r', label: 'ขวา', fullLabel: 'เท้าขวา', file: '/images/body/foot_interactive_R.svg', prefix: 'Foot_R_' },
-        ]
-    }
-];
-
-const allViews = computed(() => viewGroups.flatMap(g => g.options));
-
-const currentSvgParams = computed(() => {
-    return allViews.value.find(v => v.id === currentView.value);
-});
-
-// Selection Logic
-// Helper to get parts for a specific view configuration
-const getPartsForView = (viewParams) => {
-    const currentPrefix = viewParams?.prefix || '';
+    // View Management
+    const currentView = ref('upper_front');
     
-    // Extract just the area/ID names from the modelValue
-    return props.modelValue.reduce((acc, item) => {
-        const rawName = typeof item === 'object' ? item.area : item;
-        
-        if (currentPrefix) {
-            if (rawName.startsWith(currentPrefix)) {
-                acc.push(rawName.substring(currentPrefix.length));
-            }
-        } else {
-            // Body View (Front/Back) - take everything?
-            // If we have a prefix match for something else (e.g. Hand_L_), do we show it on Body?
-            // Usually not, unless Body SVG has that ID.
-            // For safety, Body view gets everything, assuming ID collision is handled by SVG content.
-            acc.push(rawName);
+    const viewGroups = [
+        {
+            label: 'ศีรษะ & ลำตัว (Head & Body)',
+            options: [
+                { id: 'head_v2', label: 'ศีรษะ', fullLabel: 'ศีรษะ (Head)', file: '/images/body/v2/head_model2.svg', prefix: 'Head_' },
+                { id: 'head_side_v2', label: 'ศีรษะ (ข้าง)', fullLabel: 'ศีรษะ (Side)', file: '/images/body/v2/head_side2.svg', prefix: 'HeadSide_' },
+                { id: 'upper_front_v2', label: 'อก/ไหล่', fullLabel: 'ลำตัวส่วนบน (หน้า)', file: '/images/body/v2/upper_front.svg', prefix: 'UpperFront_' },
+                { id: 'middle_front_v2', label: 'ท้อง (หน้า)', fullLabel: 'ลำตัวส่วนกลาง (หน้า)', file: '/images/body/v2/middle_front.svg', prefix: 'MidFront_' },
+                { id: 'full_upper_back_v2', label: 'หลังบน', fullLabel: 'หลังส่วนบน', file: '/images/body/v2/full_upper_back.svg', prefix: 'UpperBack_' },
+                { id: 'full_middle_back_v2', label: 'หลังกลาง', fullLabel: 'หลังส่วนกลาง', file: '/images/body/v2/full_middle_back.svg', prefix: 'MidBack_' },
+                { id: 'full_lower_back_v2', label: 'หลังล่าง', fullLabel: 'หลังส่วนล่าง', file: '/images/body/v2/Full_lower_back.svg', prefix: 'LowerBack_' },
+            ]
+        },
+        {
+            label: 'แขน (Arms)',
+            options: [
+                { id: 'bizeps_v2', label: 'กล้ามแขน', fullLabel: 'ไบเซ็ปส์ (Biceps)', file: '/images/body/v2/Bizeps2.svg', prefix: 'Biceps_' },
+                { id: 'arm_model_v2', label: 'แขน', fullLabel: 'แขน (Arm Model)', file: '/images/body/v2/arm_model3.svg', prefix: 'Arm_' },
+            ]
+        },
+        {
+            label: 'ขา (Legs)',
+            options: [
+                { id: 'upper_leg_front_v2', label: 'ขาบน (หน้า)', fullLabel: 'ขาบน (หน้า)', file: '/images/body/v2/upper_leg_front.svg', prefix: 'UpperLegF_' },
+                { id: 'lower_leg_front_v2', label: 'ขาล่าง (หน้า)', fullLabel: 'ขาล่าง (หน้า)', file: '/images/body/v2/lower_leg_front.svg', prefix: 'LowerLegF_' },
+                { id: 'upper_leg_back_v2', label: 'ขาบน (หลัง)', fullLabel: 'ขาบน (หลัง)', file: '/images/body/v2/upper_leg_back.svg', prefix: 'UpperLegB_' },
+                { id: 'lower_leg_back_v2', label: 'ขาล่าง (หลัง)', fullLabel: 'ขาล่าง (หลัง)', file: '/images/body/v2/lower_leg_back.svg', prefix: 'LowerLegB_' },
+                { id: 'side_leg_v2', label: 'ขา (ข้าง)', fullLabel: 'ขา (ข้าง)', file: '/images/body/v2/side_leg.svg', prefix: 'SideLeg_' },
+            ]
         }
-        return acc;
-    }, []);
-};
-
-// Selection Logic for Single View Mode
-const selectedParts = computed(() => {
-    return getPartsForView(currentSvgParams.value);
-});
-
-const handleToggle = (rawPartName, specificViewParams = null) => {
-    if (props.readonly) return;
+    ];
     
-    // If specificViewParams is passed (Expand All Mode), use it. Otherwise use current global view.
-    const viewParams = specificViewParams || currentSvgParams.value;
+    const allViews = computed(() => viewGroups.flatMap(g => g.options));
     
-    // Prepend prefix if applicable (e.g. Hand_L_Thumb)
-    const prefix = viewParams?.prefix || '';
-    const partName = prefix + rawPartName;
-    
-    // Check if exists
-    const existingIndex = props.modelValue.findIndex(item => {
-        const name = typeof item === 'object' ? item.area : item;
-        return name === partName;
+    const currentSvgParams = computed(() => {
+        return allViews.value.find(v => v.id === currentView.value) || allViews.value[0];
     });
-
-    const newValue = [...props.modelValue];
     
-    if (existingIndex !== -1) {
-        // Remove
-        newValue.splice(existingIndex, 1);
-    } else {
-        // Add
-        // If the modelValue contains objects, add an object structure
-        // If strings, add string.
-        // Heuristic: check first element. If empty, default to object if complex usage expected, or string if simple.
-        // In this app, Create.vue converts strings to objects on load, but starts with empty.
-        // Standardize: If we are adding to an empty list, assume object structure for consistency with Visit/Treatment record which stores { area:..., symptom:... }
-        // BUT, Create.vue expects objects for the form.
+    // Selection Logic
+    // Helper to get parts for a specific view configuration
+    const getPartsForView = (viewParams) => {
+        const currentPrefix = viewParams?.prefix || '';
         
-        // Default to string mode if empty, assuming parent manages objects if explicit mapping wasn't used.
-        // This prevents the bug where new items act as objects when the parent expects strings.
-        const isObjectMode = props.modelValue.length > 0 && typeof props.modelValue[0] === 'object';
+        // Extract just the area/ID names from the modelValue
+        return props.modelValue.reduce((acc, item) => {
+            const rawName = typeof item === 'object' ? item.area : item;
+            
+            if (currentPrefix) {
+                if (rawName.startsWith(currentPrefix)) {
+                    acc.push(rawName.substring(currentPrefix.length));
+                }
+            } else {
+                // Should not happen with new setup as all have prefixes
+                acc.push(rawName);
+            }
+            return acc;
+        }, []);
+    };
+    
+    // Selection Logic for Single View Mode
+    const selectedParts = computed(() => {
+        return getPartsForView(currentSvgParams.value);
+    });
+    
+    const handleToggle = (rawPartName, specificViewParams = null) => {
+        if (props.readonly) return;
         
-        if (isObjectMode) {
-            newValue.push({
-                area: partName,
-                symptom: '',
-                pain_level: '',
-                pain_level_after: '',
-                characteristic: ''
-            });
+        // If specificViewParams is passed (Expand All Mode), use it. Otherwise use current global view.
+        const viewParams = specificViewParams || currentSvgParams.value;
+        
+        // Prepend prefix if applicable (e.g. Hand_L_Thumb)
+        const prefix = viewParams?.prefix || '';
+        const partName = prefix + rawPartName;
+        
+        // Check if exists
+        const existingIndex = props.modelValue.findIndex(item => {
+            const name = typeof item === 'object' ? item.area : item;
+            return name === partName;
+        });
+    
+        const newValue = [...props.modelValue];
+        
+        if (existingIndex !== -1) {
+            // Remove
+            newValue.splice(existingIndex, 1);
         } else {
-            newValue.push(partName);
+            // Add
+            const isObjectMode = props.modelValue.length > 0 && typeof props.modelValue[0] === 'object';
+            
+            if (isObjectMode) {
+                newValue.push({
+                    area: partName,
+                    symptom: '',
+                    pain_level: '',
+                    pain_level_after: '',
+                    characteristic: ''
+                });
+            } else {
+                newValue.push(partName);
+            }
         }
-    }
-    
-    emit('update:modelValue', newValue);
-};
-
-const formatLabel = (part) => {
-    if (typeof part === 'string') return part.replace(/_/g, ' ');
-    if (!part) return '';
-    
-    let label = part.area.replace(/_/g, ' ');
-    if (part.symptom) label += `: ${part.symptom}`;
-    
-    const before = part.pain_level;
-    const after = part.pain_level_after;
-    
-    if (before || after) {
-        label += ` (Pain: ${before || '-'} → ${after || '-'})`;
-    }
-    
-    return label;
-};
-
-// Helper to remove item from list below
-const removeItem = (item) => {
-    if (props.readonly) return;
-    const name = typeof item === 'object' ? item.area : item;
-    handleToggle(name);
-};
-
-</script>
-
-<template>
-    <div class="flex flex-col gap-4" :class="{ 'h-full': thumbnail || compactGrid }">
         
-        <!-- Compact Grid Mode (Detailed Fixed Layout for Dashboard) -->
-        <div v-if="compactGrid" class="grid grid-cols-4 grid-rows-3 gap-2 w-full h-full p-2">
-            <!-- Front (Col 1, Row 1-3) -->
-            <div class="row-span-3 relative flex flex-col items-center justify-center bg-white rounded-lg border border-slate-100 p-2 shadow-sm hover:border-indigo-200 transition-colors">
-                <div class="w-full h-full flex items-center justify-center pointer-events-none">
-                     <InteractiveSvg 
-                        :src="viewGroups[0].options[0].file"
-                        :selected-parts="getPartsForView(viewGroups[0].options[0])"
-                        class="max-w-full max-h-full w-auto h-auto"
-                     />
-                 </div>
-                 <span class="text-[9px] text-slate-500 font-bold uppercase mt-1 leading-none">{{ viewGroups[0].options[0].label }}</span>
-            </div>
-
-            <!-- Back (Col 2, Row 1-3) -->
-            <div class="row-span-3 relative flex flex-col items-center justify-center bg-white rounded-lg border border-slate-100 p-2 shadow-sm hover:border-indigo-200 transition-colors">
-                <div class="w-full h-full flex items-center justify-center pointer-events-none">
-                     <InteractiveSvg 
-                        :src="viewGroups[0].options[1].file"
-                        :selected-parts="getPartsForView(viewGroups[0].options[1])"
-                        class="max-w-full max-h-full w-auto h-auto"
-                     />
-                 </div>
-                 <span class="text-[9px] text-slate-500 font-bold uppercase mt-1 leading-none">{{ viewGroups[0].options[1].label }}</span>
-            </div>
-
-            <!-- Head (Col 3-4, Row 1) -->
-            <div class="col-span-2 relative flex flex-col items-center justify-center bg-white rounded-lg border border-slate-100 p-2 shadow-sm hover:border-indigo-200 transition-colors">
-                 <div class="w-full h-full flex items-center justify-center pointer-events-none">
-                     <InteractiveSvg 
-                        :src="viewGroups[0].options[2].file"
-                        :selected-parts="getPartsForView(viewGroups[0].options[2])"
-                        class="max-w-full max-h-full w-auto h-auto"
-                     />
-                 </div>
-                 <span class="text-[9px] text-slate-500 font-bold uppercase mt-1 leading-none">{{ viewGroups[0].options[2].label }}</span>
-            </div>
-
-            <!-- Hand L (Col 3, Row 2) -->
-            <div class="relative flex flex-col items-center justify-center bg-white rounded-lg border border-slate-100 p-2 shadow-sm hover:border-indigo-200 transition-colors">
-                 <div class="w-full h-full flex items-center justify-center pointer-events-none">
-                     <InteractiveSvg 
-                        :src="viewGroups[1].options[0].file"
-                        :selected-parts="getPartsForView(viewGroups[1].options[0])"
-                        class="max-w-full max-h-full w-auto h-auto"
-                     />
-                 </div>
-                 <span class="text-[8px] text-slate-400 font-bold uppercase mt-1 leading-none">{{ viewGroups[1].options[0].label }}</span>
-            </div>
-
-            <!-- Hand R (Col 4, Row 2) -->
-            <div class="relative flex flex-col items-center justify-center bg-white rounded-lg border border-slate-100 p-2 shadow-sm hover:border-indigo-200 transition-colors">
-                 <div class="w-full h-full flex items-center justify-center pointer-events-none">
-                     <InteractiveSvg 
-                        :src="viewGroups[1].options[1].file"
-                        :selected-parts="getPartsForView(viewGroups[1].options[1])"
-                        class="max-w-full max-h-full w-auto h-auto"
-                     />
-                 </div>
-                 <span class="text-[8px] text-slate-400 font-bold uppercase mt-1 leading-none">{{ viewGroups[1].options[1].label }}</span>
-            </div>
-
-            <!-- Foot L (Col 3, Row 3) -->
-            <div class="relative flex flex-col items-center justify-center bg-white rounded-lg border border-slate-100 p-2 shadow-sm hover:border-indigo-200 transition-colors">
-                 <div class="w-full h-full flex items-center justify-center pointer-events-none">
-                     <InteractiveSvg 
-                        :src="viewGroups[2].options[0].file"
-                        :selected-parts="getPartsForView(viewGroups[2].options[0])"
-                        class="max-w-full max-h-full w-auto h-auto"
-                     />
-                 </div>
-                 <span class="text-[8px] text-slate-400 font-bold uppercase mt-1 leading-none">{{ viewGroups[2].options[0].label }}</span>
-            </div>
-
-            <!-- Foot R (Col 4, Row 3) -->
-            <div class="relative flex flex-col items-center justify-center bg-white rounded-lg border border-slate-100 p-2 shadow-sm hover:border-indigo-200 transition-colors">
-                 <div class="w-full h-full flex items-center justify-center pointer-events-none">
-                     <InteractiveSvg 
-                        :src="viewGroups[2].options[1].file"
-                        :selected-parts="getPartsForView(viewGroups[2].options[1])"
-                        class="max-w-full max-h-full w-auto h-auto"
-                     />
-                 </div>
-                 <span class="text-[8px] text-slate-400 font-bold uppercase mt-1 leading-none">{{ viewGroups[2].options[1].label }}</span>
-            </div>
-        </div>
+        emit('update:modelValue', newValue);
+    };
+    
+    const formatLabel = (part) => {
+        if (typeof part === 'string') return part.replace(/_/g, ' ');
+        if (!part) return '';
         
-        <!-- Thumbnail Mode (Tiny Preview - ORIGINAL) -->
-        <div v-else-if="thumbnail" class="flex flex-col gap-2 w-full h-full p-1">
-             <!-- Row 1: Body & Head (3 items) -->
-             <div class="grid grid-cols-3 gap-2 flex-1 min-h-0">
-                 <div v-for="view in viewGroups[0].options" :key="view.id" 
-                      class="relative flex flex-col items-center justify-center bg-white rounded-lg border border-slate-100 p-1 shadow-sm hover:border-indigo-200 transition-colors">
-                      <div class="w-full h-full flex items-center justify-center p-1 pointer-events-none">
-                          <InteractiveSvg 
-                             :src="view.file"
-                             :selected-parts="getPartsForView(view)"
-                             class="max-w-full max-h-full w-auto h-auto"
-                          />
-                      </div>
-                      <span class="text-[9px] text-slate-500 font-bold uppercase mb-0.5 leading-none">{{ view.label }}</span>
-                 </div>
-             </div>
-             
-             <!-- Row 2: Hands & Feet (4 items) -->
-             <div class="grid grid-cols-4 gap-2 flex-1 min-h-0">
-                  <div v-for="view in [...viewGroups[1].options, ...viewGroups[2].options]" :key="view.id" 
-                      class="relative flex flex-col items-center justify-center bg-white rounded-lg border border-slate-100 p-1 shadow-sm hover:border-indigo-200 transition-colors">
-                      <div class="w-full h-full flex items-center justify-center p-1 pointer-events-none">
-                          <InteractiveSvg 
-                             :src="view.file"
-                             :selected-parts="getPartsForView(view)"
-                             class="max-w-full max-h-full w-auto h-auto"
-                          />
-                      </div>
-                      <span class="text-[8px] text-slate-400 font-bold uppercase mb-0.5 leading-none">{{ view.label }}</span>
-                 </div>
-             </div>
-        </div>
-
-        <!-- Overview Mode (Medium size for Dashboard) -->
-        <div v-else-if="overview" class="flex flex-col gap-6 w-full px-2 py-4 animate-fadeIn">
-             <!-- Row 1: Body & Head (3 items) -->
-             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                 <div v-for="view in viewGroups[0].options" :key="view.id" 
-                      class="relative flex flex-col items-center justify-center bg-white/50 rounded-xl border border-slate-100 p-2 shadow-sm hover:border-indigo-200 transition-colors h-[320px]">
-                      <div class="absolute top-2 right-2 z-10">
-                          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ view.label }}</span>
-                      </div>
-                      <div class="w-full h-full flex items-center justify-center p-1 pointer-events-none">
-                          <InteractiveSvg 
-                             :src="view.file"
-                             :selected-parts="getPartsForView(view)"
-                             class="max-w-full max-h-full w-auto h-auto"
-                          />
-                      </div>
-                 </div>
-             </div>
-             
-             <!-- Row 2: Hands & Feet (4 items) -->
-             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div v-for="view in [...viewGroups[1].options, ...viewGroups[2].options]" :key="view.id" 
-                      class="relative flex flex-col items-center justify-center bg-white/50 rounded-xl border border-slate-100 p-2 shadow-sm hover:border-indigo-200 transition-colors h-[220px]">
-                      <div class="absolute top-2 right-2 z-10">
-                          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ view.label }}</span>
-                      </div>
-                      <div class="w-full h-full flex items-center justify-center p-1 pointer-events-none">
-                          <InteractiveSvg 
-                             :src="view.file"
-                             :selected-parts="getPartsForView(view)"
-                             class="max-w-full max-h-full w-auto h-auto"
-                          />
-                      </div>
-                 </div>
-             </div>
-        </div>
-
-        <!-- Expand All Mode -->
-        <div v-else-if="expandAll" class="space-y-12 animate-fadeIn py-6">
-            <div v-for="(group, gIdx) in viewGroups" :key="gIdx">
-                <!-- Group Header -->
-                <div class="flex items-center gap-4 mb-6">
-                     <div class="h-px bg-slate-200 flex-1"></div>
-                     <h4 class="font-bold text-slate-400 text-sm uppercase tracking-wider">{{ group.label }}</h4>
-                     <div class="h-px bg-slate-200 flex-1"></div>
-                </div>
-
-                <div :class="[
-                    'grid gap-8 px-4', 
-                    'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto'
-                ]">
-                     <div v-for="view in group.options" :key="view.id" 
-                          class="relative flex flex-col items-center bg-transparent rounded-xl">
-                         
-                         <!-- Label -->
-                         <div class="mb-2 z-10 hidden">
-                            <span class="px-4 py-1.5 rounded-full bg-slate-50 text-slate-400 text-[10px] font-bold uppercase tracking-wider border border-slate-100">
-                                {{ view.fullLabel }}
-                            </span>
-                         </div>
-                         
-                         <!-- Floating Label (Top Right) -->
-                         <div class="absolute top-0 right-0 z-10 block">
-                             <span class="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{{ view.label }}</span>
-                         </div>
-
-                         <!-- SVG Content -->
-                         <div class="w-full flex items-start justify-center">
-                             <InteractiveSvg 
-                                :src="view.file"
-                                :selected-parts="getPartsForView(view)"
-                                @toggle="(name) => handleToggle(name, view)"
-                                :class="['w-full h-auto', group.options.length === 3 ? '' : 'max-h-[500px]']"
-                             />
+        let label = part.area.replace(/_/g, ' ');
+        if (part.symptom) label += `: ${part.symptom}`;
+        
+        const before = part.pain_level;
+        const after = part.pain_level_after;
+        
+        if (before || after) {
+            label += ` (Pain: ${before || '-'} → ${after || '-'})`;
+        }
+        
+        return label;
+    };
+    
+    // Helper to remove item from list below
+    const removeItem = (item) => {
+        if (props.readonly) return;
+        const name = typeof item === 'object' ? item.area : item;
+        handleToggle(name);
+    };
+    
+    </script>
+    
+    <template>
+        <div class="flex flex-col gap-4" :class="{ 'h-full': thumbnail || compactGrid }">
+            
+            <!-- Compact Grid Mode (Updated for new assets) -->
+            <div v-if="compactGrid" class="flex flex-col gap-4 w-full h-full p-2 overflow-y-auto custom-scrollbar">
+                <div v-for="(group, gIdx) in viewGroups" :key="gIdx" class="space-y-2">
+                     <h4 class="font-bold text-slate-400 text-[10px] uppercase tracking-wider pl-1">{{ group.label }}</h4>
+                     <div class="grid grid-cols-4 gap-2">
+                         <div v-for="view in group.options" :key="view.id" 
+                              class="relative flex flex-col items-center justify-center bg-white rounded-lg border border-slate-100 p-1 shadow-sm hover:border-indigo-200 transition-colors aspect-square">
+                              <div class="w-full h-full flex items-center justify-center pointer-events-none p-1">
+                                  <InteractiveSvg 
+                                     :src="view.file"
+                                     :selected-parts="getPartsForView(view)"
+                                     class="max-w-full max-h-full w-auto h-auto"
+                                  />
+                              </div>
+                              <span class="text-[8px] text-slate-500 font-bold uppercase mt-0.5 leading-none text-center line-clamp-1">{{ view.label }}</span>
                          </div>
                      </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Show All Views Mode (Compact Grid for Zoom Modal) -->
-        <div v-else-if="showAllViews" class="space-y-8 animate-fadeIn py-4">
-             <div v-for="(group, gIdx) in viewGroups" :key="gIdx">
-                <!-- Group Header -->
-                <div class="flex items-center gap-4 mb-4">
-                     <div class="h-px bg-slate-200 flex-1"></div>
-                     <h4 class="font-bold text-slate-400 text-sm uppercase tracking-wider">{{ group.label }}</h4>
-                     <div class="h-px bg-slate-200 flex-1"></div>
-                </div>
-
-                <div class="flex flex-wrap justify-center gap-6">
-                     <div v-for="view in group.options" :key="view.id" 
-                          class="relative flex flex-col items-center bg-white rounded-xl border border-slate-100 p-4 shadow-sm min-w-[300px]">
-                          
-                          <div class="mb-4">
-                             <span class="px-3 py-1 rounded-full bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider border border-slate-100">
-                                 {{ view.fullLabel }}
-                             </span>
-                          </div>
-
-                          <!-- SVG Content -->
-                          <div class="w-full flex items-start justify-center">
-                              <InteractiveSvg 
-                                 :src="view.file"
-                                 :selected-parts="getPartsForView(view)"
-                                 @toggle="(name) => handleToggle(name, view)"
-                                 class="w-full h-auto max-h-[500px]"
-                              />
-                          </div>
+            
+            <!-- Thumbnail Mode (Tiny Preview) -->
+            <div v-else-if="thumbnail" class="grid grid-cols-4 gap-1 w-full h-full p-1 overflow-hidden">
+                 <div v-for="view in allViews.slice(0, 16)" :key="view.id" 
+                      class="relative flex flex-col items-center justify-center bg-white rounded border border-slate-100 p-0.5 shadow-sm">
+                      <div class="w-full h-full flex items-center justify-center pointer-events-none">
+                          <InteractiveSvg 
+                             :src="view.file"
+                             :selected-parts="getPartsForView(view)"
+                             class="max-w-full max-h-full w-auto h-auto"
+                          />
                       </div>
+                 </div>
+            </div>
+    
+            <!-- Overview Mode (Medium size for Dashboard) -->
+            <div v-else-if="overview" class="flex flex-col gap-6 w-full px-2 py-4 animate-fadeIn">
+                 <div v-for="(group, gIdx) in viewGroups" :key="gIdx">
+                     <h4 class="font-bold text-slate-400 text-xs uppercase tracking-wider mb-3 pl-2">{{ group.label }}</h4>
+                     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                         <div v-for="view in group.options" :key="view.id" 
+                              class="relative flex flex-col items-center justify-center bg-white/50 rounded-xl border border-slate-100 p-2 shadow-sm hover:border-indigo-200 transition-colors h-[180px]">
+                              <div class="absolute top-2 right-2 z-10">
+                                  <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{{ view.label }}</span>
+                              </div>
+                              <div class="w-full h-full flex items-center justify-center p-1 pointer-events-none">
+                                  <InteractiveSvg 
+                                     :src="view.file"
+                                     :selected-parts="getPartsForView(view)"
+                                     class="max-w-full max-h-full w-auto h-auto"
+                                  />
+                              </div>
+                         </div>
+                     </div>
+                 </div>
+            </div>
+    
+            <!-- Expand All Mode -->
+            <div v-else-if="expandAll" class="space-y-12 animate-fadeIn py-6">
+                <div v-for="(group, gIdx) in viewGroups" :key="gIdx">
+                    <!-- Group Header -->
+                    <div class="flex items-center gap-4 mb-6">
+                         <div class="h-px bg-slate-200 flex-1"></div>
+                         <h4 class="font-bold text-slate-400 text-sm uppercase tracking-wider">{{ group.label }}</h4>
+                         <div class="h-px bg-slate-200 flex-1"></div>
+                    </div>
+    
+                    <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-4">
+                         <div v-for="view in group.options" :key="view.id" 
+                              class="relative flex flex-col items-center bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
+                             
+                             <div class="absolute top-2 right-2 z-10 block">
+                                 <span class="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{{ view.label }}</span>
+                             </div>
+    
+                             <!-- SVG Content -->
+                             <div class="w-full flex items-center justify-center h-[300px]">
+                                 <InteractiveSvg 
+                                    :src="view.file"
+                                    :selected-parts="getPartsForView(view)"
+                                    @toggle="(name) => handleToggle(name, view)"
+                                    class="w-full h-full"
+                                 />
+                             </div>
+                         </div>
+                    </div>
                 </div>
             </div>
-        </div>
+    
+            <!-- Show All Views Mode (Compact Grid for Zoom Modal) -->
+            <div v-else-if="showAllViews" class="space-y-8 animate-fadeIn py-4">
+                 <div v-for="(group, gIdx) in viewGroups" :key="gIdx">
+                    <div class="flex items-center gap-4 mb-4">
+                         <div class="h-px bg-slate-200 flex-1"></div>
+                         <h4 class="font-bold text-slate-400 text-sm uppercase tracking-wider">{{ group.label }}</h4>
+                         <div class="h-px bg-slate-200 flex-1"></div>
+                    </div>
+    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                         <div v-for="view in group.options" :key="view.id" 
+                              class="relative flex flex-col items-center bg-white rounded-xl border border-slate-100 p-2 shadow-sm">
+                              
+                              <div class="mb-2">
+                                 <span class="px-3 py-1 rounded-full bg-slate-50 text-slate-500 text-[10px] font-bold uppercase tracking-wider border border-slate-100">
+                                     {{ view.label }}
+                                 </span>
+                              </div>
+    
+                              <div class="w-full flex items-start justify-center h-[200px]">
+                                  <InteractiveSvg 
+                                     :src="view.file"
+                                     :selected-parts="getPartsForView(view)"
+                                     @toggle="(name) => handleToggle(name, view)"
+                                     class="w-full h-full"
+                                  />
+                              </div>
+                          </div>
+                    </div>
+                </div>
+            </div>
 
         <!-- Single View Mode (Tabs) -->
         <div v-else class="flex flex-col gap-4">
