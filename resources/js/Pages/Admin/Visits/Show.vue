@@ -459,10 +459,10 @@ const props = defineProps({
                     
                     <div :class="viewMode === 'compact' ? 'p-4' : 'p-6'">
                         <!-- 3-Column Grid: Left (Vitals, Clinical, PE) spans 2 | Right (Body Map) spans 1 -->
-                        <div :class="viewMode === 'compact' ? 'mb-4 gap-4' : 'mb-8 gap-6'" class="grid grid-cols-1 xl:grid-cols-3">
+                        <div :class="viewMode === 'compact' ? 'mb-4 gap-4' : 'mb-8 gap-6'" class="grid grid-cols-1 xl:grid-cols-12">
                             
-                            <!-- Column 1: Vitals, Clinical, PE (Spans 2) -->
-                            <div class="space-y-6 xl:col-span-2">
+                            <!-- Column 1: Vitals, Clinical, PE (Spans 5/12 (approx 40%)) -->
+                            <div class="space-y-6 xl:col-span-5">
                                 <!-- Vitals -->
                                 <div>
                                     <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3 flex items-center gap-2">
@@ -550,28 +550,31 @@ const props = defineProps({
                                 </div>
                             </div>
 
-                            <!-- Column 2: Body Map (Pain Areas) -->
-                            <div class="flex flex-col">
+                            <!-- Column 2: Body Map (Pain Areas) Spans 7/12 (approx 60%) -->
+                            <div class="flex flex-col xl:col-span-7">
                                 <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3 flex items-center gap-2">
                                     ตำแหน่งที่ปวด
                                 </h4>
-                                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-full">
+                                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
                                     <!-- Body Selector (Preview) -->
-                                    <div class="relative group cursor-pointer bg-slate-50/30 flex items-center justify-center overflow-hidden h-[320px]" 
-                                        :class="viewMode === 'compact' ? 'h-[320px]' : 'h-96'"
+                                    <div class="relative group cursor-pointer bg-slate-50/30 flex items-center justify-center p-4" 
                                         @click="showBodyMapModal = true">
-                                         <div v-if="visit.treatment_record.pain_areas && visit.treatment_record.pain_areas.length > 0" class="w-full h-full p-4 pointer-events-none">
-                                            <BodyPartSelector :model-value="visit.treatment_record.pain_areas" :readonly="true" :compact-grid="true" />
+                                         <div v-if="visit.treatment_record.pain_areas && visit.treatment_record.pain_areas.length > 0" class="w-full pointer-events-none">
+                                            <BodyPartSelector 
+                                                :model-value="visit.treatment_record.pain_areas" 
+                                                :readonly="true" 
+                                                :overview="true"
+                                            />
                                         </div>
-                                        <div v-else class="flex flex-col items-center justify-center text-slate-300 gap-2 h-full">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-10 opacity-20">
+                                        <div v-else class="flex flex-col items-center justify-center text-slate-300 gap-2 py-20">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-16 opacity-20">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                                             </svg>
-                                            <span class="text-xs">ไม่ระบุตำแหน่ง</span>
+                                            <span class="text-sm">ไม่ระบุตำแหน่ง</span>
                                         </div>
 
                                         <!-- Hover Overlay -->
-                                        <div class="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/10 transition-colors flex items-center justify-center">
+                                        <div class="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/5 transition-colors flex items-center justify-center pointer-events-none">
                                             <div class="bg-white/90 backdrop-blur text-slate-700 px-4 py-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all font-bold text-xs flex items-center gap-2">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM10.5 7.5v6m3-3h-6" />
@@ -583,11 +586,11 @@ const props = defineProps({
 
                                     
                                     <!-- Pain Details List -->
-                                    <div v-if="visit.treatment_record.pain_areas && visit.treatment_record.pain_areas.length > 0" class="border-t border-slate-100 bg-slate-50/50 flex flex-col flex-1 p-0 overflow-hidden">
-                                        <div class="p-3 bg-slate-100/50 border-b border-slate-200/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                    <div v-if="visit.treatment_record.pain_areas && visit.treatment_record.pain_areas.length > 0" class="border-t border-slate-100 bg-slate-50/50 flex flex-col p-0">
+                                        <div class="px-4 py-3 bg-slate-100/50 border-b border-slate-200/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                                             รายการตำแหน่งที่ปวด ({{ visit.treatment_record.pain_areas.length }})
                                         </div>
-                                        <div class="overflow-y-auto custom-scrollbar p-3 space-y-2 h-60">
+                                        <div class="p-4 space-y-2">
                                             <div v-for="(item, idx) in visit.treatment_record.pain_areas" :key="idx" class="bg-white rounded-lg p-3 border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all group">
                                                 <div class="flex justify-between items-center mb-2">
                                                     <span class="font-bold text-indigo-900 text-sm flex items-center gap-2">
