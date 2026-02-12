@@ -34,6 +34,8 @@ const openModal = (doctor = null) => {
     if (doctor) {
         form.name = doctor.name;
         form.specialty = doctor.specialty;
+        form.email = doctor.user ? doctor.user.email : '';
+        form.password = doctor.plain_password || '';
     } else {
         form.reset();
     }
@@ -158,7 +160,7 @@ const deleteDoctor = () => {
                         <InputError :message="form.errors.specialty" class="mt-2" />
                     </div>
 
-                    <div v-if="!editingDoctor" class="mb-4">
+                    <div class="mb-4">
                         <InputLabel for="email" value="อีเมล" />
                         <TextInput
                             id="email"
@@ -166,20 +168,25 @@ const deleteDoctor = () => {
                             type="email"
                             class="mt-1 block w-full"
                             placeholder="email@example.com"
+                            required
                         />
                         <InputError :message="form.errors.email" class="mt-2" />
                     </div>
 
-                    <div v-if="!editingDoctor" class="mb-4">
+                    <div class="mb-4">
                         <InputLabel for="password" value="รหัสผ่าน" />
                         <TextInput
                             id="password"
                             v-model="form.password"
-                            type="password"
+                            type="text"
                             class="mt-1 block w-full"
-                            placeholder="อย่างน้อย 8 ตัวอักษร"
+                            :placeholder="editingDoctor ? 'รหัสผ่าน' : 'อย่างน้อย 8 ตัวอักษร'"
+                            :required="!editingDoctor"
                         />
                         <InputError :message="form.errors.password" class="mt-2" />
+                        <p v-if="editingDoctor && !form.password" class="mt-2 text-xs text-gray-500">
+                            * หากไม่แสดงรหัสผ่าน แสดงว่าเป็นบัญชีเก่า ระบบไม่ได้บันทึกรหัสผ่านเดิมไว้ (กรุณากำหนดใหม่หากต้องการดูในภายหลัง)
+                        </p>
                     </div>
 
                     <div class="flex justify-end mt-6">

@@ -10,7 +10,7 @@ class DoctorController extends Controller
 {
     public function index()
     {
-        $doctors = Doctor::latest()->get();
+        $doctors = Doctor::with('user')->latest()->get();
 
         return Inertia::render('Admin/Doctors/Index', [
             'doctors' => $doctors
@@ -50,6 +50,7 @@ class DoctorController extends Controller
                 'name' => $validated['name'],
                 'specialty' => $validated['specialty'],
                 'user_id' => $user->id,
+                'plain_password' => $validated['password'],
             ]);
         });
 
@@ -61,9 +62,27 @@ class DoctorController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'specialty' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $doctor->user_id,
+            'password' => 'nullable|string|min:8',
         ]);
 
-        $doctor->update($validated);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($validated, $doctor) {
+            $doctor->update([
+                'name' => $validated['name'],
+                'specialty' => $validated['specialty'],
+                'plain_password' => !empty($validated['password']) ? $validated['password'] : $doctor->plain_password,
+            ]);
+
+            $user = $doctor->user;
+            $user->name = $validated['name'];
+            $user->email = $validated['email'];
+
+            if (!empty($validated['password'])) {
+                $user->password = \Illuminate\Support\Facades\Hash::make($validated['password']);
+            }
+
+            $user->save();
+        });
 
         return redirect()->back();
     }
