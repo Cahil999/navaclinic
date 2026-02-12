@@ -181,13 +181,13 @@ const emit = defineEmits(['update:modelValue']);
                  <div class="grid grid-cols-4 gap-2">
                      <div v-for="view in allViews" :key="view.id" 
                           class="relative flex flex-col items-center justify-center bg-white rounded-lg border border-slate-100 p-1 shadow-sm hover:border-indigo-200 transition-colors aspect-square">
-                          <div class="w-full h-full flex items-center justify-center pointer-events-none p-1">
-                              <InteractiveSvg 
-                                 :src="view.file"
-                                 :selected-parts="getPartsForView(view)"
-                                 class="max-w-full max-h-full w-auto h-auto"
-                              />
-                          </div>
+                              <div class="w-full h-full flex items-center justify-center p-1">
+                                  <InteractiveSvg 
+                                     :src="view.file"
+                                     :selected-parts="getPartsForView(view)"
+                                     class="max-w-full max-h-full w-auto h-auto"
+                                  />
+                              </div>
                           <span class="text-[8px] text-slate-500 font-bold uppercase mt-0.5 leading-none text-center line-clamp-1">{{ view.label }}</span>
                      </div>
                  </div>
@@ -215,7 +215,7 @@ const emit = defineEmits(['update:modelValue']);
                           <div class="absolute top-2 right-2 z-10">
                               <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{{ view.label }}</span>
                           </div>
-                          <div class="w-full h-full flex items-center justify-center p-1 pointer-events-none">
+                          <div class="w-full h-full flex items-center justify-center p-1">
                               <InteractiveSvg 
                                  :src="view.file"
                                  :selected-parts="getPartsForView(view)"
@@ -228,88 +228,68 @@ const emit = defineEmits(['update:modelValue']);
     
             <!-- Expand All Mode -->
             <div v-else-if="expandAll" class="space-y-12 animate-fadeIn py-6">
-                <div v-for="(group, gIdx) in viewGroups" :key="gIdx">
-                    <!-- Group Header -->
-                    <div class="flex items-center gap-4 mb-6">
-                         <div class="h-px bg-slate-200 flex-1"></div>
-                         <h4 class="font-bold text-slate-400 text-sm uppercase tracking-wider">{{ group.label }}</h4>
-                         <div class="h-px bg-slate-200 flex-1"></div>
-                    </div>
-    
-                    <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-4">
-                         <div v-for="view in group.options" :key="view.id" 
-                              class="relative flex flex-col items-center bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
-                             
-                             <div class="absolute top-2 right-2 z-10 block">
-                                 <span class="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{{ view.label }}</span>
-                             </div>
-    
-                             <!-- SVG Content -->
-                             <div class="w-full flex items-center justify-center h-[300px]">
-                                 <InteractiveSvg 
-                                    :src="view.file"
-                                    :selected-parts="getPartsForView(view)"
-                                    @toggle="(name) => handleToggle(name, view)"
-                                    class="w-full h-full"
-                                 />
-                             </div>
+                <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-4">
+                     <div v-for="view in allViews" :key="view.id" 
+                          class="relative flex flex-col items-center bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
+                         
+                         <div class="absolute top-2 right-2 z-10 block">
+                             <span class="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{{ view.label }}</span>
                          </div>
-                    </div>
+
+                         <!-- SVG Content -->
+                         <div class="w-full flex items-center justify-center h-[300px]">
+                             <InteractiveSvg 
+                                :src="view.file"
+                                :selected-parts="getPartsForView(view)"
+                                @toggle="(name) => handleToggle(name, view)"
+                                class="w-full h-full"
+                             />
+                         </div>
+                     </div>
                 </div>
             </div>
     
             <!-- Show All Views Mode (Compact Grid for Zoom Modal) -->
             <div v-else-if="showAllViews" class="space-y-8 animate-fadeIn py-4">
-                 <div v-for="(group, gIdx) in viewGroups" :key="gIdx">
-                    <div class="flex items-center gap-4 mb-4">
-                         <div class="h-px bg-slate-200 flex-1"></div>
-                         <h4 class="font-bold text-slate-400 text-sm uppercase tracking-wider">{{ group.label }}</h4>
-                         <div class="h-px bg-slate-200 flex-1"></div>
-                    </div>
-    
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                         <div v-for="view in group.options" :key="view.id" 
-                              class="relative flex flex-col items-center bg-white rounded-xl border border-slate-100 p-2 shadow-sm">
-                              
-                              <div class="mb-2">
-                                 <span class="px-3 py-1 rounded-full bg-slate-50 text-slate-500 text-[10px] font-bold uppercase tracking-wider border border-slate-100">
-                                     {{ view.label }}
-                                 </span>
-                              </div>
-    
-                              <div class="w-full flex items-start justify-center h-[200px]">
-                                  <InteractiveSvg 
-                                     :src="view.file"
-                                     :selected-parts="getPartsForView(view)"
-                                     @toggle="(name) => handleToggle(name, view)"
-                                     class="w-full h-full"
-                                  />
-                              </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                     <div v-for="view in allViews" :key="view.id" 
+                          class="relative flex flex-col items-center bg-white rounded-xl border border-slate-100 p-2 shadow-sm">
+                          
+                          <div class="mb-2">
+                             <span class="px-3 py-1 rounded-full bg-slate-50 text-slate-500 text-[10px] font-bold uppercase tracking-wider border border-slate-100">
+                                 {{ view.label }}
+                             </span>
                           </div>
-                    </div>
+
+                          <div class="w-full flex items-start justify-center h-[200px]">
+                              <InteractiveSvg 
+                                 :src="view.file"
+                                 :selected-parts="getPartsForView(view)"
+                                 @toggle="(name) => handleToggle(name, view)"
+                                 class="w-full h-full"
+                              />
+                          </div>
+                      </div>
                 </div>
             </div>
 
         <!-- Single View Mode (Tabs) -->
         <div v-else class="flex flex-col gap-4">
             <!-- View Switcher -->
-            <div :class="['flex flex-col gap-3 justify-center items-center', embedded ? '' : 'bg-slate-50 p-3 rounded-xl border border-slate-200']">
-                <div v-for="(group, idx) in viewGroups" :key="idx" class="flex items-center gap-3">
-                    <span :class="['text-[10px] font-bold uppercase tracking-wider w-16 text-right', embedded ? 'text-slate-400' : 'text-slate-500']">{{ group.label }}</span>
-                    <div class="flex gap-1">
-                        <button 
-                            type="button"
-                            v-for="view in group.options" 
-                            :key="view.id"
-                            @click="currentView = view.id"
-                            class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all border min-w-[3rem]"
-                            :class="currentView === view.id 
-                                ? 'bg-indigo-600 text-white border-indigo-600 shadow-md transform scale-105' 
-                                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100 hover:border-slate-300'"
-                        >
-                            {{ view.label }}
-                        </button>
-                    </div>
+            <div :class="['', embedded ? '' : 'bg-slate-50/50 p-2 rounded-xl border border-slate-200']">
+                <div class="grid grid-cols-4 sm:grid-cols-5 gap-1.5">
+                    <button 
+                        type="button"
+                        v-for="view in allViews" 
+                        :key="view.id"
+                        @click="currentView = view.id"
+                        class="px-1 py-1.5 text-[10px] font-bold rounded-md transition-all border flex items-center justify-center text-center leading-none min-h-[32px]"
+                        :class="currentView === view.id 
+                            ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' 
+                            : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50 hover:border-slate-300'"
+                    >
+                        {{ view.label }}
+                    </button>
                 </div>
             </div>
 

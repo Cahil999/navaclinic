@@ -27,17 +27,15 @@ const fetchSvg = async () => {
         if (!response.ok) throw new Error('Failed to load SVG');
         let text = await response.text();
         
-        // Remove existing scripts to prevent interference and inline event handlers
+        // Remove existing scripts and inline handlers
         text = text.replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gim, "");
         text = text.replace(/onclick="[^"]*"/gim, "");
         text = text.replace(/onmouseover="[^"]*"/gim, "");
         
-        // Remove filters (shadows) defined in SVG
+        // Remove filters and clipping masks
         text = text.replace(/<filter\b[^>]*>([\s\S]*?)<\/filter>/gim, "");
         text = text.replace(/filter="url\(#[^"]+\)"/gim, "");
         text = text.replace(/style="[^"]*filter:[^"]*"/gim, "");
-        
-        // Remove clipping masks which often cut off edges in Illustrator exports
         text = text.replace(/<clipPath\b[^>]*>([\s\S]*?)<\/clipPath>/gim, "");
         text = text.replace(/clip-path="url\(#[^"]+\)"/gim, "");
         text = text.replace(/mask="url\(#[^"]+\)"/gim, "");
@@ -50,6 +48,7 @@ const fetchSvg = async () => {
         svgContent.value = text;
         
         nextTick(() => {
+            initInteractiveElements();
             setupInteractions();
             updateHighlights();
         });
@@ -59,104 +58,125 @@ const fetchSvg = async () => {
     }
 };
 
+const initInteractiveElements = () => {
+    if (!container.value) return;
+    const svg = container.value.querySelector('svg');
+    if (!svg) return;
+
+    // Helper to determine if a name is valid for interaction
+    const isValidName = (name) => {
+        if (!name) return false;
+        const n = name.toLowerCase();
+        // Filter out generic Illustrator names
+        if (n.startsWith('layer')) return false;
+        if (n.startsWith('group')) return false;
+        if (n.startsWith('path')) return false;
+        if (n.startsWith('line')) return false;
+        if (n.startsWith('rect')) return false;
+        if (n.startsWith('poly')) return false;
+        if (n.startsWith('clippath')) return false;
+        if (n.startsWith('image')) return false;
+        if (n.includes('background')) return false;
+        if (n.includes('shadow')) return false;
+        if (n.includes('outline')) return false;
+        return true;
+    };
+
+    // Auto-tag elements that have meaningful IDs or data-names
+    const potentialParts = svg.querySelectorAll('[id], [data-name]');
+    potentialParts.forEach(el => {
+        const rawId = el.id;
+        const rawDataName = el.getAttribute('data-name');
+        
+        // Check if explicitly marked as static
+        if (el.classList.contains('static-part')) return;
+
+        // Use data-name first, then ID
+        const name = rawDataName || rawId;
+        
+        // Clean and validate
+        const cleaned = cleanName(name);
+        
+        if (isValidName(cleaned)) {
+            // Apply class for interaction
+            el.classList.add('interactive-part');
+            
+            // Ensure strict pointer events
+            el.style.pointerEvents = 'all';
+             // Store cleaned name for easy access
+            el.setAttribute('data-clean-name', cleaned);
+        }
+    });
+};
+
 const setupInteractions = () => {
     if (!container.value) return;
-    
-    // Attach single listener to container for delegation
     container.value.addEventListener('click', handleSvgClick);
 };
 
 const cleanName = (rawName) => {
     if (!rawName) return '';
     // Smart cleaning for Illustrator IDs
-    // Replace long digit sequences (e.g., _000123...) with nothing, but preserve surrounding structure
-    // Regex to find _ followed by at least 5 digits
-    let name = rawName.replace(/_\d{5,}/g, '');
+    // Remove variations like _x31_, _1_, etc if they appear garbage-like
+    // But preserve meaningful suffixes like _L, _R
+    let name = rawName;
     
-    // cleanup double underscores or trailing/leading underscores
+    // Remove "Layer_X" prefix if present inside a string (though isValidName catches most)
+    name = name.replace(/^Layer_\d+_/i, '');
+    
+    // Replace hex codes often found in Illustrator exports (e.g. _x30_)
+    name = name.replace(/_x[0-9a-fA-F]{2,}_/g, '');
+
+    // Replace long digit sequences (ids)
+    name = name.replace(/_\d{5,}/g, '');
+    
+    // cleanup double underscores
     name = name.replace(/__+/g, '_').replace(/_$/, '').replace(/^_/, '');
     
     return name;
 };
 
 const handleSvgClick = (event) => {
-    // Find closest interactive element
-    const interactiveClasses = ['.muscle', '.interactive-muscle', '.interactive-muscle-group', '.interactive-part', '.outline-detail']; 
+    const target = event.target;
     
-    let target = event.target;
-    let interactiveElement = null;
-    
-    // Traverse up
-    while (target && target !== container.value) {
-        if (target.classList) {
-             const isInteractive = interactiveClasses.some(cls => target.matches(cls)) || target.getAttribute('data-name');
-             if (isInteractive) {
-                 interactiveElement = target;
-                 break;
-             }
+    // Traverse up to find the closest interactive part
+    let current = target;
+    while (current && current !== container.value) {
+        if (current.classList && current.classList.contains('interactive-part')) {
+            const name = current.getAttribute('data-clean-name') || cleanName(current.getAttribute('data-name') || current.id);
+            if (name) {
+                emit('toggle', name);
+                event.stopPropagation(); // Stop bubbling once handled
+                return;
+            }
         }
-        target = target.parentNode;
-    }
-    
-    if (interactiveElement) {
-        // Priority: data-name -> id
-        let name = interactiveElement.getAttribute('data-name') || interactiveElement.id;
-        
-        // Fallback or prefer parent if it has a better name (and child is generic)
-        if (interactiveElement.parentNode && interactiveElement.parentNode !== container.value) {
-             const pName = interactiveElement.parentNode.getAttribute('data-name') || interactiveElement.parentNode.id;
-             // If local name is missing or looks like "Layer_X" or generic, try parent
-             if (!name || name.startsWith('Layer_')) {
-                 if (pName) name = pName;
-             }
-        }
-        
-        if (name) {
-            emit('toggle', cleanName(name));
-        }
+        current = current.parentNode;
     }
 };
 
 const updateHighlights = () => {
     if (!container.value) return;
     
-    const allElements = container.value.querySelectorAll('*');
-    allElements.forEach(el => {
-        if (el.classList) {
-            el.classList.remove('selected', 'muscle-highlight', 'active');
-            el.style.fill = ''; 
-        }
+    // Reset all
+    const all = container.value.querySelectorAll('.selected, .muscle-highlight, .active');
+    all.forEach(el => {
+        el.classList.remove('selected', 'muscle-highlight', 'active');
+        el.style.fill = ''; 
     });
     
+    // Highlight specific items
     props.selectedParts.forEach(partName => {
-        let el = null;
+        // Try to find by data-clean-name first (most accurate)
+        let el = container.value.querySelector(`.interactive-part[data-clean-name="${partName}"]`);
         
-        // 1. Try exact data-name match (most reliable for labeled SVGs)
-        el = container.value.querySelector(`[data-name="${partName}"]`);
+        // Fallback to data-name or id exact match
+        if (!el) el = container.value.querySelector(`[data-name="${partName}"]`);
+        if (!el) el = container.value.querySelector(`[id="${partName}"]`);
         
-        // 2. Try exact ID match
-        if (!el) {
-            el = container.value.querySelector(`[id="${partName}"]`);
-        }
-        
-        // 3. Fuzzy match using same cleaning logic
-        if (!el) {
-             const candidates = container.value.querySelectorAll('[id], [data-name]');
-             for (let cand of candidates) {
-                 const raw = cand.getAttribute('data-name') || cand.id;
-                 if (raw && cleanName(raw) === partName) {
-                     el = cand;
-                     break;
-                 }
-             }
-        }
-
         if (el) {
             el.classList.add('selected');
-            
-            // Bring to front logic: Move element to the end of its parent's children
-            // This ensures the red border draws ON TOP of adjacent muscles
-            if (el.parentNode) {
+            // Bring to front logic only if it's a leaf node to avoid group messing
+            if (el.tagName !== 'g' && el.parentNode) {
                 el.parentNode.appendChild(el);
             }
         }
@@ -176,92 +196,78 @@ watch(() => props.selectedParts, () => {
 </template>
 
 <style>
-/* Global SVG Overrides when inside this container */
-/* Global SVG Overrides when inside this container */
-/* Global SVG Overrides when inside this container */
+/* Global SVG Overrides inside container */
 .interactive-svg-container svg {
     max-height: 100%;
     width: 100%;
     height: auto;
-    overflow: visible !important; /* Allow parts to spill over if needed */
+    overflow: visible !important;
     transition: all 0.3s ease;
-    filter: none !important; /* Disable any filters */
-    transform: scale(0.92); /* Shrink slightly to ensure strokes at edges aren't clipped */
+    filter: none !important;
+    transform: scale(0.95);
     transform-origin: center;
-    /* CRITICAL: Default to no pointer events to prevent overlays from blocking clicks */
-    pointer-events: none; 
+    pointer-events: none; /* Disable global pointer events */
 }
 
 .interactive-svg-container.unconstrained svg {
     max-height: none;
 }
 
-/* Only enable pointer events on specific interactive elements */
-.interactive-svg-container .muscle, 
-.interactive-svg-container .interactive-muscle,
-.interactive-svg-container .interactive-muscle-group,
-.interactive-svg-container .interactive-part,
-.interactive-svg-container .outline-detail { 
-    pointer-events: all !important; /* Re-enable clicks */
+/* 
+   Normalize ALL strokes to be equal 
+   This fixes specific body parts having thicker/thinner lines 
+*/
+.interactive-svg-container svg path,
+.interactive-svg-container svg rect,
+.interactive-svg-container svg circle,
+.interactive-svg-container svg polygon,
+.interactive-svg-container svg ellipse,
+.interactive-svg-container svg line,
+.interactive-svg-container svg polyline {
+    stroke: #64748b !important; /* Slate 500 */
+    stroke-width: 0.75px !important; /* Fine, uniform lines */
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+    vector-effect: non-scaling-stroke !important; /* Prevent scaling distortion */
+    fill: none; /* Default to no fill for safety */
+}
+
+/* Enable pointer events & specific styling ONLY on interactive parts */
+.interactive-svg-container .interactive-part { 
+    pointer-events: all !important;
     cursor: pointer; 
-    transition: fill 0.2s ease, stroke 0.2s ease;
-    fill: #ffffff; /* Default fill */
-    stroke: #475569; /* Slate 600 - Darker for visibility */
-    stroke-width: 1.5px; /* Thicker and clearer */
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    vector-effect: non-scaling-stroke; /* Keep stroke constant on zoom so lines don't disappear */
-}
-
-/* Static parts should be overlays */
-.interactive-svg-container .static-part {
-    fill: none !important;
-    stroke: #101028;
-    stroke-width: 0.5px;
-    pointer-events: none !important;
-}
-
-/* Fix for internal detail lines in some SVGs (like hands/feet) that rely on opacity */
-.interactive-svg-container .detail-line {
-    stroke: #475569 !important;
-    stroke-width: 0.75px !important;
-    stroke-opacity: 1 !important;
-    opacity: 1 !important;
-    fill: none !important;
-    pointer-events: none !important;
+    transition: all 0.2s ease;
+    fill: #ffffff !important; /* Force white fill for interactive areas */
+    stroke: #475569 !important; /* Slate 600 - Slightly darker for interactive */
+    stroke-width: 0.75px !important; /* Match the global width */
 }
 
 /* Hover effects */
-.interactive-svg-container .muscle:hover,
-.interactive-svg-container .interactive-muscle:hover,
-.interactive-svg-container .interactive-muscle-group:hover,
-.interactive-svg-container .interactive-part:hover,
-.interactive-svg-container .outline-detail:hover {
+.interactive-svg-container .interactive-part:hover {
     fill: #86efac !important; /* Green 300 */
-    opacity: 0.8 !important;
     stroke: #16a34a !important; /* Green 600 */
+    stroke-width: 1px !important; /* Subtle bold on hover */
+    z-index: 10;
 }
 
-/* Selected state - Aggressive Red */
+/* Selected state */
 .interactive-svg-container .selected,
 .interactive-svg-container .muscle-highlight,
 .interactive-svg-container .active {
     fill: #ef4444 !important; /* Red 500 */
-    stroke: #7f1d1d !important; /* Red 900 - Darker border for selected */
+    stroke: #7f1d1d !important; /* Red 900 */
     opacity: 1 !important;
-    stroke-width: 1.5px !important;
+    stroke-width: 1px !important; /* Keep it relatively fine but distinct */
     pointer-events: all !important;
 }
 
-/* Ensure children inherit the red color if the group is selected */
+/* Ensure children inherit active state if group is selected */
 .interactive-svg-container .selected path,
 .interactive-svg-container .selected rect,
 .interactive-svg-container .selected circle,
-.interactive-svg-container .selected polygon,
-.interactive-svg-container .selected ellipse,
-.interactive-svg-container .muscle-highlight path,
-.interactive-svg-container .active path {
+.interactive-svg-container .selected polygon {
     fill: #ef4444 !important;
-    stroke: #991b1b !important; 
+    stroke: #7f1d1d !important; 
+    stroke-width: 1px !important;
 }
 </style>
