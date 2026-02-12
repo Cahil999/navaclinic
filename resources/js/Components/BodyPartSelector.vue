@@ -234,9 +234,26 @@ const emit = defineEmits(['update:modelValue']);
             </div>
             
             <!-- Thumbnail Mode (Tiny Preview) -->
-            <div v-else-if="thumbnail" class="grid grid-cols-4 gap-1 w-full h-full p-1 overflow-hidden">
+            <div v-else-if="thumbnail" class="grid grid-cols-5 gap-1 w-full h-full p-1 overflow-y-auto custom-scrollbar">
                  <div v-for="view in allViews.slice(0, 16)" :key="view.id" 
-                      class="relative flex flex-col items-center justify-center bg-white rounded border border-slate-100 p-0.5 shadow-sm">
+                      class="relative flex flex-col items-center justify-center rounded border p-0.5 shadow-sm transition-colors"
+                      :class="[
+                          view.group === 'ด้านหน้า' ? 'bg-blue-50/30 border-blue-100' :
+                          view.group === 'ด้านหลัง' ? 'bg-orange-50/30 border-orange-100' :
+                          'bg-white border-slate-100'
+                      ]">
+                      
+                      <!-- Tiny Orientation Dot -->
+                      <div class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full"
+                           :class="view.group === 'ด้านหน้า' ? 'bg-blue-300' : (view.group === 'ด้านหลัง' ? 'bg-orange-300' : 'bg-slate-200')">
+                      </div>
+
+                       <!-- Pain Count Badge (Mini) -->
+                      <div v-if="getPartsForView(view).length > 0" 
+                           class="absolute top-1 left-1 bg-red-500 text-white text-[8px] font-bold w-3 h-3 flex items-center justify-center rounded-full shadow-sm z-10">
+                          {{ getPartsForView(view).length }}
+                      </div>
+
                       <div class="w-full h-full flex items-center justify-center pointer-events-none">
                           <InteractiveSvg 
                              :src="view.file"
@@ -293,10 +310,30 @@ const emit = defineEmits(['update:modelValue']);
             <div v-else-if="expandAll" class="space-y-12 animate-fadeIn py-6">
                 <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-4">
                      <div v-for="view in allViews" :key="view.id" 
-                          class="relative flex flex-col items-center bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
+                          class="relative flex flex-col items-center rounded-xl border p-4 shadow-sm transition-all"
+                          :class="[
+                              view.group === 'ด้านหน้า' ? 'bg-blue-50/20 border-blue-100' :
+                              view.group === 'ด้านหลัง' ? 'bg-orange-50/20 border-orange-100' :
+                              'bg-white border-slate-100'
+                          ]">
                          
-                         <div class="absolute top-2 right-2 z-10 block">
-                             <span class="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{{ view.label }}</span>
+                         <div class="absolute top-3 right-3 z-10 flex flex-col items-end gap-1">
+                             <span class="text-[10px] font-bold uppercase tracking-widest"
+                                   :class="view.group === 'ด้านหน้า' ? 'text-blue-300' : (view.group === 'ด้านหลัง' ? 'text-orange-300' : 'text-slate-300')">
+                                   {{ view.label }}
+                             </span>
+                             
+                             <!-- Pain Count Badge -->
+                              <div v-if="getPartsForView(view).length > 0" 
+                                   class="bg-red-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow-sm border border-red-400">
+                                  {{ getPartsForView(view).length }} จุด
+                              </div>
+                         </div>
+                         
+                         <!-- Orientation Marker -->
+                         <div class="absolute top-3 left-3 z-10">
+                            <div v-if="view.group === 'ด้านหน้า'" class="w-2 h-2 rounded-full bg-blue-200"></div>
+                            <div v-else-if="view.group === 'ด้านหลัง'" class="w-2 h-2 rounded-full bg-orange-200"></div>
                          </div>
 
                          <!-- SVG Content -->
@@ -316,11 +353,25 @@ const emit = defineEmits(['update:modelValue']);
             <div v-else-if="showAllViews" class="space-y-8 animate-fadeIn py-4">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                      <div v-for="view in allViews" :key="view.id" 
-                          class="relative flex flex-col items-center bg-white rounded-xl border border-slate-100 p-2 shadow-sm">
+                          class="relative flex flex-col items-center rounded-xl border p-2 shadow-sm"
+                          :class="[
+                              view.group === 'ด้านหน้า' ? 'bg-blue-50/20 border-blue-100' :
+                              view.group === 'ด้านหลัง' ? 'bg-orange-50/20 border-orange-100' :
+                              'bg-white border-slate-100'
+                          ]">
                           
-                          <div class="mb-2">
-                             <span class="px-3 py-1 rounded-full bg-slate-50 text-slate-500 text-[10px] font-bold uppercase tracking-wider border border-slate-100">
+                          <div class="mb-2 flex items-center gap-2">
+                             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border"
+                                   :class="[
+                                       view.group === 'ด้านหน้า' ? 'bg-blue-50 text-blue-500 border-blue-100' :
+                                       view.group === 'ด้านหลัง' ? 'bg-orange-50 text-orange-500 border-orange-100' :
+                                       'bg-slate-50 text-slate-500 border-slate-100'
+                                   ]">
                                  {{ view.label }}
+                             </span>
+                             
+                             <span v-if="getPartsForView(view).length > 0" class="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm">
+                                {{ getPartsForView(view).length }}
                              </span>
                           </div>
 
