@@ -218,9 +218,25 @@ const emit = defineEmits(['update:modelValue']);
             
             <!-- Compact Grid Mode (Updated for new assets) -->
             <div v-if="compactGrid" class="w-full h-full p-2 overflow-y-auto custom-scrollbar">
-                 <div class="grid grid-cols-4 gap-2">
+                 <div class="grid grid-cols-5 gap-2 max-h-full">
                      <div v-for="view in allViews" :key="view.id" 
-                          class="relative flex flex-col items-center justify-center bg-white rounded-lg border border-slate-100 p-1 shadow-sm hover:border-indigo-200 transition-colors aspect-square">
+                          class="relative flex flex-col items-center justify-center rounded-lg border p-1 shadow-sm transition-colors aspect-square"
+                          :class="[
+                              view.group === 'ด้านหน้า' ? 'bg-blue-50/50 border-blue-100 hover:border-blue-300' :
+                              view.group === 'ด้านหลัง' ? 'bg-orange-50/50 border-orange-100 hover:border-orange-300' :
+                              'bg-slate-50/50 border-slate-100 hover:border-slate-300'
+                          ]">
+                              <div class="absolute top-1 right-1">
+                                  <div v-if="view.group === 'ด้านหน้า'" class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                                  <div v-else-if="view.group === 'ด้านหลัง'" class="w-1.5 h-1.5 rounded-full bg-orange-400"></div>
+                              </div>
+                              
+                              <!-- Pain Count Badge (Top-Left) -->
+                              <div v-if="getPartsForView(view).length > 0" 
+                                   class="absolute top-1 left-1 bg-red-500 text-white text-[8px] font-bold w-3 h-3 flex items-center justify-center rounded-full shadow-sm z-10 border border-red-400">
+                                  {{ getPartsForView(view).length }}
+                              </div>
+
                               <div class="w-full h-full flex items-center justify-center p-1">
                                   <InteractiveSvg 
                                      :src="view.file"
@@ -228,7 +244,14 @@ const emit = defineEmits(['update:modelValue']);
                                      class="max-w-full max-h-full w-auto h-auto"
                                   />
                               </div>
-                          <span class="text-[8px] text-slate-500 font-bold uppercase mt-0.5 leading-none text-center line-clamp-1">{{ view.label }}</span>
+                          
+                          <!-- Label Logic (Always show label) -->
+                          <div class="w-full text-center mt-1">
+                                <span class="text-[8px] font-bold uppercase leading-none line-clamp-1 block"
+                                      :class="getPartsForView(view).length > 0 ? 'text-red-500' : 'text-slate-400'">
+                                    {{ view.label }}
+                                </span>
+                          </div>
                      </div>
                  </div>
             </div>

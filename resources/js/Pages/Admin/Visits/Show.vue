@@ -563,11 +563,11 @@ const props = defineProps({
                                 </h4>
                                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-full">
                                     <!-- Body Selector (Preview) -->
-                                    <div class="relative group cursor-pointer bg-slate-50/30 flex items-center justify-center overflow-hidden" 
-                                        :class="viewMode === 'compact' ? 'h-64' : 'h-96'"
+                                    <div class="relative group cursor-pointer bg-slate-50/30 flex items-center justify-center overflow-hidden h-[320px]" 
+                                        :class="viewMode === 'compact' ? 'h-[320px]' : 'h-96'"
                                         @click="showBodyMapModal = true">
                                          <div v-if="visit.treatment_record.pain_areas && visit.treatment_record.pain_areas.length > 0" class="w-full h-full p-4 pointer-events-none">
-                                            <BodyPartSelector :model-value="visit.treatment_record.pain_areas" :readonly="true" :thumbnail="true" />
+                                            <BodyPartSelector :model-value="visit.treatment_record.pain_areas" :readonly="true" :compact-grid="true" />
                                         </div>
                                         <div v-else class="flex flex-col items-center justify-center text-slate-300 gap-2 h-full">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-10 opacity-20">
@@ -764,7 +764,7 @@ const props = defineProps({
                 <BodyPartSelector 
                     :model-value="visit.treatment_record.pain_areas" 
                     :readonly="true" 
-                    :expand-all="true" 
+                    :show-all-views="true"
                     height="600"
                 />
             </div>
