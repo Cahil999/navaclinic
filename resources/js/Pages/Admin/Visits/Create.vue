@@ -15,6 +15,27 @@ const props = defineProps({
     doctors: Array,
 });
 
+const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('th-TH', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
+};
+
+const formatTime = (timeString) => {
+    if (!timeString) return '-';
+    if (typeof timeString === 'object' || timeString.includes('T') || timeString.includes(' ')) {
+         return new Date(timeString).toLocaleTimeString('th-TH', {
+            hour: '2-digit',
+            minute: '2-digit',
+        }) + ' น.';
+    }
+    const [hour, minute] = timeString.split(':');
+    return `${hour}:${minute} น.`;
+};
+
 const mode = ref('booking'); // 'booking' or 'walk_in'
 const selectedBooking = ref(null);
 
@@ -475,7 +496,7 @@ const confirmSubmit = () => {
                                                     </svg>
                                                 </div>
                                                 <div>
-                                                    <p class="font-bold text-slate-800 text-lg">{{ booking.appointment_date }} • <span class="text-indigo-600">{{ booking.start_time }}</span></p>
+                                                    <p class="font-bold text-slate-800 text-lg">{{ formatDate(booking.appointment_date) }} • <span class="text-indigo-600">{{ formatTime(booking.start_time) }}</span></p>
                                                     <p class="text-sm text-slate-500 flex items-center gap-1">
                                                         <span class="w-2 h-2 rounded-full bg-slate-300"></span>
                                                         Dr. {{ booking.doctor?.name || 'Any Doctor' }}
@@ -879,7 +900,7 @@ const confirmSubmit = () => {
                         เวลา
                     </span>
                     <span class="font-bold text-slate-800">
-                        {{ mode === 'walk_in' ? `${visitTime} (${form.duration_minutes} น.)` : (selectedBooking?.start_time || '-') }}
+                        {{ mode === 'walk_in' ? `${visitTime} (${form.duration_minutes} น.)` : formatTime(selectedBooking?.start_time) }}
                     </span>
                 </div>
             </div>
