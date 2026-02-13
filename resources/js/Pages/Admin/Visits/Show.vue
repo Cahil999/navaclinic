@@ -7,7 +7,7 @@ import { computed, ref } from 'vue';
 import { translateBodyPart } from '@/Utils/BodyPartTranslations';
 
 const showBodyMapModal = ref(false);
-const viewMode = ref('default');
+const viewMode = ref('compact');
 
 const toggleViewMode = () => {
     viewMode.value = viewMode.value === 'default' ? 'compact' : 'default';
