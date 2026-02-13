@@ -183,6 +183,19 @@ const formatDate = (dateString) => {
         day: '2-digit',
     });
 };
+const getPainStyle = (level) => {
+    const val = parseInt(level);
+    if (!val && val !== 0) return {}; 
+    
+    // 0 (Green) -> 10 (Red)
+    const hue = Math.max(0, 130 - (val * (130 / 10)));
+    
+    return {
+        backgroundColor: `hsl(${hue}, 85%, 96%)`,
+        color: `hsl(${hue}, 80%, 40%)`,
+        borderColor: `hsl(${hue}, 60%, 85%)`
+    };
+};
 </script>
 
 <template>
@@ -691,20 +704,22 @@ const formatDate = (dateString) => {
                                                                     <h4 class="text-xs font-bold text-slate-800 truncate">
                                                                         {{ typeof item.area === 'string' ? translateBodyPart(item.area) : translateBodyPart(item.area?.area || item.area) }}
                                                                     </h4>
-                                                                <!-- Mini Bars -->
-                                                                <div v-if="item.pain_level || item.pain_level_after" class="flex gap-2 items-center">
-                                                                     <div class="flex flex-col items-center ml-2">
-                                                                        <div class="h-1.5 w-8 bg-slate-100 rounded-full overflow-hidden">
-                                                                            <div class="h-full bg-rose-400 rounded-full" :style="{ width: (item.pain_level || 0) * 10 + '%' }"></div>
-                                                                        </div>
+                                                                <!-- Pain Levels (Numbers + Color) -->
+                                                                <div v-if="item.pain_level || item.pain_level_after" class="flex gap-2 items-center ml-2">
+                                                                     <div v-if="item.pain_level" 
+                                                                          class="w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold border" 
+                                                                          :style="getPainStyle(item.pain_level)">
+                                                                         {{ item.pain_level }}
                                                                      </div>
-                                                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-slate-300" viewBox="0 0 20 20" fill="currentColor">
+                                                                     
+                                                                     <svg v-if="item.pain_level && item.pain_level_after" xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-slate-300" viewBox="0 0 20 20" fill="currentColor">
                                                                         <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
                                                                      </svg>
-                                                                     <div class="flex flex-col items-center">
-                                                                        <div class="h-1.5 w-8 bg-slate-100 rounded-full overflow-hidden">
-                                                                            <div class="h-full bg-emerald-400 rounded-full" :style="{ width: (item.pain_level_after || 0) * 10 + '%' }"></div>
-                                                                        </div>
+
+                                                                     <div v-if="item.pain_level_after" 
+                                                                          class="w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold border" 
+                                                                          :style="getPainStyle(item.pain_level_after)">
+                                                                         {{ item.pain_level_after }}
                                                                      </div>
                                                                 </div>
                                                             </div>
