@@ -211,15 +211,17 @@ const props = defineProps({
                                  <table class="w-full text-xs text-left">
                                     <thead class="text-slate-400 font-bold bg-white sticky top-0 shadow-sm text-[10px]">
                                         <tr>
-                                            <th class="pl-3 py-1">บริเวณ</th>
+                                            <th class="pl-3 py-1 w-8 text-center">#</th>
+                                            <th class="py-1">บริเวณ</th>
                                             <th class="py-1">อาการ</th>
                                             <th class="py-1 text-center">VAS (ก่อน)</th>
                                             <th class="pr-3 py-1 text-center">VAS (หลัง)</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-50">
-                                        <tr v-for="area in visit.treatment_record?.pain_areas || []" :key="area.area" class="hover:bg-slate-50">
-                                            <td class="pl-3 py-2 font-bold text-indigo-700">{{ translateBodyPart(area.area) }}</td>
+                                        <tr v-for="(area, idx) in visit.treatment_record?.pain_areas || []" :key="area.area" class="hover:bg-slate-50">
+                                            <td class="pl-3 py-2 text-center text-slate-400 font-bold text-[10px]">{{ idx + 1 }}</td>
+                                            <td class="py-2 font-bold text-indigo-700">{{ translateBodyPart(area.area) }}</td>
                                             <td class="py-2 text-slate-600 truncate max-w-[100px]">{{ area.symptom }}</td>
                                             <td class="py-2 text-center">
                                                 <span class="px-1.5 py-0.5 rounded font-bold text-[10px] border transition-colors" :style="getPainLevelStyle(area.pain_level)">{{ area.pain_level }}</span>
