@@ -151,7 +151,7 @@ const emit = defineEmits(['update:modelValue']);
                         // Determine contextual Left/Right
                         // Front View: Screen Left = Patient Right
                         // Back View: Screen Left = Patient Left
-                        const isFrontView = viewParams.label.includes('หน้า') || viewParams.fullLabel.includes('หน้า');
+                        const isFrontView = viewParams.label.includes('หน้า') || viewParams.fullLabel.includes('หน้า') || viewParams.id === 'side_leg_v2';
                         
                         if (isFrontView) {
                              partName += isScreenLeft ? '_R' : '_L';
