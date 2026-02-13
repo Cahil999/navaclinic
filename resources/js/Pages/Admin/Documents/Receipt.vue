@@ -1,6 +1,6 @@
 <script setup>
 import { Head } from '@inertiajs/vue3';
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import 'paper-css/paper.css';
 
 const props = defineProps({
@@ -16,13 +16,33 @@ const form = ref({
     items: [
         { name: 'ค่ารักษา', sub: 'ค่านวดรักษา', amount: Number(props.visit.treatment_fee || props.visit.price) }
     ],
-    total: Number(props.visit.price),
+    discount: props.visit.discount_type === 'percent' 
+        ? `${Number(props.visit.discount_value)}%` 
+        : (Number(props.visit.discount_value) || ''),
     cashier: 'สังวรณ์ เชื้อเต๊ะ'
+});
+
+const subtotal = computed(() => {
+    return form.value.items.reduce((sum, item) => sum + Number(item.amount), 0);
+});
+
+const calculatedDiscount = computed(() => {
+    const d = String(form.value.discount).trim();
+    if (d.endsWith('%')) {
+        const p = parseFloat(d.replace('%', ''));
+        if (!isNaN(p)) {
+            return (subtotal.value * p) / 100;
+        }
+    }
+    return parseFloat(d) || 0;
+});
+
+const netTotal = computed(() => {
+    return subtotal.value - calculatedDiscount.value;
 });
 
 const updateItem = (index, field, value) => {
     form.value.items[index][field] = value;
-    form.value.total = form.value.items.reduce((sum, item) => sum + Number(item.amount), 0);
 };
 
 const addItem = () => {
@@ -31,7 +51,6 @@ const addItem = () => {
 
 const removeItem = (index) => {
     form.value.items.splice(index, 1);
-    form.value.total = form.value.items.reduce((sum, item) => sum + Number(item.amount), 0);
 };
 
 const print = () => {
@@ -184,14 +203,25 @@ onUnmounted(() => {
                     </div>
                 </div>
 
+                <!-- Discount Row -->
+                <div class="border-t border-black flex text-sm h-8 bg-transparent divide-x divide-black">
+                    <div class="flex-1 px-4 flex items-center justify-end text-xs mr-[112px] border-r border-black/0">
+                        <span class="font-bold mr-2">ส่วนลด</span>
+                        <input v-model="form.discount" class="bg-transparent border-none p-0 focus:ring-0 text-xs text-right text-gray-900 w-16 h-5" placeholder="0">
+                    </div>
+                    <div class="w-28 px-2 flex items-center justify-end font-bold relative">
+                        {{ Number(calculatedDiscount).toLocaleString('th-TH') }}.-
+                    </div>
+                </div>
+
                 <!-- Total Row -->
                 <div class="border-t border-black flex text-sm h-8 bg-transparent divide-x divide-black">
                      <div class="flex-1 px-4 flex items-center justify-end text-xs mr-[112px] border-r border-black/0"> <!-- Spacer to merge cols visually -->
                         <span class="font-bold mr-2">รวมทั้งสิ้น</span> 
-                        <span class="uppercase text-[10px]">TOTAL</span>
+                        <span class="uppercase text-[10px] w-16 text-right">TOTAL</span>
                     </div>
                     <div class="w-28 px-2 flex items-center justify-end font-bold relative">
-                         {{ Number(form.total).toLocaleString('th-TH') }}.-
+                         {{ Number(netTotal).toLocaleString('th-TH') }}.-
                     </div>
                 </div>
             </div>
