@@ -86,16 +86,28 @@ const emit = defineEmits(['update:modelValue']);
         const currentPrefix = viewParams?.prefix || '';
         
         // Extract just the area/ID names from the modelValue
-        return props.modelValue.reduce((acc, item) => {
-            const rawName = typeof item === 'object' ? item.area : item;
+        return props.modelValue.reduce((acc, item, index) => {
+            const rawName = typeof item === 'object' ? item.area : item; // e.g. "Head_Cheek"
             
+            // Check if this part belongs to the current view (prefix match)
+            let match = false;
+            let localName = rawName;
+
             if (currentPrefix) {
                 if (rawName.startsWith(currentPrefix)) {
-                    acc.push(rawName.substring(currentPrefix.length));
+                    match = true;
+                    localName = rawName.substring(currentPrefix.length);
                 }
             } else {
-                // Should not happen with new setup as all have prefixes
-                acc.push(rawName);
+                // Should not happen with new setup as all have prefixes, but fallback
+                match = true; 
+            }
+
+            if (match) {
+                acc.push({
+                    id: localName,     // Local SVG ID (e.g. "Cheek")
+                    index: index + 1   // Global Index (1-based)
+                });
             }
             return acc;
         }, []);
@@ -452,12 +464,15 @@ const emit = defineEmits(['update:modelValue']);
                         v-for="view in allViews" 
                         :key="view.id"
                         @click="currentView = view.id"
-                        class="px-1 py-1.5 text-[10px] font-bold rounded-md transition-all border flex items-center justify-center text-center leading-none min-h-[32px]"
-                        :class="currentView === view.id 
-                            ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' 
-                            : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50 hover:border-slate-300'"
+                        class="px-1 py-1.5 text-[10px] font-bold rounded-md transition-all border flex items-center justify-center text-center leading-none min-h-[32px] relative overflow-hidden"
+                        :class="[
+                            currentView === view.id 
+                                ? (getPartsForView(view).length > 0 ? 'bg-red-500 text-white border-red-500 shadow-sm' : 'bg-indigo-600 text-white border-indigo-600 shadow-sm')
+                                : (getPartsForView(view).length > 0 ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50 hover:border-slate-300')
+                        ]"
                     >
                         {{ view.label }}
+                        <!-- Optional: Pulse animation for active pain views? Maybe too much. -->
                     </button>
                 </div>
             </div>

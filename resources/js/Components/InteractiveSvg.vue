@@ -157,31 +157,103 @@ const handleSvgClick = (event) => {
 const updateHighlights = () => {
     if (!container.value) return;
     
-    // Reset all
+    // Clear badges
+    const badges = container.value.querySelectorAll('.part-badge');
+    badges.forEach(b => b.remove());
+
+    // Reset all highlights
     const all = container.value.querySelectorAll('.selected, .muscle-highlight, .active');
     all.forEach(el => {
         el.classList.remove('selected', 'muscle-highlight', 'active');
         el.style.fill = ''; 
+        // Note: we don't move them back in DOM, which is fine, they just lose the class.
     });
-    
-    // Highlight specific items
-    props.selectedParts.forEach(partName => {
-        // 1. Try exact match
+
+    // Helper: Find element for a part
+    const findPartElement = (partName) => {
         let el = findElement(partName);
-        
-        // 2. Try stripping _L / _R / _Left / _Right suffix
-        // This allows 'part_1_L' to highlight 'part_1'
         if (!el) {
             const baseName = partName.replace(/(_L|_R|_Left|_Right)$/, '');
             if (baseName !== partName) {
                 el = findElement(baseName);
             }
         }
+        return el;
+    };
+
+    // Pass 1: Highlight and Bring to Front
+    props.selectedParts.forEach(part => {
+        const partName = typeof part === 'object' ? part.id : part;
+        const el = findPartElement(partName);
 
         if (el) {
             el.classList.add('selected');
             if (el.tagName !== 'g' && el.parentNode) {
                 el.parentNode.appendChild(el);
+            }
+        }
+    });
+
+    // Pass 2: Draw Badges
+    const svg = container.value.querySelector('svg');
+    let scaleFactor = 1;
+    
+    // Calculate scale factor based on viewbox to keep badges consistent
+    if (svg && svg.viewBox && svg.viewBox.baseVal) {
+        const vb = svg.viewBox.baseVal;
+        // logic: if viewbox is 500 wide, scale is 1. If 1000, scale 2.
+        const dim = Math.min(vb.width, vb.height);
+        if (dim > 0) scaleFactor = dim / 500;
+    }
+
+    props.selectedParts.forEach(part => {
+        // Only draw if we have an index (object mode)
+        if (typeof part !== 'object' || !part.index) return;
+        
+        const partName = part.id;
+        const el = findPartElement(partName);
+        
+        if (el) {
+            const bbox = el.getBBox();
+            const cx = bbox.x + bbox.width / 2;
+            const cy = bbox.y + bbox.height / 2;
+            
+            const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            group.setAttribute("class", "part-badge");
+            group.style.pointerEvents = "none";
+            
+            // Sizes
+            const r = 14 * scaleFactor; 
+            const fontSize = 14 * scaleFactor;
+            const strokeWidth = 2 * scaleFactor;
+            
+            // Circle
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", cx);
+            circle.setAttribute("cy", cy);
+            circle.setAttribute("r", r);
+            circle.setAttribute("fill", "#ef4444");
+            circle.setAttribute("stroke", "#ffffff");
+            circle.setAttribute("stroke-width", strokeWidth);
+            
+            // Text
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", cx);
+            text.setAttribute("y", cy);
+            text.setAttribute("dy", "0.35em"); // vertically center
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("fill", "white");
+            text.setAttribute("font-size", fontSize);
+            text.setAttribute("font-weight", "bold");
+            text.setAttribute("font-family", "Arial, sans-serif");
+            text.textContent = part.index;
+            
+            group.appendChild(circle);
+            group.appendChild(text);
+            
+            // Append to element's parent (after element)
+            if (el.parentNode) {
+                el.parentNode.appendChild(group);
             }
         }
     });
