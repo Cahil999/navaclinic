@@ -135,23 +135,23 @@ const props = defineProps({
                     <div class="bg-white rounded-xl border border-slate-200 p-3 shadow-sm shrink-0">
                          <h3 class="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1 tracking-wider">
                             <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            Vital Signs
+                            สัญญาณชีพ (Vital Signs)
                          </h3>
                          <div class="grid grid-cols-1 xl:grid-cols-2 gap-2">
                              <div class="bg-indigo-50/50 p-2 rounded-lg border border-indigo-100 text-center">
-                                 <div class="text-[9px] text-slate-400 uppercase font-bold">BP</div>
+                                 <div class="text-[9px] text-slate-400 uppercase font-bold">ความดัน (BP)</div>
                                  <div class="font-bold text-indigo-700 text-sm">{{ visit.treatment_record?.blood_pressure || '-' }}</div>
                              </div>
                               <div class="bg-rose-50/50 p-2 rounded-lg border border-rose-100 text-center">
-                                 <div class="text-[9px] text-slate-400 uppercase font-bold">Temp</div>
+                                 <div class="text-[9px] text-slate-400 uppercase font-bold">อุณหภูมิ (Temp)</div>
                                  <div class="font-bold text-rose-700 text-sm">{{ visit.treatment_record?.temperature || '-' }}</div>
                              </div>
                              <div class="bg-blue-50/50 p-2 rounded-lg border border-blue-100 text-center">
-                                 <div class="text-[9px] text-slate-400 uppercase font-bold">Pulse</div>
+                                 <div class="text-[9px] text-slate-400 uppercase font-bold">ชีพจร (Pulse)</div>
                                  <div class="font-bold text-blue-700 text-sm">{{ visit.treatment_record?.pulse_rate || '-' }}</div>
                              </div>
                              <div class="bg-emerald-50/50 p-2 rounded-lg border border-emerald-100 text-center">
-                                 <div class="text-[9px] text-slate-400 uppercase font-bold">Resp</div>
+                                 <div class="text-[9px] text-slate-400 uppercase font-bold">การหายใจ (Resp)</div>
                                  <div class="font-bold text-emerald-700 text-sm">{{ visit.treatment_record?.respiratory_rate || '-' }}</div>
                              </div>
                          </div>
@@ -164,15 +164,15 @@ const props = defineProps({
                         </div>
                         <div class="p-3 space-y-3 text-sm">
                             <div>
-                                <span class="text-[9px] font-bold text-amber-500 uppercase block mb-1 tracking-wider">Symptoms (CC)</span>
+                                <span class="text-[9px] font-bold text-amber-500 uppercase block mb-1 tracking-wider">อาการสำคัญ (CC)</span>
                                 <div class="text-slate-800 bg-amber-50/50 p-2.5 rounded-lg border border-amber-100 text-xs leading-relaxed font-medium min-h-[3rem]">{{ visit.symptoms || '-' }}</div>
                             </div>
                             <div v-if="visit.treatment_record">
-                                <span class="text-[9px] font-bold text-indigo-500 uppercase block mb-1 tracking-wider">Diagnosis (DX)</span>
+                                <span class="text-[9px] font-bold text-indigo-500 uppercase block mb-1 tracking-wider">การวินิจฉัย (DX)</span>
                                 <div class="text-slate-800 bg-indigo-50/50 p-2.5 rounded-lg border border-indigo-100 text-xs leading-relaxed font-bold">{{ visit.treatment_record.diagnosis || '-' }}</div>
                             </div>
                             <div v-if="visit.treatment_record">
-                                <span class="text-[9px] font-bold text-slate-400 uppercase block mb-1 tracking-wider">Physical Exam (PE)</span>
+                                <span class="text-[9px] font-bold text-slate-400 uppercase block mb-1 tracking-wider">การตรวจร่างกาย (PE)</span>
                                 <div class="text-slate-600 text-[11px] whitespace-pre-wrap leading-relaxed">{{ visit.treatment_record.physical_exam || '-' }}</div>
                             </div>
                         </div>
@@ -205,10 +205,10 @@ const props = defineProps({
                                  <table class="w-full text-xs text-left">
                                     <thead class="text-slate-400 font-bold bg-white sticky top-0 shadow-sm text-[10px]">
                                         <tr>
-                                            <th class="pl-3 py-1">Area</th>
-                                            <th class="py-1">Symptom</th>
-                                            <th class="py-1 text-center">VAS (Pre)</th>
-                                            <th class="pr-3 py-1 text-center">VAS (Post)</th>
+                                            <th class="pl-3 py-1">บริเวณ</th>
+                                            <th class="py-1">อาการ</th>
+                                            <th class="py-1 text-center">VAS (ก่อน)</th>
+                                            <th class="pr-3 py-1 text-center">VAS (หลัง)</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-50">
@@ -238,7 +238,7 @@ const props = defineProps({
                     <!-- Treatment Plan -->
                      <div class="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col flex-1 min-h-0 overflow-hidden">
                         <div class="px-3 py-2 border-b border-slate-100 bg-slate-50 flex justify-between items-center sticky top-0 shrink-0">
-                            <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">แผน (Plan)</h3>
+                            <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">แผนการรักษา (Plan)</h3>
                              <Link
                                 v-if="!visit.treatment_record"
                                 :href="route('admin.visits.treatment.create', visit.id)"
@@ -267,7 +267,7 @@ const props = defineProps({
                                     <div class="font-bold text-slate-700">{{ visit.treatment_record.massage_weight || '-' }}</div>
                                 </div>
                                 <div class="bg-slate-50 p-2 rounded border border-slate-100">
-                                    <div class="text-[9px] text-slate-400 uppercase tracking-wider mb-0.5">VAS (Pre <span class="text-slate-300">→</span> Post)</div>
+                                    <div class="text-[9px] text-slate-400 uppercase tracking-wider mb-0.5">VAS (ก่อน <span class="text-slate-300">→</span> หลัง)</div>
                                     <div class="font-bold text-indigo-600">
                                         {{ visit.treatment_record.pain_level_before || '-' }} <span class="text-slate-300 mx-1">→</span> {{ visit.treatment_record.pain_level_after || '-' }}
                                     </div>
@@ -387,7 +387,7 @@ const props = defineProps({
                                         </div>
                                         <div>
                                             <p class="text-slate-900 font-bold text-base">{{ visit.doctor?.name || 'ไม่ได้ระบุแพทย์' }}</p>
-                                            <p class="text-xs text-slate-500">Physician</p>
+                                            <p class="text-xs text-slate-500">แพทย์ผู้รักษา</p>
                                         </div>
                                     </div>
                                 </div>
@@ -445,7 +445,7 @@ const props = defineProps({
                         <div>
                             <h3 class="font-black text-slate-800 text-2xl flex items-center gap-3">
                                 <span>บันทึกเวชระเบียน</span>
-                                <span class="bg-indigo-600 text-white text-xs px-2 py-0.5 rounded uppercase tracking-wider font-bold">Medical Record</span>
+                                <span class="bg-indigo-600 text-white text-xs px-2 py-0.5 rounded uppercase tracking-wider font-bold">เวชระเบียน</span>
                             </h3>
                             <p class="text-slate-500 text-sm mt-1">รายละเอียดการตรวจรักษา และอาการของผู้ป่วย</p>
                         </div>
@@ -500,12 +500,12 @@ const props = defineProps({
                                         <!-- W/H -->
                                         <div :class="viewMode === 'compact' ? 'col-span-4 mt-1 py-2' : 'col-span-2 mt-2 p-3'" class="bg-slate-50 rounded-xl border border-slate-100 flex justify-around items-center">
                                             <div class="flex flex-col items-center">
-                                                <span class="text-[9px] text-slate-400 uppercase font-bold">Weight</span>
+                                                <span class="text-[9px] text-slate-400 uppercase font-bold">น้ำหนัก (Kg)</span>
                                                 <span class="font-bold text-slate-700">{{ visit.treatment_record.weight || '-' }} <span class="text-[10px] font-normal text-slate-400">kg</span></span>
                                             </div>
                                             <div class="h-8 w-px bg-slate-200"></div>
                                             <div class="flex flex-col items-center">
-                                                <span class="text-[9px] text-slate-400 uppercase font-bold">Height</span>
+                                                <span class="text-[9px] text-slate-400 uppercase font-bold">ส่วนสูง (Cm)</span>
                                                 <span class="font-bold text-slate-700">{{ visit.treatment_record.height || '-' }} <span class="text-[10px] font-normal text-slate-400">cm</span></span>
                                             </div>
                                         </div>
@@ -748,7 +748,7 @@ const props = defineProps({
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 text-indigo-600">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                     </svg>
-                    Pain Areas Map (แผนภาพตำแหน่งปวด)
+                    แผนภาพตำแหน่งปวด (Pain Areas Map)
                 </h3>
                 <button @click="showBodyMapModal = false" class="text-slate-400 hover:text-slate-600 transition-colors bg-slate-100 hover:bg-slate-200 p-1 rounded-full">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-5">
@@ -768,7 +768,7 @@ const props = defineProps({
             
             <div class="mt-6 flex justify-end">
                 <button @click="showBodyMapModal = false" class="px-5 py-2 bg-slate-800 text-white rounded-lg text-sm font-bold hover:bg-slate-700 transition-colors shadow-lg">
-                    Close
+                    ปิด
                 </button>
             </div>
         </div>
