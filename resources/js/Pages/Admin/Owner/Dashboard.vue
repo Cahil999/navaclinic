@@ -42,6 +42,14 @@ const props = defineProps({
 
 const period = ref(props.filters.period);
 const date = ref(props.filters.date);
+const selectedDoctor = ref('');
+
+const filteredDoctorStats = computed(() => {
+    if (!selectedDoctor.value) {
+        return props.doctor_stats;
+    }
+    return props.doctor_stats.filter(d => d.doctor_id === selectedDoctor.value);
+});
 
 const updateDashboard = () => {
     router.get(route('admin.owner.dashboard'), {
@@ -381,13 +389,23 @@ const peakHoursChartOptions = {
 
                 <!-- Full Width Doctor Breakdown -->
                 <div class="space-y-6">
-                    <h3 class="text-lg font-bold text-slate-800">รายละเอียดผลงานแพทย์</h3>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <h3 class="text-lg font-bold text-slate-800">รายละเอียดผลงานแพทย์</h3>
+                        <div class="w-full sm:w-auto">
+                            <select v-model="selectedDoctor" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <option value="">ดูทั้งหมด ({{ doctor_stats.length }} ท่าน)</option>
+                                <option v-for="doctor in doctor_stats" :key="doctor.doctor_id" :value="doctor.doctor_id">
+                                    {{ doctor.doctor_name }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
                     
                     <div v-if="doctor_stats.length === 0" class="text-center py-12 bg-white rounded-lg border border-slate-200 text-slate-500">
                         ไม่พบข้อมูลสำหรับช่วงเวลาที่เลือก
                     </div>
 
-                    <div v-for="doctor in doctor_stats" :key="doctor.doctor_id" class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-slate-200">
+                    <div v-for="doctor in filteredDoctorStats" :key="doctor.doctor_id" class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-slate-200">
                         <div class="p-6 border-b border-slate-100 bg-slate-50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
                                 <h4 class="text-lg font-bold text-slate-900">{{ doctor.doctor_name }}</h4>
