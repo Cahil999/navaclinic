@@ -89,6 +89,29 @@ const modalContent = computed(() => {
     }
 });
 
+const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('th-TH', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
+};
+
+const formatTime = (timeString) => {
+    if (!timeString) return '-';
+    // If it's a full date string or date object
+    if (typeof timeString === 'object' || timeString.includes('T') || timeString.includes(' ')) {
+         return new Date(timeString).toLocaleTimeString('th-TH', {
+            hour: '2-digit',
+            minute: '2-digit',
+        }) + ' น.';
+    }
+    // If it's HH:mm:ss
+    const [hour, minute] = timeString.split(':');
+    return `${hour}:${minute} น.`;
+};
+
 const getStatusClass = (status) => {
     switch (status) {
         case 'confirmed':
@@ -212,8 +235,8 @@ const isDetailedPainArea = (areas) => {
                                 </h3>
                                 <div class="space-y-3 text-slate-600">
                                     <p><strong class="text-slate-800">แพทย์:</strong> {{ booking.doctor?.name }}</p>
-                                    <p><strong class="text-slate-800">วันที่:</strong> {{ booking.appointment_date }}</p>
-                                    <p><strong class="text-slate-800">เวลา:</strong> {{ booking.start_time }} ({{ booking.duration_minutes }} นาที)</p>
+                                    <p><strong class="text-slate-800">วันที่:</strong> {{ formatDate(booking.appointment_date) }}</p>
+                                    <p><strong class="text-slate-800">เวลา:</strong> {{ formatTime(booking.start_time) }} ({{ booking.duration_minutes }} นาที)</p>
                                     <p><strong class="text-slate-800">อาการเบื้องต้น:</strong> {{ booking.symptoms }}</p>
                                     <p class="mt-2 flex items-center gap-2">
                                         <strong class="text-slate-800">สถานะ:</strong>
@@ -320,11 +343,12 @@ const isDetailedPainArea = (areas) => {
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-slate-500 text-xs">วันที่นัดหมาย</span>
-                            <span class="font-medium text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md">{{ booking.appointment_date }}</span>
+                            <span class="font-medium text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md">{{ formatDate(booking.appointment_date) }}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-slate-500 text-xs">เวลานัดหมาย</span>
-                            <span class="font-medium text-slate-800">{{ booking.start_time }}</span>
+
+                            <span class="font-medium text-slate-800">{{ formatTime(booking.start_time) }}</span>
                         </div>
                          <div class="flex justify-between items-center">
                             <span class="text-slate-500 text-xs">แพทย์ผู้รักษา</span>

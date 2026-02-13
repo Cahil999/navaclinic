@@ -161,6 +161,16 @@ const submit = () => {
     });
 };
 
+const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    // Use th-TH for Thai locale
+    return new Date(dateString).toLocaleDateString('th-TH', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
+};
+
 const formatTime = (time) => {
     const [hour, minute] = time.split(':');
     return `${hour}:${minute}`;
@@ -189,7 +199,7 @@ const selectTime = (slot) => {
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 bg-white border-b border-gray-200">
                         <form @submit.prevent="submit" class="space-y-6">
-                            
+                 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <!-- Left Column -->
                                 <div class="space-y-6">
@@ -205,7 +215,6 @@ const selectTime = (slot) => {
                                         <textarea v-model="form.symptoms" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
                                         <div v-if="form.errors.symptoms" class="text-red-500 text-xs mt-1">{{ form.errors.symptoms }}</div>
                                     </div>
-
 
 
                                     <div>
@@ -266,7 +275,7 @@ const selectTime = (slot) => {
 
                                     <!-- Available Slots Helper -->
                                     <div class="bg-indigo-50 p-4 rounded-lg">
-                                        <h4 class="text-xs font-bold text-indigo-700 uppercase mb-2">ช่วงเวลาว่างสำหรับ {{ form.appointment_date }}</h4>
+                                        <h4 class="text-xs font-bold text-indigo-700 uppercase mb-2">ช่วงเวลาว่างสำหรับ {{ formatDate(form.appointment_date) }}</h4>
                                         <div v-if="loadingEx" class="flex justify-center p-2"><span class="loading loading-spinner text-indigo-500"></span></div>
                                         <div v-else-if="availableSlots.length === 0" class="text-xs text-gray-500 italic">ไม่พบช่วงเวลาว่าง (หรือยังไม่ได้เลือกวันที่)</div>
                                         <div v-else class="space-y-4">
