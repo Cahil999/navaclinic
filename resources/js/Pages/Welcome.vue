@@ -115,13 +115,16 @@ const features = [
                                 <li v-if="$page.props.auth.user.is_admin">
                                     <Link :href="route('admin.dashboard')">แดชบอร์ดแอดมิน</Link>
                                 </li>
-                                <li v-if="$page.props.auth.user.is_admin">
+                                <li v-if="$page.props.auth.user.is_doctor">
+                                    <Link :href="route('admin.doctor.dashboard')">แดชบอร์ดแพทย์</Link>
+                                </li>
+                                <li v-if="$page.props.auth.user.is_admin || $page.props.auth.user.is_doctor">
                                     <Link :href="route('admin.patients.index')">รายชื่อคนไข้</Link>
                                 </li>
                                 <li v-if="$page.props.auth.user.is_admin">
                                     <Link :href="route('admin.doctors.index')">รายชื่อหมอ</Link>
                                 </li>
-                                <li v-if="!$page.props.auth.user.is_admin"><Link :href="route('dashboard')">ประวัติการจองคิว</Link></li>
+                                <li v-if="!$page.props.auth.user.is_admin && !$page.props.auth.user.is_doctor"><Link :href="route('dashboard')">ประวัติการจองคิว</Link></li>
                                 <li><Link :href="route('logout')" method="post" as="button" class="text-red-600">ออกจากระบบ</Link></li>
                             </ul>
                         </div>

@@ -175,7 +175,7 @@ const isDetailedPainArea = (areas) => {
                 <h2 class="font-semibold text-xl text-slate-800 dark:text-slate-200 leading-tight">
                     การจองเลขที่ #{{ booking.id }}
                 </h2>
-                <Link :href="route('admin.dashboard')" class="text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100">
+                <Link :href="$page.props.auth.user.is_doctor ? route('admin.doctor.dashboard') : route('admin.dashboard')" class="text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100">
                     &larr; กลับไปหน้าแดชบอร์ด
                 </Link>
             </div>

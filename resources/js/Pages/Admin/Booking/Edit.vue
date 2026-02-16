@@ -128,7 +128,7 @@ onMounted(() => {
          const doctor = user.doctor;
          if (!doctor || doctor.id !== props.booking.doctor_id) {
              // Not their booking, redirect
-             router.visit(route('admin.dashboard'));
+             router.visit(route('admin.doctor.dashboard'));
              return;
          }
     }

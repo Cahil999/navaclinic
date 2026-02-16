@@ -195,6 +195,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     // Shared Routes for Staff (Admins + Doctors)
     Route::middleware('staff')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('admin.dashboard');
+        Route::get('/doctor-dashboard', [\App\Http\Controllers\Admin\DoctorDashboardController::class, 'index'])->name('admin.doctor.dashboard');
 
         // Booking Management
         Route::get('/bookings/create', [\App\Http\Controllers\Admin\BookingController::class, 'create'])->name('admin.bookings.create');
