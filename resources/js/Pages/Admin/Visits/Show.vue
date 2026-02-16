@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import BodyPartSelector from '@/Components/BodyPartSelector.vue';
 import Modal from '@/Components/Modal.vue';
 import { computed, ref } from 'vue';
@@ -40,9 +40,18 @@ const getPainLevelStyle = (level) => {
     };
 };
 
-
 const props = defineProps({
     visit: Object,
+});
+
+const canEditTreatment = computed(() => {
+    const user = usePage().props.auth.user;
+    if (user.is_admin) return true;
+    if (user.is_doctor) {
+        // Must have a doctor assigned to the visit, and it must match the current user's doctor profile
+        return props.visit.doctor && user.doctor && user.doctor.id === props.visit.doctor.id;
+    }
+    return false;
 });
 </script>
 
@@ -248,14 +257,14 @@ const props = defineProps({
                         <div class="px-3 py-2 border-b border-slate-100 bg-slate-50 flex justify-between items-center sticky top-0 shrink-0">
                             <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">แผนการรักษา (Plan)</h3>
                              <Link
-                                v-if="!visit.treatment_record"
+                                v-if="!visit.treatment_record && canEditTreatment"
                                 :href="route('admin.visits.treatment.create', visit.id)"
                                 class="text-[9px] bg-indigo-600 hover:bg-indigo-700 text-white px-1.5 py-0.5 rounded shadow transition-colors font-bold"
                             >
                                 + เพิ่ม
                             </Link>
                              <Link
-                                v-else
+                                v-else-if="visit.treatment_record && canEditTreatment"
                                 :href="route('admin.visits.treatment.create', visit.id)"
                                 class="text-[9px] text-indigo-600 hover:text-indigo-800 font-bold bg-indigo-50 px-1.5 py-0.5 rounded hover:bg-indigo-100 transition-colors"
                             >
@@ -429,7 +438,7 @@ const props = defineProps({
                          </div>
 
                          <!-- Management Actions -->
-                         <div v-if="!visit.treatment_record" class="pt-6 border-t border-slate-100">
+                         <div v-if="!visit.treatment_record && canEditTreatment" class="pt-6 border-t border-slate-100">
                             <h4 class="font-bold text-slate-800 mb-4">การจัดการ (Management)</h4>
                             <div class="flex flex-wrap gap-4">
                                 <Link
@@ -457,7 +466,7 @@ const props = defineProps({
                             </h3>
                             <p class="text-slate-500 text-sm mt-1">รายละเอียดการตรวจรักษา และอาการของผู้ป่วย</p>
                         </div>
-                        <Link :href="route('admin.visits.treatment.create', visit.id)" class="group flex items-center gap-2 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 px-5 py-2.5 rounded-full shadow-lg shadow-indigo-200 transition-all hover:-translate-y-0.5">
+                        <Link v-if="canEditTreatment" :href="route('admin.visits.treatment.create', visit.id)" class="group flex items-center gap-2 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 px-5 py-2.5 rounded-full shadow-lg shadow-indigo-200 transition-all hover:-translate-y-0.5">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                             </svg>
