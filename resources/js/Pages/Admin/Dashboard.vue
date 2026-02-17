@@ -328,12 +328,12 @@ const processBookingCancellation = () => {
 </script>
 
 <template>
-    <Head title="แดชบอร์ดผู้ดูแลระบบ" />
+    <Head title="แดชบอร์ดหลัก" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-slate-800 leading-tight">
-                แดชบอร์ดผู้ดูแลระบบ
+                แดชบอร์ดหลัก
             </h2>
         </template>
 

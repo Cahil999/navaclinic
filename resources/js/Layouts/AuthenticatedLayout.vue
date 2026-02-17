@@ -44,7 +44,7 @@ const isMobileMenuOpen = ref(false);
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1.5">
                                   <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5m.75-9 3-3 2.148 2.148A12.061 12.061 0 0 1 16.5 7.605" />
                                 </svg>
-                                แดชบอร์ดผู้ดูแลระบบ
+                                แดชบอร์ดหลัก
                             </Link>
                         </li>
                         <li v-if="$page.props.auth.user.is_doctor">
@@ -214,7 +214,7 @@ const isMobileMenuOpen = ref(false);
                             <li><a class="font-medium text-slate-700 mb-1">{{ $page.props.auth.user.name }}</a></li>
                             <div class="divider my-0"></div>
                             <li><Link :href="route('profile.edit')">แก้ไขข้อมูลส่วนตัว</Link></li>
-                            <li v-if="$page.props.auth.user.is_admin || $page.props.auth.user.is_doctor"><Link :href="route('admin.dashboard')">แดชบอร์ดผู้ดูแลระบบ</Link></li>
+                            <li v-if="$page.props.auth.user.is_admin || $page.props.auth.user.is_doctor"><Link :href="route('admin.dashboard')">แดชบอร์ดหลัก</Link></li>
                             <li v-if="$page.props.auth.user.is_doctor"><Link :href="route('admin.doctor.dashboard')">แดชบอร์ดแพทย์</Link></li>
                             <li><Link :href="route('logout')" method="post" as="button" class="text-red-600 hover:bg-red-50">ออกจากระบบ</Link></li>
                         </ul>
@@ -256,7 +256,7 @@ const isMobileMenuOpen = ref(false);
                     </div>
 
                     <Link :href="route('welcome')" class="btn btn-ghost justify-start text-lg font-normal" @click="isMobileMenuOpen = false">หน้าหลัก</Link>
-                    <Link v-if="$page.props.auth.user.is_admin || $page.props.auth.user.is_doctor" :href="route('admin.dashboard')" class="btn btn-ghost justify-start text-lg font-normal" :class="{'bg-blue-50 text-blue-600 font-bold': route().current('admin.dashboard')}" @click="isMobileMenuOpen = false">แดชบอร์ดผู้ดูแลระบบ</Link>
+                    <Link v-if="$page.props.auth.user.is_admin || $page.props.auth.user.is_doctor" :href="route('admin.dashboard')" class="btn btn-ghost justify-start text-lg font-normal" :class="{'bg-blue-50 text-blue-600 font-bold': route().current('admin.dashboard')}" @click="isMobileMenuOpen = false">แดชบอร์ดหลัก</Link>
                     <Link v-if="$page.props.auth.user.is_doctor" :href="route('admin.doctor.dashboard')" class="btn btn-ghost justify-start text-lg font-normal" :class="{'bg-blue-50 text-blue-600 font-bold': route().current('admin.doctor.dashboard')}" @click="isMobileMenuOpen = false">แดชบอร์ดแพทย์</Link>
                     <Link v-if="$page.props.auth.user.is_admin" :href="route('admin.owner.dashboard')" class="btn btn-ghost justify-start text-lg font-normal" :class="{'bg-blue-50 text-blue-600 font-bold': route().current('admin.owner.dashboard')}" @click="isMobileMenuOpen = false">เจ้าของ</Link>
                     <Link v-if="$page.props.auth.user.is_admin || $page.props.auth.user.is_doctor" :href="route('admin.patients.index')" class="btn btn-ghost justify-start text-lg font-normal" :class="{'bg-blue-50 text-blue-600 font-bold': route().current('admin.patients.index')}" @click="isMobileMenuOpen = false">จัดการคนไข้</Link>
