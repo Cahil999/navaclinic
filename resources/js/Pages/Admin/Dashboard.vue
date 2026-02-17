@@ -541,7 +541,7 @@ const processBookingCancellation = () => {
 
                     </div>
                 </div>
-            </div>
+
 
                 <!-- Latest Visits Table -->
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-slate-100 mt-6">
@@ -596,6 +596,7 @@ const processBookingCancellation = () => {
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
 
             <!-- Payment Proof Modal -->

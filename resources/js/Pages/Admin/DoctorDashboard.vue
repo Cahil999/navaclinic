@@ -324,12 +324,12 @@ const getStatusClass = (status) => {
 </script>
 
 <template>
-    <Head title="แดชบอร์ดแพทย์" />
+    <Head :title="`แดชบอร์ดแพทย์: ${$page.props.auth.user.name}`" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-slate-800 leading-tight">
-                แดชบอร์ดแพทย์
+                แดชบอร์ดแพทย์: {{ $page.props.auth.user.name }}
             </h2>
         </template>
 
@@ -533,7 +533,7 @@ const getStatusClass = (status) => {
 
                     </div>
                 </div>
-            </div>
+
 
                 <!-- Latest Visits Table -->
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-slate-100 mt-6">
@@ -588,6 +588,7 @@ const getStatusClass = (status) => {
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
 
             <!-- Payment Proof Modal -->
