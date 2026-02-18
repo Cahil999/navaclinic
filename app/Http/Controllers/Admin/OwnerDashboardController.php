@@ -111,6 +111,101 @@ class OwnerDashboardController extends Controller
             }
         }
 
+        // --- Financial Breakdown Chart (Revenue, Fee, Tip) ---
+        // --- Chart Specific Filtering ---
+        $chartPeriod = $request->input('chart_period', $period);
+        $chartDateRaw = $request->input('chart_date', $request->input('date'));
+        $chartDate = $chartDateRaw ? Carbon::parse($chartDateRaw) : Carbon::now();
+        $chartDoctorId = $request->input('chart_doctor_id');
+
+        // Determine chart date range
+        if ($chartPeriod === 'daily') {
+            $chartStartDate = $chartDate->copy()->startOfDay();
+            $chartEndDate = $chartDate->copy()->endOfDay();
+        } elseif ($chartPeriod === 'weekly') {
+            $chartStartDate = $chartDate->copy()->startOfWeek();
+            $chartEndDate = $chartDate->copy()->endOfWeek();
+        } elseif ($chartPeriod === 'yearly') {
+            $chartStartDate = $chartDate->copy()->startOfYear();
+            $chartEndDate = $chartDate->copy()->endOfYear();
+        } else { // monthly
+            $chartStartDate = $chartDate->copy()->startOfMonth();
+            $chartEndDate = $chartDate->copy()->endOfMonth();
+        }
+
+        $chartQuery = Visit::with(['doctor'])
+            ->whereNotNull('doctor_id')
+            ->whereBetween('visit_date', [$chartStartDate, $chartEndDate]);
+
+        if ($chartDoctorId) {
+            $chartQuery->where('doctor_id', $chartDoctorId);
+        }
+
+        $chartVisits = $chartQuery->orderBy('visit_date', 'asc')->get();
+
+        // --- Financial Breakdown Chart (Revenue, Fee, Tip) ---
+        // Using $chartVisits instead of global $visits
+        $financialGrouped = $chartVisits->groupBy(function ($date) use ($chartPeriod) {
+            if ($chartPeriod === 'daily') {
+                return $date->visit_date->format('H:00');
+            } elseif ($chartPeriod === 'yearly') {
+                return $date->visit_date->format('Y-m');
+            }
+            return $date->visit_date->format('Y-m-d');
+        })->map(function ($dayVisits) {
+            $revenue = $dayVisits->sum('treatment_fee'); // Gross
+            $tip = $dayVisits->sum('tip');
+            $fee = $dayVisits->sum(function ($visit) {
+                return $visit->doctor_commission ?? ($visit->price * ($visit->doctor->commission_rate ?? 50) / 100);
+            });
+            return [
+                'revenue' => $revenue,
+                'fee' => $fee,
+                'tip' => $tip
+            ];
+        });
+
+        $finRevenueValues = [];
+        $finFeeValues = [];
+        $finTipValues = [];
+        $finChartLabels = []; // Re-calculate labels based on CHART period
+
+        if ($chartPeriod === 'daily') {
+            for ($i = 9; $i <= 20; $i++) {
+                $time = sprintf('%02d:00', $i);
+                $finChartLabels[] = $time;
+                $d = $financialGrouped->get($time, ['revenue' => 0, 'fee' => 0, 'tip' => 0]);
+                $finRevenueValues[] = $d['revenue'];
+                $finFeeValues[] = $d['fee'];
+                $finTipValues[] = $d['tip'];
+            }
+        } elseif ($chartPeriod === 'yearly') {
+            $current = $chartStartDate->copy();
+            while ($current <= $chartEndDate) {
+                $key = $current->format('Y-m');
+                $finChartLabels[] = $current->format('M');
+                $d = $financialGrouped->get($key, ['revenue' => 0, 'fee' => 0, 'tip' => 0]);
+                $finRevenueValues[] = $d['revenue'];
+                $finFeeValues[] = $d['fee'];
+                $finTipValues[] = $d['tip'];
+                $current->addMonth();
+            }
+        } else {
+            $current = $chartStartDate->copy();
+            $chartLabelFormat = ($chartPeriod === 'weekly') ? 'D d M' : 'd M';
+            $chartKeyFormat = 'Y-m-d';
+
+            while ($current <= $chartEndDate) {
+                $key = $current->format($chartKeyFormat);
+                $finChartLabels[] = $current->format($chartLabelFormat);
+                $d = $financialGrouped->get($key, ['revenue' => 0, 'fee' => 0, 'tip' => 0]);
+                $finRevenueValues[] = $d['revenue'];
+                $finFeeValues[] = $d['fee'];
+                $finTipValues[] = $d['tip'];
+                $current->addDay();
+            }
+        }
+
         // --- Top Patients ---
         $topPatients = $visits->groupBy('patient_id')
             ->map(function ($patientVisits) {
@@ -126,32 +221,61 @@ class OwnerDashboardController extends Controller
             ->take(5)
             ->values();
 
-        // --- Doctor Stats ---
-        $doctorStats = $visits->groupBy('doctor_id')->map(function ($doctorVisits) {
-            $doctor = $doctorVisits->first()->doctor;
+        // --- Doctor Performance Stats Filtering ---
+        $doctorPeriod = $request->input('doctor_period', $period);
+        $doctorDateRaw = $request->input('doctor_date', $request->input('date'));
+        $doctorDate = $doctorDateRaw ? Carbon::parse($doctorDateRaw) : Carbon::now();
 
-            $gross = $doctorVisits->sum('treatment_fee');
-            $discount = $doctorVisits->reduce(function ($carry, $visit) {
+        // Determine doctor stats date range
+        if ($doctorPeriod === 'daily') {
+            $doctorStartDate = $doctorDate->copy()->startOfDay();
+            $doctorEndDate = $doctorDate->copy()->endOfDay();
+        } elseif ($doctorPeriod === 'weekly') {
+            $doctorStartDate = $doctorDate->copy()->startOfWeek();
+            $doctorEndDate = $doctorDate->copy()->endOfWeek();
+        } elseif ($doctorPeriod === 'yearly') {
+            $doctorStartDate = $doctorDate->copy()->startOfYear();
+            $doctorEndDate = $doctorDate->copy()->endOfYear();
+        } else { // monthly
+            $doctorStartDate = $doctorDate->copy()->startOfMonth();
+            $doctorEndDate = $doctorDate->copy()->endOfMonth();
+        }
+
+        // Query visits specific to doctor stats
+        $doctorVisitsQuery = Visit::with(['doctor', 'patient'])
+            ->whereNotNull('doctor_id')
+            ->whereBetween('visit_date', [$doctorStartDate, $doctorEndDate])
+            ->orderBy('visit_date', 'desc');
+
+        $doctorVisits = $doctorVisitsQuery->get();
+
+        // --- Doctor Stats ---
+        // Use $doctorVisits instead of global $visits
+        $doctorStats = $doctorVisits->groupBy('doctor_id')->map(function ($uniqueDoctorVisits) {
+            $doctor = $uniqueDoctorVisits->first()->doctor;
+
+            $gross = $uniqueDoctorVisits->sum('treatment_fee');
+            $discount = $uniqueDoctorVisits->reduce(function ($carry, $visit) {
                 $fee = $visit->treatment_fee ?? $visit->price;
                 $val = $visit->discount_value ?? 0;
                 $type = $visit->discount_type ?? 'amount';
                 return $carry + ($type === 'percent' ? ($fee * ($val / 100)) : $val);
             }, 0);
-            $net = $doctorVisits->sum('price');
-            $doctorFee = $doctorVisits->sum(function ($visit) {
+            $net = $uniqueDoctorVisits->sum('price');
+            $doctorFee = $uniqueDoctorVisits->sum(function ($visit) {
                 return $visit->doctor_commission ?? ($visit->price * ($visit->doctor->commission_rate ?? 50) / 100);
             });
 
             return [
                 'doctor_id' => $doctor->id,
                 'doctor_name' => $doctor->name,
-                'total_revenue' => $gross, // Modified to Gross as requested for "Treatment Fee" context
+                'total_revenue' => $gross,
                 'total_discount' => $discount,
                 'net_revenue' => $net,
-                'total_duration' => $doctorVisits->sum('duration_minutes'),
+                'total_duration' => $uniqueDoctorVisits->sum('duration_minutes'),
                 'total_doctor_fee' => $doctorFee,
-                'total_tip' => $doctorVisits->sum('tip'),
-                'visits' => $doctorVisits->map(function ($visit) {
+                'total_tip' => $uniqueDoctorVisits->sum('tip'),
+                'visits' => $uniqueDoctorVisits->map(function ($visit) {
                     // Calc discount for this visit
                     $fee = $visit->treatment_fee ?? $visit->price;
                     $val = $visit->discount_value ?? 0;
@@ -170,7 +294,6 @@ class OwnerDashboardController extends Controller
                         'tip' => $visit->tip ?? 0,
                     ];
                 })
-
             ];
         })->values();
 
@@ -235,6 +358,8 @@ class OwnerDashboardController extends Controller
             ->whereNotNull('doctor_id')
             ->get();
 
+        $doctors = Doctor::orderBy('name')->get();
+
         $calculateMetrics = function ($visitsCollection) {
             $grossRevenue = $visitsCollection->sum('treatment_fee');
 
@@ -292,6 +417,12 @@ class OwnerDashboardController extends Controller
                 'labels' => $chartLabels,
                 'data' => $chartValues,
             ],
+            'financial_chart' => [
+                'labels' => $finChartLabels,
+                'revenue' => $finRevenueValues,
+                'fee' => $finFeeValues,
+                'tip' => $finTipValues,
+            ],
             'chart_new_vs_returning' => [
                 'labels' => ['New Patients', 'Returning Patients'],
                 'data' => [$newPatientsCount, $returningPatientsCount],
@@ -303,11 +434,21 @@ class OwnerDashboardController extends Controller
             'upcoming_bookings' => $upcomingBookings,
             'top_patients' => $topPatients,
             'doctor_stats' => $doctorStats,
+            'doctors' => $doctors,
             'filters' => [
                 'period' => $period,
                 'date' => $date->format('Y-m-d'),
                 'startDate' => $startDate->format('Y-m-d'),
                 'endDate' => $endDate->format('Y-m-d'),
+            ],
+            'chart_filters' => [
+                'period' => $chartPeriod,
+                'date' => $chartDate->format('Y-m-d'),
+                'doctor_id' => $chartDoctorId,
+            ],
+            'doctor_filters' => [
+                'period' => $doctorPeriod,
+                'date' => $doctorDate->format('Y-m-d'),
             ]
         ]);
     }

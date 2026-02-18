@@ -33,15 +33,28 @@ const props = defineProps({
     financial_overview: Object,
     doctor_stats: Array,
     filters: Object,
+    chart_filters: Object,
+    doctor_filters: Object, // New prop
     chart_data: Object,
+    financial_chart: Object,
     chart_new_vs_returning: Object,
     chart_peak_hours: Object,
     upcoming_bookings: Array,
     top_patients: Array,
+    doctors: Array,
 });
 
 const period = ref(props.filters.period);
 const date = ref(props.filters.date);
+
+// Chart Specific Filters
+const chartPeriod = ref(props.chart_filters?.period || props.filters.period);
+const chartDate = ref(props.chart_filters?.date || props.filters.date);
+const chartDoctorId = ref(props.chart_filters?.doctor_id || '');
+
+// Doctor Stats Specific Filters
+const doctorPeriod = ref(props.doctor_filters?.period || props.filters.period);
+const doctorDate = ref(props.doctor_filters?.date || props.filters.date);
 const selectedDoctor = ref('');
 
 const filteredDoctorStats = computed(() => {
@@ -61,9 +74,54 @@ const updateDashboard = () => {
     router.get(route('admin.owner.dashboard'), {
         period: period.value,
         date: date.value,
+        // Preserve chart filters
+        chart_period: chartPeriod.value,
+        chart_date: chartDate.value,
+        chart_doctor_id: chartDoctorId.value,
+        // Preserve doctor filters
+        doctor_period: doctorPeriod.value,
+        doctor_date: doctorDate.value,
     }, {
         preserveState: true,
         preserveScroll: true,
+    });
+};
+
+const updateDoctorStats = () => {
+    router.get(route('admin.owner.dashboard'), {
+        // Preserve global filters
+        period: period.value,
+        date: date.value,
+        // Preserve chart filters
+        chart_period: chartPeriod.value,
+        chart_date: chartDate.value,
+        chart_doctor_id: chartDoctorId.value,
+        // Update doctor filters
+        doctor_period: doctorPeriod.value,
+        doctor_date: doctorDate.value,
+    }, {
+        preserveState: true,
+        preserveScroll: true,
+        only: ['doctor_stats', 'doctor_filters'],
+    });
+};
+
+const updateChart = () => {
+    router.get(route('admin.owner.dashboard'), {
+        // Preserve global filters
+        period: period.value,
+        date: date.value,
+        // Update chart filters
+        chart_period: chartPeriod.value,
+        chart_date: chartDate.value,
+        chart_doctor_id: chartDoctorId.value,
+        // Preserve doctor filters
+        doctor_period: doctorPeriod.value,
+        doctor_date: doctorDate.value,
+    }, {
+        preserveState: true,
+        preserveScroll: true,
+        only: ['financial_chart', 'chart_filters'],
     });
 };
 
@@ -97,27 +155,96 @@ const formatDateLabel = (dateStr, type) => {
     return '';
 };
 
-// --- Chart Configs ---
-const revenueChartConfig = computed(() => ({
-    labels: props.chart_data.labels,
-    datasets: [{
-        label: 'รายได้',
-        data: props.chart_data.data,
-        borderColor: '#4f46e5',
-        backgroundColor: 'rgba(79, 70, 229, 0.1)',
-        tension: 0.3,
-        fill: true,
-    }]
-}));
+// Helper to generate chart data from visits (for individual doctor filtering)
+const getDoctorChartData = (visits) => {
+    const grouped = {};
+    visits.forEach(visit => {
+        const dateKey = visit.visit_date; 
+        if (!grouped[dateKey]) {
+            grouped[dateKey] = { revenue: 0, fee: 0, tip: 0 };
+        }
+        grouped[dateKey].revenue += parseFloat(visit.treatment_fee || 0);
+        grouped[dateKey].fee += parseFloat(visit.doctor_fee || 0);
+        grouped[dateKey].tip += parseFloat(visit.tip || 0);
+    });
+
+    const dates = Object.keys(grouped).reverse(); // PHP sends Descending, so we reverse for Chart (Ascending)
+
+    return {
+        labels: dates,
+        datasets: [
+            {
+                label: 'รายได้รวม (ไม่หักส่วนลด)',
+                data: dates.map(d => grouped[d].revenue),
+                borderColor: '#4f46e5', // Indigo
+                backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                tension: 0.3,
+                fill: false,
+            },
+            {
+                label: 'ค่ามือแพทย์รวม',
+                data: dates.map(d => grouped[d].fee),
+                borderColor: '#10b981', // Emerald
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                tension: 0.3,
+                fill: false,
+            },
+            {
+                label: 'ทิปรวม',
+                data: dates.map(d => grouped[d].tip),
+                borderColor: '#f59e0b', // Amber
+                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                tension: 0.3,
+                fill: false,
+                borderDash: [5, 5],
+            }
+        ]
+    };
+};
+
+const revenueChartConfig = computed(() => {
+    return {
+        labels: props.financial_chart.labels,
+        datasets: [
+            {
+                label: 'รายได้รวม (ไม่หักส่วนลด)',
+                data: props.financial_chart.revenue,
+                borderColor: '#4f46e5', // Indigo
+                backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                tension: 0.3,
+                fill: false,
+            },
+            {
+                label: 'ค่ามือแพทย์รวม',
+                data: props.financial_chart.fee,
+                borderColor: '#10b981', // Emerald
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                tension: 0.3,
+                fill: false,
+            },
+            {
+                label: 'ทิปรวม',
+                data: props.financial_chart.tip,
+                borderColor: '#f59e0b', // Amber
+                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                tension: 0.3,
+                fill: false,
+                borderDash: [5, 5],
+            }
+        ]
+    };
+});
 
 const revenueChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-        legend: { display: false },
+        legend: { display: true, position: 'top' },
         tooltip: {
+            mode: 'index',
+            intersect: false,
             callbacks: {
-                label: (context) => `รายได้: ${formatCurrency(context.raw)}`
+                label: (context) => `${context.dataset.label}: ${formatCurrency(context.raw)}`
             }
         }
     },
@@ -130,6 +257,8 @@ const revenueChartOptions = {
         }
     }
 };
+
+
 
 const newVsReturningChartConfig = computed(() => ({
     labels: props.chart_new_vs_returning.labels,
@@ -172,53 +301,7 @@ const peakHoursChartOptions = {
     }
 };
 
-const getDoctorChartData = (visits) => {
-    // Group by date
-    const grouped = {};
-    visits.forEach(visit => {
-        const date = visit.visit_date; // Assuming YYYY-MM-DD or similar sortable string
-        if (!grouped[date]) {
-            grouped[date] = { revenue: 0, fee: 0, tip: 0 };
-        }
-        grouped[date].revenue += parseFloat(visit.treatment_fee || 0);
-        grouped[date].fee += parseFloat(visit.doctor_fee || 0);
-        grouped[date].tip += parseFloat(visit.tip || 0);
-    });
 
-    // Sort dates
-    const dates = Object.keys(grouped).sort();
-
-    return {
-        labels: dates.map(d => formatDateLabel(d, 'day')),
-        datasets: [
-            {
-                label: 'รายได้',
-                data: dates.map(d => grouped[d].revenue),
-                borderColor: '#4f46e5', // Indigo-600
-                backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                tension: 0.3,
-                fill: false,
-            },
-            {
-                label: 'ค่ามือแพทย์',
-                data: dates.map(d => grouped[d].fee),
-                borderColor: '#10b981', // Emerald-500
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                tension: 0.3,
-                fill: false,
-            },
-            {
-                label: 'ทิป',
-                data: dates.map(d => grouped[d].tip),
-                borderColor: '#f59e0b', // Amber-500
-                backgroundColor: 'rgba(245, 158, 11, 0.1)',
-                tension: 0.3,
-                fill: false,
-                borderDash: [5, 5], // Dashed line for tips
-            }
-        ]
-    };
-};
 
 const doctorChartOptions = {
     responsive: true,
@@ -272,7 +355,7 @@ const doctorChartOptions = {
                         </select>
                         <input type="date" v-model="date" @change="updateDashboard" class="rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     </div>
-                    <div class="text-slate-500 text-sm">
+                     <div class="text-slate-500 text-sm">
                         แสดงข้อมูล: <span class="font-semibold text-slate-700">{{ filters.startDate }}</span> ถึง <span class="font-semibold text-slate-700">{{ filters.endDate }}</span>
                     </div>
                 </div>
@@ -407,12 +490,33 @@ const doctorChartOptions = {
                         </div>
                     </div>
                 </div>
-
+                
                 <!-- Charts Row -->
                 <div class="grid grid-cols-1 gap-6">
                     <!-- Revenue Chart -->
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-slate-200 p-6">
-                        <h3 class="text-lg font-bold text-slate-800 mb-4">แนวโน้มรายได้</h3>
+                        <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
+                            <h3 class="text-lg font-bold text-slate-800">แนวโน้มรายได้และค่าตอบแทน</h3>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <!-- Chart Specific Period -->
+                                <select v-model="chartPeriod" @change="updateChart" class="rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1">
+                                    <option value="daily">รายวัน</option>
+                                    <option value="weekly">รายสัปดาห์</option>
+                                    <option value="monthly">รายเดือน</option>
+                                    <option value="yearly">รายปี</option>
+                                </select>
+                                <!-- Chart Specific Date -->
+                                <input type="date" v-model="chartDate" @change="updateChart" class="rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1" />
+                                
+                                <!-- Chart Specific Doctor -->
+                                <select v-model="chartDoctorId" @change="updateChart" class="rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1 max-w-[150px]">
+                                    <option value="">ทั้งหมด</option>
+                                    <option v-for="doc in doctors" :key="doc.id" :value="doc.id">
+                                        {{ doc.name }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
                         <div class="h-80 w-full">
                              <Line :data="revenueChartConfig" :options="revenueChartOptions" />
                         </div>
@@ -516,28 +620,23 @@ const doctorChartOptions = {
                 <div class="space-y-6">
                     <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
                         <h3 class="text-lg font-bold text-slate-800">รายละเอียดผลงานแพทย์</h3>
-                        
-                        <div class="flex flex-col sm:flex-row gap-2 w-full xl:w-auto">
-                            <!-- Period Filter -->
-                            <div class="flex items-center gap-2">
-                                <select v-model="period" @change="updateDashboard" class="block w-full sm:w-auto rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                    <option value="daily">รายวัน</option>
-                                    <option value="weekly">รายสัปดาห์</option>
-                                    <option value="monthly">รายเดือน</option>
-                                    <option value="yearly">รายปี</option>
-                                </select>
-                                <input type="date" v-model="date" @change="updateDashboard" class="block w-full sm:w-auto rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                            </div>
+                        <div class="flex flex-col md:flex-row items-center gap-2 w-full xl:w-auto">
+                            <!-- Doctor Stats Period -->
+                             <select v-model="doctorPeriod" @change="updateDoctorStats" class="rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1">
+                                <option value="daily">รายวัน</option>
+                                <option value="weekly">รายสัปดาห์</option>
+                                <option value="monthly">รายเดือน</option>
+                                <option value="yearly">รายปี</option>
+                            </select>
+                            <!-- Doctor Stats Date -->
+                            <input type="date" v-model="doctorDate" @change="updateDoctorStats" class="rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1" />
 
-                            <!-- Doctor Filter -->
-                            <div class="w-full sm:w-auto">
-                                <select v-model="selectedDoctor" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                    <option value="">ดูทั้งหมด ({{ doctor_stats.length }} ท่าน)</option>
-                                    <option v-for="doctor in doctor_stats" :key="doctor.doctor_id" :value="doctor.doctor_id">
-                                        {{ doctor.doctor_name }}
-                                    </option>
-                                </select>
-                            </div>
+                            <select v-model="selectedDoctor" class="rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1 w-full md:w-auto xl:w-64">
+                                <option value="">แสดงทั้งหมด (All Doctors)</option>
+                                <option v-for="doc in doctors" :key="doc.id" :value="doc.id">
+                                    {{ doc.name }}
+                                </option>
+                            </select>
                         </div>
                     </div>
                     
