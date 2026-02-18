@@ -658,7 +658,7 @@ const doctorChartOptions = {
                         </div>
                     </div>
                     
-                    <div v-if="doctor_stats.length === 0" class="text-center py-12 bg-white rounded-lg border border-slate-200 text-slate-500">
+                    <div v-if="filteredDoctorStats.length === 0" class="text-center py-12 bg-white rounded-lg border border-slate-200 text-slate-500">
                         ไม่พบข้อมูลสำหรับช่วงเวลาที่เลือก
                     </div>
 
