@@ -23,6 +23,7 @@ import {
     ArrowsPointingOutIcon,
     ArrowsPointingInIcon
 } from '@heroicons/vue/24/outline';
+import { ExclamationTriangleIcon as ExclamationTriangleIconSolid } from '@heroicons/vue/24/solid';
 import { translateBodyPart } from '@/Utils/BodyPartTranslations';
 
 const props = defineProps({
@@ -196,6 +197,13 @@ const getPainStyle = (level) => {
         borderColor: `hsl(${hue}, 60%, 85%)`
     };
 };
+
+const hasMedicalHistory = computed(() => {
+    return props.patient.drug_allergy || 
+           props.patient.underlying_disease || 
+           props.patient.surgery_history || 
+           props.patient.accident_history;
+});
 </script>
 
 <template>
@@ -211,8 +219,9 @@ const getPainStyle = (level) => {
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                             </svg>
                         </Link>
-                        <h2 class="font-bold text-2xl text-slate-800 leading-tight">
+                        <h2 class="font-bold text-2xl leading-tight flex items-center gap-2" :class="hasMedicalHistory ? 'text-red-600' : 'text-slate-800'">
                             {{ patient.name }}
+                            <ExclamationTriangleIconSolid v-if="hasMedicalHistory" class="w-6 h-6 text-red-500" />
                         </h2>
                         <span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-full border border-indigo-100">
                             {{ patient.patient_id }}

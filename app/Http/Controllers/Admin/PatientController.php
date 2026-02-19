@@ -39,6 +39,10 @@ class PatientController extends Controller
                 'id_card_number' => $user->id_card_number,
                 'created_at' => $user->created_at,
                 'type' => 'user',
+                'drug_allergy' => $user->drug_allergy,
+                'underlying_disease' => $user->underlying_disease,
+                'surgery_history' => $user->surgery_history,
+                'accident_history' => $user->accident_history,
             ];
         });
 

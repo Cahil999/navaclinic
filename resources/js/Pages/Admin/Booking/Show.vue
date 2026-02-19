@@ -16,6 +16,7 @@ const form = useForm({
 
 import { computed, ref } from 'vue';
 import Modal from '@/Components/Modal.vue';
+import { ExclamationTriangleIcon } from '@heroicons/vue/24/solid';
 
 const showConfirmModal = ref(false);
 const showImageModal = ref(false);
@@ -164,6 +165,16 @@ const isDetailedPainArea = (areas) => {
 
 // ... (existing functions)
 
+// ... (existing functions)
+
+const hasMedicalHistory = (patient) => {
+    if (!patient) return false;
+    return patient.drug_allergy || 
+           patient.underlying_disease || 
+           patient.surgery_history || 
+           patient.accident_history;
+};
+
 </script>
 
 <template>
@@ -196,7 +207,13 @@ const isDetailedPainArea = (areas) => {
                                     ข้อมูลผู้ป่วย
                                 </h3>
                                 <div class="space-y-3 text-slate-600">
-                                    <p><strong class="text-slate-800">ชื่อ:</strong> {{ booking.user ? booking.user.name : (booking.customer_name || 'Guest') }}</p>
+                                    <p class="flex items-center gap-2">
+                                        <strong class="text-slate-800">ชื่อ:</strong> 
+                                        <span :class="(booking.user && hasMedicalHistory(booking.user)) ? 'text-red-600 font-bold flex items-center gap-1' : ''">
+                                            {{ booking.user ? booking.user.name : (booking.customer_name || 'Guest') }}
+                                            <ExclamationTriangleIcon v-if="booking.user && hasMedicalHistory(booking.user)" class="w-4 h-4 text-red-500" />
+                                        </span>
+                                    </p>
                                     <p><strong class="text-slate-800">ข้อมูลติดต่อ:</strong> {{ booking.user ? booking.user.phone_number : (booking.customer_phone || '-') }}</p>
                                     <div class="mt-4 pt-2">
                                          <Link v-if="booking.user" :href="route('admin.patients.show', booking.user.id)" class="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium hover:underline">
@@ -349,7 +366,10 @@ const isDetailedPainArea = (areas) => {
                     <div class="space-y-2.5 text-sm">
                         <div class="flex justify-between items-center">
                             <span class="text-slate-500 text-xs">ผู้ป่วย</span>
-                            <span class="font-bold text-slate-800">{{ booking.user ? booking.user.name : (booking.customer_name || 'Guest') }}</span>
+                            <span class="font-bold flex items-center gap-1" :class="(booking.user && hasMedicalHistory(booking.user)) ? 'text-red-600' : 'text-slate-800'">
+                                {{ booking.user ? booking.user.name : (booking.customer_name || 'Guest') }}
+                                <ExclamationTriangleIcon v-if="booking.user && hasMedicalHistory(booking.user)" class="w-4 h-4 text-red-500" />
+                            </span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-slate-500 text-xs">วันที่นัดหมาย</span>

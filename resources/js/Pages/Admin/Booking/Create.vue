@@ -4,6 +4,7 @@ import { Head, useForm, Link } from '@inertiajs/vue3';
 import { ref, watch, computed } from 'vue';
 import axios from 'axios';
 import Calendar from '@/Components/Calendar.vue';
+import { ExclamationTriangleIcon } from '@heroicons/vue/24/solid';
 
 const props = defineProps({
     doctors: Array,
@@ -237,6 +238,15 @@ const onSearchInput = () => {
     form.user_id = '';
 };
 
+
+
+const hasMedicalHistory = (patient) => {
+    if (!patient) return false;
+    return patient.drug_allergy || 
+           patient.underlying_disease || 
+           patient.surgery_history || 
+           patient.accident_history;
+};
 </script>
 
 <template>
@@ -315,7 +325,11 @@ const onSearchInput = () => {
                                                 @click="choosePatient(p)"
                                                 class="px-4 py-2 hover:bg-indigo-50 cursor-pointer border-b border-gray-50 last:border-0"
                                             >
-                                                <div class="font-medium text-gray-900">{{ p.name }}</div>
+                                            >
+                                                <div class="font-medium flex items-center gap-1" :class="hasMedicalHistory(p) ? 'text-red-600' : 'text-gray-900'">
+                                                    {{ p.name }}
+                                                    <ExclamationTriangleIcon v-if="hasMedicalHistory(p)" class="w-4 h-4 text-red-500" />
+                                                </div>
                                                 <div class="text-xs text-gray-500">
                                                     {{ p.phone }} 
                                                     <span v-if="p.type === 'guest'" class="text-orange-500 font-bold ml-1">(Guest History)</span>
@@ -331,7 +345,10 @@ const onSearchInput = () => {
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                     </svg>
                                     <div>
-                                        <div class="font-medium text-indigo-800">Selected: {{ selectedPatient.name }}</div>
+                                        <div class="font-medium flex items-center gap-1" :class="hasMedicalHistory(selectedPatient) ? 'text-red-600' : 'text-indigo-800'">
+                                            Selected: {{ selectedPatient.name }}
+                                            <ExclamationTriangleIcon v-if="hasMedicalHistory(selectedPatient)" class="w-4 h-4 text-red-500" />
+                                        </div>
                                         <div class="text-sm text-indigo-600">{{ selectedPatient.phone }}</div>
                                     </div>
                                 </div>
@@ -469,7 +486,10 @@ const onSearchInput = () => {
                                 <div class="space-y-2 text-sm">
                                     <div class="flex justify-between">
                                         <span class="text-gray-500">Patient:</span>
-                                        <span class="font-medium">{{ userType === 'existing' ? selectedPatient?.name : form.customer_name }}</span>
+                                        <span class="font-medium" :class="(userType === 'existing' && hasMedicalHistory(selectedPatient)) ? 'text-red-600 flex items-center gap-1' : ''">
+                                            {{ userType === 'existing' ? selectedPatient?.name : form.customer_name }}
+                                            <ExclamationTriangleIcon v-if="userType === 'existing' && hasMedicalHistory(selectedPatient)" class="w-4 h-4 text-red-500 inline" />
+                                        </span>
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-gray-500">Date:</span>

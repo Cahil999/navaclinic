@@ -11,6 +11,9 @@ import PrimaryButton from '@/Components/PrimaryButton.vue'; // Added PrimaryButt
 import InputError from '@/Components/InputError.vue'; // Added InputError
 import TextInput from '@/Components/TextInput.vue'; // Added TextInput
 import ThaiAddressInput from '@/Components/ThaiAddressInput.vue'; // Added ThaiAddressInput
+import { 
+    ExclamationTriangleIcon 
+} from '@heroicons/vue/24/solid';
 
 const props = defineProps({
     patients: {
@@ -143,6 +146,13 @@ const formatTime = (timeString) => {
     return timeString.substring(0, 5);
 };
 
+const hasMedicalHistory = (patient) => {
+    return patient.drug_allergy || 
+           patient.underlying_disease || 
+           patient.surgery_history || 
+           patient.accident_history;
+};
+
 const openRegisterModal = () => {
     registerForm.reset();
     showRegisterModal.value = true;
@@ -245,8 +255,12 @@ const submitRegister = () => {
                                 </thead>
                                 <tbody class="bg-white divide-y divide-slate-100">
                                     <tr v-for="patient in patients.data" :key="patient.id" class="hover:bg-blue-50/50 transition-colors">
-                                        <td class="px-6 py-4 font-medium text-slate-900">
-                                            {{ patient.name }}<br>
+                                        <td class="px-6 py-4 font-medium" :class="hasMedicalHistory(patient) ? 'text-red-600' : 'text-slate-900'">
+                                            <div class="flex items-center gap-1">
+                                                {{ patient.name }}
+                                                <ExclamationTriangleIcon v-if="hasMedicalHistory(patient)" class="w-4 h-4 text-red-500 inline-block" />
+                                            </div>
+                                            <br>
                                             <span 
                                                 class="text-xs font-bold px-2 py-0.5 rounded-full mt-1 inline-block"
                                                 :class="patient.type === 'guest' ? 'text-orange-600 bg-orange-50' : 'text-blue-600 bg-blue-50'"

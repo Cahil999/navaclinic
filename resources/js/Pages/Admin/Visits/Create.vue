@@ -8,6 +8,7 @@ import BodyPartSelector from '@/Components/BodyPartSelector.vue';
 import PainLevelSelector from '@/Components/PainLevelSelector.vue';
 import Swal from 'sweetalert2';
 import { translateBodyPart } from '@/Utils/BodyPartTranslations';
+import { ExclamationTriangleIcon } from '@heroicons/vue/24/solid';
 
 const props = defineProps({
     patient: Object,
@@ -403,6 +404,13 @@ const confirmSubmit = () => {
         onFinish: () => confirmingVisit.value = false,
     });
 };
+
+const hasMedicalHistory = computed(() => {
+    return props.patient.drug_allergy || 
+           props.patient.underlying_disease || 
+           props.patient.surgery_history || 
+           props.patient.accident_history;
+});
 </script>
 
 <template>
@@ -416,8 +424,9 @@ const confirmSubmit = () => {
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                 </Link>
-                <h2 class="font-bold text-xl text-slate-800 leading-tight">
+                <h2 class="font-bold text-xl leading-tight flex items-center gap-2" :class="hasMedicalHistory ? 'text-red-600' : 'text-slate-800'">
                     New Visit: {{ patient.name }}
+                    <ExclamationTriangleIcon v-if="hasMedicalHistory" class="w-5 h-5 text-red-500" />
                 </h2>
             </div>
         </template>

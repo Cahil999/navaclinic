@@ -15,6 +15,7 @@ import { Bar, Pie } from 'vue-chartjs'
 import { computed, ref } from 'vue';
 import Pagination from '@/Components/Pagination.vue';
 import Modal from '@/Components/Modal.vue';
+import { ExclamationTriangleIcon } from '@heroicons/vue/24/solid';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend)
 
@@ -331,6 +332,14 @@ const processBookingCancellation = () => {
         preserveScroll: true
     });
 };
+
+const hasMedicalHistory = (patient) => {
+    if (!patient) return false;
+    return patient.drug_allergy || 
+           patient.underlying_disease || 
+           patient.surgery_history || 
+           patient.accident_history;
+};
 </script>
 
 <template>
@@ -518,7 +527,10 @@ const processBookingCancellation = () => {
                                     <tr v-for="booking in bookings.data" :key="booking.id" class="hover:bg-blue-50/50 transition-colors">
                                         <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">
                                             <div v-if="booking.user">
-                                                {{ booking.user.name }}
+                                                <div class="flex items-center gap-1" :class="hasMedicalHistory(booking.user) ? 'text-red-600 font-bold' : ''">
+                                                    {{ booking.user.name }}
+                                                    <ExclamationTriangleIcon v-if="hasMedicalHistory(booking.user)" class="w-4 h-4 text-red-500" />
+                                                </div>
                                                 <div class="text-xs text-slate-500">{{ booking.user.phone_number || '-' }}</div>
                                             </div>
                                             <div v-else>
@@ -610,7 +622,10 @@ const processBookingCancellation = () => {
                                     <tr v-for="visit in latestVisits.data" :key="visit.id" class="hover:bg-emerald-50/50 transition-colors">
                                         <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">
                                             <div v-if="visit.patient">
-                                                {{ visit.patient.name }}
+                                                <div class="flex items-center gap-1" :class="hasMedicalHistory(visit.patient) ? 'text-red-600 font-bold' : ''">
+                                                    {{ visit.patient.name }}
+                                                    <ExclamationTriangleIcon v-if="hasMedicalHistory(visit.patient)" class="w-4 h-4 text-red-500" />
+                                                </div>
                                                 <div class="text-xs text-slate-500">{{ visit.patient.phone_number || '-' }}</div>
                                             </div>
                                             <div v-else>
