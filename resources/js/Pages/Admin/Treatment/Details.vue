@@ -75,6 +75,31 @@ watch(() => form.treatment_fee, (newFee) => {
 });
 
 const submit = () => {
+    // Check Treatment Fee
+    let fee = parseFloat(form.treatment_fee) || 0;
+    
+    if (fee <= 500) {
+        Swal.fire({
+            title: 'แจ้งเตือน',
+            text: 'กรุณาตรวจสอบจำนวนเงินค่ารักษา ให้ถูกต้อง',
+            icon: 'warning',
+            confirmButtonText: 'ยืนยันยอดเงินนี้',
+            showCancelButton: true,
+            cancelButtonText: 'กลับไปแก้ไข',
+            confirmButtonColor: '#f59e0b', // amber-500
+            cancelButtonColor: '#94a3b8',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                showConfirmationDialog();
+            }
+        });
+        return;
+    }
+
+    showConfirmationDialog();
+};
+
+const showConfirmationDialog = () => {
     Swal.fire({
         title: 'ยืนยันแผนการรักษา',
         text: 'ต้องการดำเนินการอย่างไรต่อ?',
