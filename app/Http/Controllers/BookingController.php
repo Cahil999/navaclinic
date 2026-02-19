@@ -50,6 +50,48 @@ class BookingController extends Controller
             return back()->withErrors(['appointment_date' => "Clinic is closed on this day."]);
         }
 
+        // Check for Doctor Availability (Double Booking Prevention)
+        if ($validated['doctor_id']) {
+            $requestedStart = \Carbon\Carbon::parse($validated['appointment_date'] . ' ' . $validated['start_time']);
+            $requestedEnd = $requestedStart->copy()->addMinutes((int) $validated['duration_minutes']);
+
+            // Check Bookings
+            $conflictingBooking = Booking::where('doctor_id', $validated['doctor_id'])
+                ->whereDate('appointment_date', $validated['appointment_date'])
+                ->whereIn('status', ['pending', 'confirmed'])
+                ->get()
+                ->first(function ($booking) use ($requestedStart, $requestedEnd) {
+                    // Calculate Booking Time Range + 30m Buffer
+                    $bStart = $booking->appointment_date->copy()->setTimeFromTimeString($booking->start_time);
+                    $bEnd = $bStart->copy()->addMinutes($booking->duration_minutes + 30);
+
+                    return $requestedStart->lt($bEnd) && $requestedEnd->gt($bStart);
+                });
+
+            if ($conflictingBooking) {
+                return back()->withErrors(['doctor_id' => 'Doctor is not available at this time (Double Booking).']);
+            }
+
+            // Check Visits (Walk-ins)
+            $conflictingVisit = \App\Models\Visit::where('doctor_id', $validated['doctor_id'])
+                ->whereDate('visit_date', $validated['appointment_date'])
+                ->whereIn('status', ['pending', 'ongoing'])
+                ->get()
+                ->first(function ($visit) use ($requestedStart, $requestedEnd) {
+                    if ($visit->booking_id)
+                        return false;
+
+                    $vStart = \Carbon\Carbon::parse($visit->visit_date);
+                    $vEnd = $vStart->copy()->addMinutes(($visit->duration_minutes ?? 30) + 30); // Buffer
+    
+                    return $requestedStart->lt($vEnd) && $requestedEnd->gt($vStart);
+                });
+
+            if ($conflictingVisit) {
+                return back()->withErrors(['doctor_id' => 'Doctor is currently busy with a walk-in patient.']);
+            }
+        }
+
         // Prepare data
         $bookingData = [
             'doctor_id' => $validated['doctor_id'],
@@ -189,7 +231,7 @@ class BookingController extends Controller
         $doctors = Doctor::all();
 
         // 1. Fetch Bookings
-        $bookings = Booking::where('appointment_date', $date)
+        $bookings = Booking::whereDate('appointment_date', $date)
             ->whereIn('status', ['pending', 'confirmed'])
             ->get();
 
@@ -240,8 +282,9 @@ class BookingController extends Controller
                 $busySlots = [];
 
                 foreach ($doctorBookings as $b) {
-                    $bStart = \Carbon\Carbon::parse($b->appointment_date . ' ' . $b->start_time)->format('H:i');
-                    $bEnd = \Carbon\Carbon::parse($b->appointment_date . ' ' . $b->start_time)->addMinutes($b->duration_minutes)->format('H:i');
+                    $dateTime = $b->appointment_date->copy()->setTimeFromTimeString($b->start_time);
+                    $bStart = $dateTime->format('H:i');
+                    $bEnd = $dateTime->copy()->addMinutes($b->duration_minutes)->format('H:i');
                     $busySlots[] = "$bStart-$bEnd";
                 }
                 foreach ($doctorVisits as $v) {
@@ -260,14 +303,15 @@ class BookingController extends Controller
 
                 // 1. Bookings Overlap
                 $conflictingBooking = $doctorBookings->first(function ($booking) use ($slotStart, $checkEnd) {
-                    $bookingStart = \Carbon\Carbon::parse($booking->appointment_date . ' ' . $booking->start_time);
+                    $bookingStart = $booking->appointment_date->copy()->setTimeFromTimeString($booking->start_time);
                     $bookingEnd = $bookingStart->copy()->addMinutes($booking->duration_minutes + 30);
                     return $slotStart < $bookingEnd && $checkEnd > $bookingStart;
                 });
 
                 if ($conflictingBooking) {
-                    $bStart = \Carbon\Carbon::parse($conflictingBooking->appointment_date . ' ' . $conflictingBooking->start_time)->format('H:i');
-                    $bEnd = \Carbon\Carbon::parse($conflictingBooking->appointment_date . ' ' . $conflictingBooking->start_time)->addMinutes($conflictingBooking->duration_minutes)->format('H:i');
+                    $dateTime = $conflictingBooking->appointment_date->copy()->setTimeFromTimeString($conflictingBooking->start_time);
+                    $bStart = $dateTime->format('H:i');
+                    $bEnd = $dateTime->copy()->addMinutes($conflictingBooking->duration_minutes)->format('H:i');
 
                     return [
                         'id' => $doctor->id,
