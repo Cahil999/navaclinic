@@ -106,7 +106,8 @@ const emit = defineEmits(['update:modelValue']);
             if (match) {
                 acc.push({
                     id: localName,     // Local SVG ID (e.g. "Cheek")
-                    index: index + 1   // Global Index (1-based)
+                    index: index + 1,  // Global Index (1-based)
+                    rawItem: typeof item === 'object' ? item : null
                 });
             }
             return acc;

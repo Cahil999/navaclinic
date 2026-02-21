@@ -165,8 +165,16 @@ const updateHighlights = () => {
     const all = container.value.querySelectorAll('.selected, .muscle-highlight, .active');
     all.forEach(el => {
         el.classList.remove('selected', 'muscle-highlight', 'active');
-        el.style.fill = ''; 
-        // Note: we don't move them back in DOM, which is fine, they just lose the class.
+        el.style.removeProperty('fill');
+        el.style.removeProperty('stroke');
+        
+        const children = el.querySelectorAll('*');
+        children.forEach(child => {
+            if (child.style) {
+                 child.style.removeProperty('fill');
+                 child.style.removeProperty('stroke');
+            }
+        });
     });
 
     // Helper: Find element for a part
@@ -188,6 +196,31 @@ const updateHighlights = () => {
 
         if (el) {
             el.classList.add('selected');
+            
+            if (typeof part === 'object' && part.rawItem) {
+                let level = null;
+                const before = parseInt(part.rawItem.pain_level);
+                const after = parseInt(part.rawItem.pain_level_after);
+
+                if (!isNaN(before) && before > 0) level = before;
+                if (!isNaN(after) && after > 0) level = after;
+
+                if (level) {
+                    const hue = Math.max(0, 130 - ((level - 1) * (130 / 9)));
+                    const bgColor = `hsl(${hue}, 85%, 50%)`;
+                    const strokeColor = `hsl(${hue}, 85%, 40%)`;
+
+                    el.style.setProperty('fill', bgColor, 'important');
+                    el.style.setProperty('stroke', strokeColor, 'important');
+                    
+                    const children = el.querySelectorAll('path, rect, circle, polygon, ellipse, line, polyline');
+                    children.forEach(child => {
+                        child.style.setProperty('fill', bgColor, 'important');
+                        child.style.setProperty('stroke', strokeColor, 'important');
+                    });
+                }
+            }
+
             if (el.tagName !== 'g' && el.parentNode) {
                 el.parentNode.appendChild(el);
             }
@@ -227,12 +260,27 @@ const updateHighlights = () => {
             const fontSize = 14 * scaleFactor;
             const strokeWidth = 2 * scaleFactor;
             
+            // Color logic
+            let badgeBg = "#ef4444";
+            if (part.rawItem) {
+                let level = null;
+                const before = parseInt(part.rawItem.pain_level);
+                const after = parseInt(part.rawItem.pain_level_after);
+                if (!isNaN(before) && before > 0) level = before;
+                if (!isNaN(after) && after > 0) level = after;
+
+                if (level) {
+                    const hue = Math.max(0, 130 - ((level - 1) * (130 / 9)));
+                    badgeBg = `hsl(${hue}, 85%, 50%)`;
+                }
+            }
+            
             // Circle
             const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
             circle.setAttribute("cx", cx);
             circle.setAttribute("cy", cy);
             circle.setAttribute("r", r);
-            circle.setAttribute("fill", "#ef4444");
+            circle.setAttribute("fill", badgeBg);
             circle.setAttribute("stroke", "#ffffff");
             circle.setAttribute("stroke-width", strokeWidth);
             
