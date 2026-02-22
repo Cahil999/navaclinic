@@ -669,9 +669,11 @@ const doctorChartOptions = {
                                             <th class="px-6 py-3">อันดับ</th>
                                             <th class="px-6 py-3">แพทย์</th>
                                             <th class="px-6 py-3 text-right">จำนวนเคส</th>
+                                            <th class="px-6 py-3 text-right">รายได้</th>
                                             <th class="px-6 py-3 text-right">ค่ามือแพทย์รวม</th>
                                             <th class="px-6 py-3 text-right">ทิปรวม</th>
                                             <th class="px-6 py-3 text-right">รวมรับสุทธิ</th>
+                                            <th class="px-6 py-3 text-right">รายได้สุทธิ</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100">
@@ -679,21 +681,25 @@ const doctorChartOptions = {
                                             <td class="px-6 py-4">{{ index + 1 }}</td>
                                             <td class="px-6 py-4 font-medium text-slate-900">{{ doctor.doctor_name }}</td>
                                             <td class="px-6 py-4 text-right">{{ doctor.visits.length }}</td>
+                                            <td class="px-6 py-4 text-right font-bold text-slate-700">{{ formatCurrency(doctor.total_revenue) }}</td>
                                             <td class="px-6 py-4 text-right font-bold text-emerald-600">{{ formatCurrency(doctor.total_doctor_fee) }}</td>
                                             <td class="px-6 py-4 text-right font-bold text-amber-500">{{ formatCurrency(doctor.total_tip) }}</td>
                                             <td class="px-6 py-4 text-right font-bold text-indigo-700">{{ formatCurrency(doctor.total_doctor_fee + doctor.total_tip) }}</td>
+                                            <td class="px-6 py-4 text-right font-bold text-purple-700">{{ formatCurrency(doctor.total_revenue - (doctor.total_doctor_fee + doctor.total_tip)) }}</td>
                                         </tr>
                                          <tr v-if="doctor_stats.length === 0">
-                                            <td colspan="6" class="px-6 py-8 text-center text-slate-500 italic">ไม่พบข้อมูลสำหรับช่วงเวลาที่เลือก</td>
+                                            <td colspan="8" class="px-6 py-8 text-center text-slate-500 italic">ไม่พบข้อมูลสำหรับช่วงเวลาที่เลือก</td>
                                         </tr>
                                     </tbody>
                                     <tfoot v-if="doctor_stats.length > 0" class="bg-slate-50 font-bold text-slate-900">
                                         <tr>
                                             <td colspan="2" class="px-6 py-4 text-right">รวมทั้งหมด</td>
                                             <td class="px-6 py-4 text-right">{{ doctor_stats.reduce((acc, doc) => acc + doc.visits.length, 0) }}</td>
+                                            <td class="px-6 py-4 text-right text-slate-800">{{ formatCurrency(doctor_stats.reduce((acc, doc) => acc + doc.total_revenue, 0)) }}</td>
                                             <td class="px-6 py-4 text-right text-emerald-700">{{ formatCurrency(doctor_stats.reduce((acc, doc) => acc + doc.total_doctor_fee, 0)) }}</td>
                                             <td class="px-6 py-4 text-right text-amber-700">{{ formatCurrency(doctor_stats.reduce((acc, doc) => acc + doc.total_tip, 0)) }}</td>
-                                             <td class="px-6 py-4 text-right text-indigo-800">{{ formatCurrency(doctor_stats.reduce((acc, doc) => acc + doc.total_doctor_fee + doc.total_tip, 0)) }}</td>
+                                            <td class="px-6 py-4 text-right text-indigo-800">{{ formatCurrency(doctor_stats.reduce((acc, doc) => acc + doc.total_doctor_fee + doc.total_tip, 0)) }}</td>
+                                            <td class="px-6 py-4 text-right text-purple-800">{{ formatCurrency(doctor_stats.reduce((acc, doc) => acc + (doc.total_revenue - (doc.total_doctor_fee + doc.total_tip)), 0)) }}</td>
                                         </tr>
                                     </tfoot>
                                 </table>
