@@ -219,9 +219,9 @@ const hasMedicalHistory = computed(() => {
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                             </svg>
                         </Link>
-                        <h2 class="font-bold text-2xl leading-tight flex items-center gap-2" :class="hasMedicalHistory ? 'text-red-600' : 'text-slate-800'">
+                        <h2 class="font-bold text-2xl leading-tight flex items-center gap-2 text-slate-800">
                             {{ patient.name }}
-                            <ExclamationTriangleIconSolid v-if="hasMedicalHistory" class="w-6 h-6 text-red-500" />
+                            <ExclamationTriangleIconSolid v-if="hasMedicalHistory" class="w-6 h-6 text-red-500 animate-pulse" />
                         </h2>
                         <span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-full border border-indigo-100">
                             {{ patient.patient_id }}

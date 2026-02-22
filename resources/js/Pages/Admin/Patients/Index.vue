@@ -255,10 +255,10 @@ const submitRegister = () => {
                                 </thead>
                                 <tbody class="bg-white divide-y divide-slate-100">
                                     <tr v-for="patient in patients.data" :key="patient.id" class="hover:bg-blue-50/50 transition-colors">
-                                        <td class="px-6 py-4 font-medium" :class="hasMedicalHistory(patient) ? 'text-red-600' : 'text-slate-900'">
+                                        <td class="px-6 py-4 font-medium text-slate-900">
                                             <div class="flex items-center gap-1">
                                                 {{ patient.name }}
-                                                <ExclamationTriangleIcon v-if="hasMedicalHistory(patient)" class="w-4 h-4 text-red-500 inline-block" />
+                                                <ExclamationTriangleIcon v-if="hasMedicalHistory(patient)" class="w-4 h-4 text-red-500 inline-block animate-pulse" />
                                             </div>
                                             <br>
                                             <span 

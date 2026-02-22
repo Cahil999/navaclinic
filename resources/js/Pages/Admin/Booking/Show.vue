@@ -209,9 +209,9 @@ const hasMedicalHistory = (patient) => {
                                 <div class="space-y-3 text-slate-600">
                                     <p class="flex items-center gap-2">
                                         <strong class="text-slate-800">ชื่อ:</strong> 
-                                        <span :class="(booking.user && hasMedicalHistory(booking.user)) ? 'text-red-600 font-bold flex items-center gap-1' : ''">
+                                        <span :class="(booking.user && hasMedicalHistory(booking.user)) ? 'font-bold flex items-center gap-1' : ''">
                                             {{ booking.user ? booking.user.name : (booking.customer_name || 'Guest') }}
-                                            <ExclamationTriangleIcon v-if="booking.user && hasMedicalHistory(booking.user)" class="w-4 h-4 text-red-500" />
+                                            <ExclamationTriangleIcon v-if="booking.user && hasMedicalHistory(booking.user)" class="w-4 h-4 text-red-500 animate-pulse" />
                                         </span>
                                     </p>
                                     <p><strong class="text-slate-800">ข้อมูลติดต่อ:</strong> {{ booking.user ? booking.user.phone_number : (booking.customer_phone || '-') }}</p>
@@ -366,9 +366,9 @@ const hasMedicalHistory = (patient) => {
                     <div class="space-y-2.5 text-sm">
                         <div class="flex justify-between items-center">
                             <span class="text-slate-500 text-xs">ผู้ป่วย</span>
-                            <span class="font-bold flex items-center gap-1" :class="(booking.user && hasMedicalHistory(booking.user)) ? 'text-red-600' : 'text-slate-800'">
+                            <span class="font-bold flex items-center gap-1 text-slate-800">
                                 {{ booking.user ? booking.user.name : (booking.customer_name || 'Guest') }}
-                                <ExclamationTriangleIcon v-if="booking.user && hasMedicalHistory(booking.user)" class="w-4 h-4 text-red-500" />
+                                <ExclamationTriangleIcon v-if="booking.user && hasMedicalHistory(booking.user)" class="w-4 h-4 text-red-500 animate-pulse" />
                             </span>
                         </div>
                         <div class="flex justify-between items-center">

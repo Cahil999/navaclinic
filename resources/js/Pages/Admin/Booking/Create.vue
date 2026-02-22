@@ -327,9 +327,9 @@ const hasMedicalHistory = (patient) => {
                                                 class="px-4 py-2 hover:bg-indigo-50 cursor-pointer border-b border-gray-50 last:border-0"
                                             >
                                             >
-                                                <div class="font-medium flex items-center gap-1" :class="hasMedicalHistory(p) ? 'text-red-600' : 'text-gray-900'">
+                                                <div class="font-medium flex items-center gap-1 text-gray-900">
                                                     {{ p.name }}
-                                                    <ExclamationTriangleIcon v-if="hasMedicalHistory(p)" class="w-4 h-4 text-red-500" />
+                                                    <ExclamationTriangleIcon v-if="hasMedicalHistory(p)" class="w-4 h-4 text-red-500 animate-pulse" />
                                                 </div>
                                                 <div class="text-xs text-gray-500">
                                                     {{ p.phone }} 
@@ -346,9 +346,9 @@ const hasMedicalHistory = (patient) => {
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                     </svg>
                                     <div>
-                                        <div class="font-medium flex items-center gap-1" :class="hasMedicalHistory(selectedPatient) ? 'text-red-600' : 'text-indigo-800'">
+                                        <div class="font-medium flex items-center gap-1 text-indigo-800">
                                             Selected: {{ selectedPatient.name }}
-                                            <ExclamationTriangleIcon v-if="hasMedicalHistory(selectedPatient)" class="w-4 h-4 text-red-500" />
+                                            <ExclamationTriangleIcon v-if="hasMedicalHistory(selectedPatient)" class="w-4 h-4 text-red-500 animate-pulse" />
                                         </div>
                                         <div class="text-sm text-indigo-600">{{ selectedPatient.phone }}</div>
                                     </div>
@@ -487,9 +487,9 @@ const hasMedicalHistory = (patient) => {
                                 <div class="space-y-2 text-sm">
                                     <div class="flex justify-between">
                                         <span class="text-gray-500">Patient:</span>
-                                        <span class="font-medium" :class="(userType === 'existing' && hasMedicalHistory(selectedPatient)) ? 'text-red-600 flex items-center gap-1' : ''">
+                                        <span class="font-medium" :class="(userType === 'existing' && hasMedicalHistory(selectedPatient)) ? 'flex items-center gap-1' : ''">
                                             {{ userType === 'existing' ? selectedPatient?.name : form.customer_name }}
-                                            <ExclamationTriangleIcon v-if="userType === 'existing' && hasMedicalHistory(selectedPatient)" class="w-4 h-4 text-red-500 inline" />
+                                            <ExclamationTriangleIcon v-if="userType === 'existing' && hasMedicalHistory(selectedPatient)" class="w-4 h-4 text-red-500 inline animate-pulse" />
                                         </span>
                                     </div>
                                     <div class="flex justify-between">

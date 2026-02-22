@@ -527,9 +527,9 @@ const hasMedicalHistory = (patient) => {
                                     <tr v-for="booking in bookings.data" :key="booking.id" class="hover:bg-blue-50/50 transition-colors">
                                         <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">
                                             <div v-if="booking.user">
-                                                <div class="flex items-center gap-1" :class="hasMedicalHistory(booking.user) ? 'text-red-600 font-bold' : ''">
+                                                <div class="flex items-center gap-1" :class="hasMedicalHistory(booking.user) ? 'font-bold' : ''">
                                                     {{ booking.user.name }}
-                                                    <ExclamationTriangleIcon v-if="hasMedicalHistory(booking.user)" class="w-4 h-4 text-red-500" />
+                                                    <ExclamationTriangleIcon v-if="hasMedicalHistory(booking.user)" class="w-4 h-4 text-red-500 animate-pulse" />
                                                 </div>
                                                 <div class="text-xs text-slate-500">{{ booking.user.phone_number || '-' }}</div>
                                             </div>
@@ -623,9 +623,9 @@ const hasMedicalHistory = (patient) => {
                                     <tr v-for="visit in latestVisits.data" :key="visit.id" class="hover:bg-emerald-50/50 transition-colors">
                                         <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">
                                             <div v-if="visit.patient">
-                                                <div class="flex items-center gap-1" :class="hasMedicalHistory(visit.patient) ? 'text-red-600 font-bold' : ''">
+                                                <div class="flex items-center gap-1" :class="hasMedicalHistory(visit.patient) ? 'font-bold' : ''">
                                                     {{ visit.patient.name }}
-                                                    <ExclamationTriangleIcon v-if="hasMedicalHistory(visit.patient)" class="w-4 h-4 text-red-500" />
+                                                    <ExclamationTriangleIcon v-if="hasMedicalHistory(visit.patient)" class="w-4 h-4 text-red-500 animate-pulse" />
                                                 </div>
                                                 <div class="text-xs text-slate-500">{{ visit.patient.phone_number || '-' }}</div>
                                             </div>

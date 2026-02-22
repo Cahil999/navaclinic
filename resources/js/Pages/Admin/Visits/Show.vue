@@ -114,9 +114,9 @@ const hasMedicalHistory = computed(() => {
                         {{ visit.patient.name.charAt(0) }}
                     </div>
                     <div>
-                        <h1 class="text-base font-bold leading-tight flex items-center gap-2" :class="hasMedicalHistory ? 'text-red-600' : 'text-slate-800'">
+                        <h1 class="text-base font-bold leading-tight flex items-center gap-2 text-slate-800">
                             {{ visit.patient.name }}
-                            <ExclamationTriangleIcon v-if="hasMedicalHistory" class="w-4 h-4 text-red-500" />
+                            <ExclamationTriangleIcon v-if="hasMedicalHistory" class="w-4 h-4 text-red-500 animate-pulse" />
                             <Link :href="route('admin.patients.show', visit.patient.id)" class="text-[10px] flex items-center px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
                                 ดูประวัติ
                             </Link>
@@ -363,9 +363,9 @@ const hasMedicalHistory = computed(() => {
                     <div :class="viewMode === 'compact' ? 'px-4 py-3' : 'px-6 py-5'" class="border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                          <div>
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">ผู้ป่วย (Patient)</p>
-                            <h3 class="font-bold text-lg flex items-center gap-2" :class="hasMedicalHistory ? 'text-red-600' : 'text-slate-900'">
+                            <h3 class="font-bold text-lg flex items-center gap-2 text-slate-900">
                                 {{ visit.patient.name }}
-                                <ExclamationTriangleIcon v-if="hasMedicalHistory" class="w-5 h-5 text-red-500" />
+                                <ExclamationTriangleIcon v-if="hasMedicalHistory" class="w-5 h-5 text-red-500 animate-pulse" />
                                 <Link :href="route('admin.patients.show', visit.patient.id)" class="text-xs font-normal text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 transition-colors">
                                     ดูประวัติ
                                 </Link>
