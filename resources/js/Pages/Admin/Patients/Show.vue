@@ -465,6 +465,7 @@ const hasMedicalHistory = computed(() => {
                                             <th scope="col" class="px-6 py-3 font-semibold">วันที่ / เวลา</th>
                                             <th scope="col" class="px-6 py-3 font-semibold">แพทย์</th>
                                             <th scope="col" class="px-6 py-3 font-semibold">อาการ / หมายเหตุ</th>
+                                            <th scope="col" class="px-6 py-3 font-semibold">สถานะข้อมูล</th>
                                             <th scope="col" class="px-6 py-3 font-semibold text-right">ดำเนินการ</th>
                                         </tr>
                                     </thead>
@@ -495,6 +496,10 @@ const hasMedicalHistory = computed(() => {
                                                     {{ visit.notes }}
                                                 </div>
                                             </td>
+                                            <td class="px-6 py-4">
+                                                <span v-if="visit.is_complete" class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full bg-emerald-100 text-emerald-800">ครบถ้วน</span>
+                                                <span v-else class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full bg-amber-100 text-amber-800" title="ยังไม่ได้กรอก Physical Exam, Diagnosis หรือ Treatment Procedures">รอข้อมูล</span>
+                                            </td>
                                             <td class="px-6 py-4 text-right">
                                                 <Link :href="route('admin.visits.show', visit.id)" class="text-emerald-600 hover:text-emerald-800 font-bold text-xs uppercase tracking-wide border border-emerald-100 px-3 py-1.5 rounded hover:bg-emerald-50 transition-all">
                                                     ดูรายละเอียด
@@ -502,7 +507,7 @@ const hasMedicalHistory = computed(() => {
                                             </td>
                                         </tr>
                                         <tr v-if="visits.length === 0">
-                                            <td colspan="4" class="px-6 py-12 text-center text-slate-500">
+                                            <td colspan="5" class="px-6 py-12 text-center text-slate-500">
                                                 ไม่พบประวัติการรักษา
                                             </td>
                                         </tr>
