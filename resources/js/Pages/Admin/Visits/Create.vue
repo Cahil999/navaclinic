@@ -260,7 +260,8 @@ const fetchTimeSlots = async () => {
         const response = await window.axios.get(route('api.available-slots'), {
             params: {
                 date: dateStr,
-                duration: form.duration_minutes
+                duration: form.duration_minutes,
+                is_admin: 1
             }
         });
 

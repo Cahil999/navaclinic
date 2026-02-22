@@ -249,6 +249,9 @@ class BookingController extends Controller
 
         // Use dynamic Open/Close times from Schedule
         $startOfDay = \Carbon\Carbon::parse($date . ' ' . $schedule->open_time);
+        if ($request->boolean('is_admin')) {
+            $startOfDay->subMinutes(120); // Add 4 slots before opening for admin
+        }
         $endOfDay = \Carbon\Carbon::parse($date . ' ' . $schedule->close_time);
 
         $slots = [];
@@ -257,7 +260,10 @@ class BookingController extends Controller
         $now = \Carbon\Carbon::now();
         $isToday = $now->format('Y-m-d') === $date;
 
-        while ($current->copy()->addMinutes($duration) <= $endOfDay) {
+        // For admin, allow 5 time slots after the last time. For user, allow 1 slot.
+        $extraMinutes = $request->boolean('is_admin') ? 150 : 30;
+        $endCheckBounds = $endOfDay->copy()->addMinutes($extraMinutes);
+        while ($current->copy()->addMinutes($duration) <= $endCheckBounds) {
             $slotStart = $current->copy();
 
             // Skip past times if today

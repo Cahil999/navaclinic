@@ -44,7 +44,8 @@ const fetchSlots = async () => {
         const res = await axios.get(route('api.available-slots'), {
             params: { 
                 date: form.appointment_date, 
-                duration: form.duration_minutes 
+                duration: form.duration_minutes,
+                is_admin: 1
             }
         });
         availableSlots.value = res.data;
