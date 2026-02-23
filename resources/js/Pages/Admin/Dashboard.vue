@@ -15,7 +15,7 @@ import { Bar, Pie } from 'vue-chartjs'
 import { computed, ref } from 'vue';
 import Pagination from '@/Components/Pagination.vue';
 import Modal from '@/Components/Modal.vue';
-import { ExclamationTriangleIcon } from '@heroicons/vue/24/solid';
+import MedicalHistoryIcons from '@/Components/MedicalHistoryIcons.vue';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend)
 
@@ -529,7 +529,7 @@ const hasMedicalHistory = (patient) => {
                                             <div v-if="booking.user">
                                                 <div class="flex items-center gap-1" :class="hasMedicalHistory(booking.user) ? 'font-bold' : ''">
                                                     {{ booking.user.name }}
-                                                    <ExclamationTriangleIcon v-if="hasMedicalHistory(booking.user)" class="w-4 h-4 text-red-500 animate-pulse" />
+                                                    <MedicalHistoryIcons :patient="booking.user" />
                                                 </div>
                                                 <div class="text-xs text-slate-500">{{ booking.user.phone_number || '-' }}</div>
                                             </div>
@@ -625,7 +625,7 @@ const hasMedicalHistory = (patient) => {
                                             <div v-if="visit.patient">
                                                 <div class="flex items-center gap-1" :class="hasMedicalHistory(visit.patient) ? 'font-bold' : ''">
                                                     {{ visit.patient.name }}
-                                                    <ExclamationTriangleIcon v-if="hasMedicalHistory(visit.patient)" class="w-4 h-4 text-red-500 animate-pulse" />
+                                                    <MedicalHistoryIcons :patient="visit.patient" />
                                                 </div>
                                                 <div class="text-xs text-slate-500">{{ visit.patient.phone_number || '-' }}</div>
                                             </div>

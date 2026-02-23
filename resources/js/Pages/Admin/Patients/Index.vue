@@ -11,9 +11,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue'; // Added PrimaryButt
 import InputError from '@/Components/InputError.vue'; // Added InputError
 import TextInput from '@/Components/TextInput.vue'; // Added TextInput
 import ThaiAddressInput from '@/Components/ThaiAddressInput.vue'; // Added ThaiAddressInput
-import { 
-    ExclamationTriangleIcon 
-} from '@heroicons/vue/24/solid';
+import MedicalHistoryIcons from '@/Components/MedicalHistoryIcons.vue';
 
 const props = defineProps({
     patients: {
@@ -258,7 +256,7 @@ const submitRegister = () => {
                                         <td class="px-6 py-4 font-medium text-slate-900">
                                             <div class="flex items-center gap-1">
                                                 {{ patient.name }}
-                                                <ExclamationTriangleIcon v-if="hasMedicalHistory(patient)" class="w-4 h-4 text-red-500 inline-block animate-pulse" />
+                                                <MedicalHistoryIcons :patient="patient" />
                                             </div>
                                             <br>
                                             <span 

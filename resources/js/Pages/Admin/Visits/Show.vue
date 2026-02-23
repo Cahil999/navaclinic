@@ -5,7 +5,7 @@ import BodyPartSelector from '@/Components/BodyPartSelector.vue';
 import Modal from '@/Components/Modal.vue';
 import { computed, ref } from 'vue';
 import { translateBodyPart } from '@/Utils/BodyPartTranslations';
-import { ExclamationTriangleIcon } from '@heroicons/vue/24/solid';
+import MedicalHistoryIcons from '@/Components/MedicalHistoryIcons.vue';
 
 const showBodyMapModal = ref(false);
 const viewMode = ref('compact');
@@ -116,7 +116,7 @@ const hasMedicalHistory = computed(() => {
                     <div>
                         <h1 class="text-base font-bold leading-tight flex items-center gap-2 text-slate-800">
                             {{ visit.patient.name }}
-                            <ExclamationTriangleIcon v-if="hasMedicalHistory" class="w-4 h-4 text-red-500 animate-pulse" />
+                            <MedicalHistoryIcons :patient="visit.patient" />
                             <Link :href="route('admin.patients.show', visit.patient.id)" class="text-[10px] flex items-center px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
                                 ดูประวัติ
                             </Link>
@@ -365,7 +365,7 @@ const hasMedicalHistory = computed(() => {
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">ผู้ป่วย (Patient)</p>
                             <h3 class="font-bold text-lg flex items-center gap-2 text-slate-900">
                                 {{ visit.patient.name }}
-                                <ExclamationTriangleIcon v-if="hasMedicalHistory" class="w-5 h-5 text-red-500 animate-pulse" />
+                                <MedicalHistoryIcons :patient="visit.patient" />
                                 <Link :href="route('admin.patients.show', visit.patient.id)" class="text-xs font-normal text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 transition-colors">
                                     ดูประวัติ
                                 </Link>

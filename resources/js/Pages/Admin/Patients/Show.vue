@@ -23,7 +23,7 @@ import {
     ArrowsPointingOutIcon,
     ArrowsPointingInIcon
 } from '@heroicons/vue/24/outline';
-import { ExclamationTriangleIcon as ExclamationTriangleIconSolid } from '@heroicons/vue/24/solid';
+import MedicalHistoryIcons from '@/Components/MedicalHistoryIcons.vue';
 import { translateBodyPart } from '@/Utils/BodyPartTranslations';
 
 const props = defineProps({
@@ -221,7 +221,7 @@ const hasMedicalHistory = computed(() => {
                         </Link>
                         <h2 class="font-bold text-2xl leading-tight flex items-center gap-2 text-slate-800">
                             {{ patient.name }}
-                            <ExclamationTriangleIconSolid v-if="hasMedicalHistory" class="w-6 h-6 text-red-500 animate-pulse" />
+                            <MedicalHistoryIcons :patient="patient" />
                         </h2>
                         <span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-full border border-indigo-100">
                             {{ patient.patient_id }}

@@ -16,7 +16,7 @@ const form = useForm({
 
 import { computed, ref } from 'vue';
 import Modal from '@/Components/Modal.vue';
-import { ExclamationTriangleIcon } from '@heroicons/vue/24/solid';
+import MedicalHistoryIcons from '@/Components/MedicalHistoryIcons.vue';
 
 const showConfirmModal = ref(false);
 const showImageModal = ref(false);
@@ -211,7 +211,7 @@ const hasMedicalHistory = (patient) => {
                                         <strong class="text-slate-800">ชื่อ:</strong> 
                                         <span :class="(booking.user && hasMedicalHistory(booking.user)) ? 'font-bold flex items-center gap-1' : ''">
                                             {{ booking.user ? booking.user.name : (booking.customer_name || 'Guest') }}
-                                            <ExclamationTriangleIcon v-if="booking.user && hasMedicalHistory(booking.user)" class="w-4 h-4 text-red-500 animate-pulse" />
+                                            <MedicalHistoryIcons v-if="booking.user" :patient="booking.user" />
                                         </span>
                                     </p>
                                     <p><strong class="text-slate-800">ข้อมูลติดต่อ:</strong> {{ booking.user ? booking.user.phone_number : (booking.customer_phone || '-') }}</p>
@@ -368,7 +368,7 @@ const hasMedicalHistory = (patient) => {
                             <span class="text-slate-500 text-xs">ผู้ป่วย</span>
                             <span class="font-bold flex items-center gap-1 text-slate-800">
                                 {{ booking.user ? booking.user.name : (booking.customer_name || 'Guest') }}
-                                <ExclamationTriangleIcon v-if="booking.user && hasMedicalHistory(booking.user)" class="w-4 h-4 text-red-500 animate-pulse" />
+                                <MedicalHistoryIcons v-if="booking.user" :patient="booking.user" />
                             </span>
                         </div>
                         <div class="flex justify-between items-center">

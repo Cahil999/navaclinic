@@ -8,7 +8,7 @@ import BodyPartSelector from '@/Components/BodyPartSelector.vue';
 import PainLevelSelector from '@/Components/PainLevelSelector.vue';
 import Swal from 'sweetalert2';
 import { translateBodyPart } from '@/Utils/BodyPartTranslations';
-import { ExclamationTriangleIcon } from '@heroicons/vue/24/solid';
+import MedicalHistoryIcons from '@/Components/MedicalHistoryIcons.vue';
 
 const props = defineProps({
     patient: Object,
@@ -427,7 +427,7 @@ const hasMedicalHistory = computed(() => {
                 </Link>
                 <h2 class="font-bold text-xl leading-tight flex items-center gap-2 text-slate-800">
                     New Visit: {{ patient.name }}
-                    <ExclamationTriangleIcon v-if="hasMedicalHistory" class="w-5 h-5 text-red-500 animate-pulse" />
+                    <MedicalHistoryIcons :patient="patient" />
                 </h2>
             </div>
         </template>

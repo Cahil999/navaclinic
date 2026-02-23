@@ -4,7 +4,7 @@ import { Head, useForm, Link } from '@inertiajs/vue3';
 import { ref, watch, computed } from 'vue';
 import axios from 'axios';
 import Calendar from '@/Components/Calendar.vue';
-import { ExclamationTriangleIcon } from '@heroicons/vue/24/solid';
+import MedicalHistoryIcons from '@/Components/MedicalHistoryIcons.vue';
 
 const props = defineProps({
     doctors: Array,
@@ -329,7 +329,7 @@ const hasMedicalHistory = (patient) => {
                                             >
                                                 <div class="font-medium flex items-center gap-1 text-gray-900">
                                                     {{ p.name }}
-                                                    <ExclamationTriangleIcon v-if="hasMedicalHistory(p)" class="w-4 h-4 text-red-500 animate-pulse" />
+                                                    <MedicalHistoryIcons :patient="p" />
                                                 </div>
                                                 <div class="text-xs text-gray-500">
                                                     {{ p.phone }} 
@@ -348,7 +348,7 @@ const hasMedicalHistory = (patient) => {
                                     <div>
                                         <div class="font-medium flex items-center gap-1 text-indigo-800">
                                             Selected: {{ selectedPatient.name }}
-                                            <ExclamationTriangleIcon v-if="hasMedicalHistory(selectedPatient)" class="w-4 h-4 text-red-500 animate-pulse" />
+                                            <MedicalHistoryIcons :patient="selectedPatient" />
                                         </div>
                                         <div class="text-sm text-indigo-600">{{ selectedPatient.phone }}</div>
                                     </div>
@@ -489,7 +489,7 @@ const hasMedicalHistory = (patient) => {
                                         <span class="text-gray-500">Patient:</span>
                                         <span class="font-medium" :class="(userType === 'existing' && hasMedicalHistory(selectedPatient)) ? 'flex items-center gap-1' : ''">
                                             {{ userType === 'existing' ? selectedPatient?.name : form.customer_name }}
-                                            <ExclamationTriangleIcon v-if="userType === 'existing' && hasMedicalHistory(selectedPatient)" class="w-4 h-4 text-red-500 inline animate-pulse" />
+                                            <MedicalHistoryIcons v-if="userType === 'existing'" :patient="selectedPatient" />
                                         </span>
                                     </div>
                                     <div class="flex justify-between">
