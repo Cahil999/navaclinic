@@ -98,6 +98,10 @@ const isSlotSelected = (slotTime) => {
     return current >= start && current < end;
 };
 
+const isAllDoctorsBusy = (slot) => {
+    return !slot.doctors || slot.doctors.length === 0 || slot.doctors.every(d => d.status !== 'available');
+};
+
 // --- Step 3: Doctor ---
 const selectDoctor = (doctor) => {
     form.doctor_id = doctor.id;
@@ -292,8 +296,13 @@ const selectedDoctorName = computed(() => {
                             <button 
                                 v-for="slot in availableSlots" 
                                 :key="slot.time" 
-                                @click="selectTime(slot)"
-                                :class="['py-3 px-4 rounded-lg font-medium transition-colors', isSlotSelected(slot.time) ? 'bg-indigo-600 text-white shadow-lg transform scale-105' : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100']"
+                                @click="!isAllDoctorsBusy(slot) && selectTime(slot)"
+                                :disabled="isAllDoctorsBusy(slot)"
+                                :class="[
+                                    'py-3 px-4 rounded-lg font-medium transition-colors',
+                                    isAllDoctorsBusy(slot) ? 'bg-gray-200 text-gray-400 opacity-50 cursor-not-allowed' :
+                                    (isSlotSelected(slot.time) ? 'bg-indigo-600 text-white shadow-lg transform scale-105' : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100')
+                                ]"
                             >
                                 {{ formatTime(slot.time) }}
                             </button>

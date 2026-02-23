@@ -293,8 +293,11 @@ const isSlotSelected = (slotTime) => {
     // Calculate difference in minutes
     const diff = (slotDate - visitDate) / (1000 * 60);
     
-    // Select if diff is 0, 30, or 60 (covering 90 mins total)
     return diff === 0 || diff === 30 || diff === 60;
+};
+
+const isAllDoctorsBusy = (slot) => {
+    return !slot.doctors || slot.doctors.length === 0 || slot.doctors.every(d => d.status !== 'available');
 };
 
 const closeModal = () => {
@@ -756,12 +759,13 @@ const hasMedicalHistory = computed(() => {
                                                             v-for="slot in timeSlots" 
                                                             :key="slot.time"
                                                             type="button"
-                                                            @click="selectTimeSlot(slot)"
-                                                            :class="{
-                                                                'bg-indigo-600 text-white shadow-md transform scale-105 font-bold ring-2 ring-indigo-300': isSlotSelected(slot.time),
-                                                                'bg-white text-slate-700 border border-slate-200 hover:border-indigo-400 hover:text-indigo-600': !isSlotSelected(slot.time)
-                                                            }"
-                                                            class="py-2.5 px-1 rounded-lg text-sm transition-all text-center"
+                                                            @click="!isAllDoctorsBusy(slot) && selectTimeSlot(slot)"
+                                                            :disabled="isAllDoctorsBusy(slot)"
+                                                            :class="[
+                                                                'py-2.5 px-1 rounded-lg text-sm transition-all text-center',
+                                                                isAllDoctorsBusy(slot) ? 'bg-slate-100 text-slate-400 opacity-50 cursor-not-allowed border border-slate-200' :
+                                                                (isSlotSelected(slot.time) ? 'bg-indigo-600 text-white shadow-md transform scale-105 font-bold ring-2 ring-indigo-300' : 'bg-white text-slate-700 border border-slate-200 hover:border-indigo-400 hover:text-indigo-600')
+                                                            ]"
                                                         >
                                                             {{ slot.time }}
                                                         </button>
