@@ -672,8 +672,8 @@ const doctorChartOptions = {
                                             <th class="px-6 py-3 text-right">รายได้</th>
                                             <th class="px-6 py-3 text-right">ค่ามือแพทย์รวม</th>
                                             <th class="px-6 py-3 text-right">ทิปรวม</th>
-                                            <th class="px-6 py-3 text-right">รวมรับสุทธิ</th>
-                                            <th class="px-6 py-3 text-right">รายได้สุทธิ</th>
+                                            <th class="px-6 py-3 text-right">รวมต้องจ่ายหมอ</th>
+                                            <th class="px-6 py-3 text-right">รายได้คงเหลือ</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100">
