@@ -357,37 +357,48 @@ const showWalkInDetails = computed(() => {
 });
 
 const handleMedicalNext = () => {
+    const requiredFields = [];
+    
     if (mode.value === 'walk_in') {
-        // Validation for Walk-in Mode
-        const requiredFields = [
+        // Validation for Walk-in Mode specific fields
+        requiredFields.push(
             { key: 'weight', label: 'น้ำหนัก (Weight)' },
             { key: 'height', label: 'ส่วนสูง (Height)' },
             { key: 'blood_pressure', label: 'ความดันโลหิต (Blood Pressure)' },
             { key: 'temperature', label: 'อุณหภูมิ (Temperature)' },
-            { key: 'pulse_rate', label: 'ชีพจร (Pulse Rate)' },
-            { key: 'symptoms', label: 'อาการสำคัญ (Chief Complaint)' }
-        ];
+            { key: 'pulse_rate', label: 'ชีพจร (Pulse Rate)' }
+        );
+    }
+    
+    // Both modes require symptoms
+    requiredFields.push({ key: 'symptoms', label: 'อาการสำคัญ (Chief Complaint)' });
 
-        const missingFields = requiredFields.filter(field => !form[field.key]);
+    const missingFields = requiredFields.filter(field => !form[field.key]);
 
-        if (missingFields.length > 0) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'กรุณากรอกข้อมูลให้ครบถ้วน',
-                html: `
-                    <div class="text-left text-sm">
-                        <p class="mb-2">กรุณาระบุข้อมูลต่อไปนี้ก่อนดำเนินการต่อ:</p>
-                        <ul class="list-disc list-inside text-rose-600 font-medium space-y-1">
-                            ${missingFields.map(f => `<li>${f.label}</li>`).join('')}
-                        </ul>
-                    </div>
-                `,
-                confirmButtonColor: '#4F46E5',
-                confirmButtonText: 'ตกลง'
-            });
-            return;
-        }
+    // Validate pain_areas
+    if (form.pain_areas.length === 0) {
+        missingFields.push({ label: 'ตำแหน่งที่ปวดอย่างน้อย 1 จุด (Pain Areas)' });
+    }
 
+    if (missingFields.length > 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'กรุณากรอกข้อมูลให้ครบถ้วน',
+            html: `
+                <div class="text-left text-sm">
+                    <p class="mb-2">กรุณาระบุข้อมูลต่อไปนี้ก่อนดำเนินการต่อ:</p>
+                    <ul class="list-disc list-inside text-rose-600 font-medium space-y-1">
+                        ${missingFields.map(f => `<li>${f.label}</li>`).join('')}
+                    </ul>
+                </div>
+            `,
+            confirmButtonColor: '#4F46E5',
+            confirmButtonText: 'ตกลง'
+        });
+        return;
+    }
+
+    if (mode.value === 'walk_in') {
         nextStep();
     } else {
         confirmVisit();

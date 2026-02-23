@@ -157,6 +157,16 @@ const updateParts = (newParts) => {
 };
 
 const submitForm = () => {
+    if (form.pain_areas.length === 0) {
+        Swal.fire({
+            title: 'ข้อมูลไม่ครบถ้วน',
+            text: 'กรุณาระบุตำแหน่งที่ปวดอย่างน้อย 1 จุด',
+            icon: 'warning',
+            confirmButtonText: 'ตกลง'
+        });
+        return;
+    }
+
     const routeName = props.isVisit ? 'admin.visits.treatment.store' : 'admin.treatment.store';
     const routeParam = entity.id;
     
