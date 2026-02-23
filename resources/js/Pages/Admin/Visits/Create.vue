@@ -110,22 +110,18 @@ const bmiColor = computed(() => {
 });
 
 const selectedParts = computed(() => {
-    return form.pain_areas.map(item => {
-        if (typeof item.area === 'object' && item.area) return item.area.area;
-        return item.area;
-    });
+    return form.pain_areas;
 });
 
-
-
 const updateParts = (newParts) => {
-    const removedItems = form.pain_areas.filter(item => !newParts.includes(item.area));
+    const newPartNames = newParts.map(item => typeof item === 'object' ? item.area : item);
+    const removedItems = form.pain_areas.filter(item => !newPartNames.includes(item.area));
     
     // Remove unselected
-    form.pain_areas = form.pain_areas.filter(item => newParts.includes(item.area));
+    form.pain_areas = form.pain_areas.filter(item => newPartNames.includes(item.area));
     
     // Add new selected
-    newParts.forEach(part => {
+    newPartNames.forEach(part => {
         if (!form.pain_areas.find(item => item.area === part)) {
             form.pain_areas.push({
                 area: part,
@@ -638,7 +634,7 @@ const hasMedicalHistory = computed(() => {
                                                             </div>
                                                             
                                                             <div class="flex items-center gap-2 flex-shrink-0">
-                                                                <button type="button" @click="updateParts(selectedParts.filter(p => p !== item.area))" class="text-xs font-medium text-rose-500 hover:text-rose-700 bg-rose-50 px-2 py-1 rounded hover:bg-rose-100 transition-colors">
+                                                                <button type="button" @click="updateParts(selectedParts.filter(p => p.area !== item.area))" class="text-xs font-medium text-rose-500 hover:text-rose-700 bg-rose-50 px-2 py-1 rounded hover:bg-rose-100 transition-colors">
                                                                     ลบ
                                                                 </button>
                                                             </div>

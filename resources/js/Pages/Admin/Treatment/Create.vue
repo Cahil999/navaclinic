@@ -81,19 +81,16 @@ const form = useForm({
     save_action: 'next',
 });
 
-// Computed property for BodyPartSelector (needs simple array of strings)
+// Computed property for BodyPartSelector (pass full objects to enable color coding based on pain level)
 const selectedParts = computed(() => {
-    return form.pain_areas.map(item => {
-        // Defensive check
-        if (typeof item.area === 'object' && item.area) return item.area.area;
-        return item.area;
-    });
+    return form.pain_areas;
 });
 
 // Handle updates from BodyPartSelector
 const updateParts = (newParts) => {
+    const newPartNames = newParts.map(item => typeof item === 'object' ? item.area : item);
     // Check for removed items
-    const removedItems = form.pain_areas.filter(item => !newParts.includes(item.area));
+    const removedItems = form.pain_areas.filter(item => !newPartNames.includes(item.area));
     
     if (removedItems.length > 0) {
         const Toast = Swal.mixin({
@@ -121,10 +118,10 @@ const updateParts = (newParts) => {
     }
 
     // 1. Remove areas that are no longer selected
-    form.pain_areas = form.pain_areas.filter(item => newParts.includes(item.area));
+    form.pain_areas = form.pain_areas.filter(item => newPartNames.includes(item.area));
     
     // 2. Add new areas that are selected but not in form data
-    newParts.forEach(part => {
+    newPartNames.forEach(part => {
         if (!form.pain_areas.find(item => item.area === part)) {
             // Push to add to end of list (Chronological order)
             form.pain_areas.push({
@@ -386,7 +383,7 @@ const bmiColor = computed(() => {
                                                     <button type="button" @click="handleSave('stay')" class="text-xs font-medium text-emerald-600 hover:text-emerald-800 bg-emerald-50 px-2 py-1 rounded hover:bg-emerald-100 transition-colors">
                                                         บันทึก
                                                     </button>
-                                                    <button type="button" @click="updateParts(selectedParts.filter(p => p !== item.area))" class="text-xs font-medium text-rose-500 hover:text-rose-700 bg-rose-50 px-2 py-1 rounded hover:bg-rose-100 transition-colors">
+                                                    <button type="button" @click="updateParts(selectedParts.filter(p => p.area !== item.area))" class="text-xs font-medium text-rose-500 hover:text-rose-700 bg-rose-50 px-2 py-1 rounded hover:bg-rose-100 transition-colors">
                                                         ลบ
                                                     </button>
                                                 </div>
