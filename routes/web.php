@@ -225,8 +225,6 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::put('/patients/{user}', [\App\Http\Controllers\Admin\PatientController::class, 'update'])->name('admin.patients.update');
         Route::get('/patients/{user}', [\App\Http\Controllers\Admin\PatientController::class, 'show'])->name('admin.patients.show');
 
-        // Assign Package to Patient
-        Route::post('/patients/packages', [\App\Http\Controllers\Admin\PatientPackageController::class, 'store'])->name('admin.patient-packages.store');
 
         // Visit Management
         Route::get('/visits/check-availability', [\App\Http\Controllers\Admin\VisitController::class, 'checkAvailability'])->name('admin.visits.check-availability');
@@ -273,16 +271,6 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('/settings/holidays', [\App\Http\Controllers\Admin\SettingController::class, 'storeHoliday'])->name('admin.settings.holidays.store');
         Route::delete('/settings/holidays/{holiday}', [\App\Http\Controllers\Admin\SettingController::class, 'destroyHoliday'])->name('admin.settings.holidays.destroy');
 
-        // Service Packages
-        Route::resource('packages', \App\Http\Controllers\Admin\ServicePackageController::class)->names([
-            'index' => 'admin.packages.index',
-            'create' => 'admin.packages.create',
-            'store' => 'admin.packages.store',
-            'show' => 'admin.packages.show',
-            'edit' => 'admin.packages.edit',
-            'update' => 'admin.packages.update',
-            'destroy' => 'admin.packages.destroy',
-        ]);
 
         // Services
         Route::resource('services', \App\Http\Controllers\Admin\ServiceController::class)->names([

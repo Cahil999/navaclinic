@@ -22,10 +22,7 @@ const props = defineProps({
         type: Object,
         default: () => ({ search: '' }),
     },
-    availablePackages: { // Added availablePackages prop
-        type: Array,
-        default: () => [],
-    },
+
     unregisteredBookings: {
         type: Array,
         default: () => [],
@@ -42,35 +39,6 @@ watch(search, debounce((value) => {
     );
 }, 300));
 
-// --- Sell Package Logic ---
-const showSellModal = ref(false);
-const selectedPatient = ref(null);
-const sellForm = useForm({
-    user_id: '',
-    service_package_id: '',
-});
-
-const openSellModal = (patient) => {
-    selectedPatient.value = patient;
-    sellForm.user_id = patient.id;
-    sellForm.service_package_id = '';
-    showSellModal.value = true;
-};
-
-const closeSellModal = () => {
-    showSellModal.value = false;
-    sellForm.reset();
-    selectedPatient.value = null;
-};
-
-const submitSellPackage = () => {
-    sellForm.post(route('admin.patient-packages.store'), {
-        onSuccess: () => {
-            closeSellModal();
-            // Optional: Show success notification or toast
-        },
-    });
-};
 
 // --- Register Patient Logic ---
 const showRegisterModal = ref(false);
@@ -289,14 +257,7 @@ const submitRegister = () => {
                                                 ดูรายละเอียด
                                             </Link>
 
-                                            <!-- Sell Package Button (Only for Registered Users) -->
-                                            <button 
-                                                v-if="patient.type === 'user'"
-                                                @click="openSellModal(patient)"
-                                                class="text-green-600 hover:text-green-800 font-bold transition-colors text-sm"
-                                            >
-                                                ขายแพ็คเกจ
-                                            </button>
+
                                         </td>
                                     </tr>
                                     <tr v-if="patients.data.length === 0">
@@ -629,41 +590,7 @@ const submitRegister = () => {
             </div>
         </Modal>
 
-        <!-- Sell Package Modal -->
-        <Modal :show="showSellModal" @close="closeSellModal">
-            <div class="p-6">
-                <h2 class="text-lg font-medium text-gray-900 mb-4">
-                    ขายแพ็คเกจให้กับ {{ selectedPatient?.name }}
-                </h2>
 
-                <div class="mt-4">
-                    <InputLabel for="package_select" value="เลือกแพ็คเกจ" />
-                    <select
-                        id="package_select"
-                        v-model="sellForm.service_package_id"
-                        class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                    >
-                        <option value="" disabled>กรุณาเลือกแพ็คเกจ...</option>
-                        <option v-for="pkg in availablePackages" :key="pkg.id" :value="pkg.id">
-                            {{ pkg.name }} - {{ Number(pkg.price).toLocaleString() }} THB ({{ pkg.total_sessions }} ครั้ง)
-                        </option>
-                    </select>
-                    <InputError :message="sellForm.errors.service_package_id" class="mt-2" />
-                </div>
-
-                <div class="mt-6 flex justify-end">
-                    <SecondaryButton @click="closeSellModal"> ยกเลิก </SecondaryButton>
-                    <PrimaryButton 
-                        class="ml-3 bg-green-600 hover:bg-green-700 focus:bg-green-700 active:bg-green-900 ring-green-500"
-                        :class="{ 'opacity-25': sellForm.processing }"
-                        :disabled="sellForm.processing || !sellForm.service_package_id"
-                        @click="submitSellPackage"
-                    >
-                        ยืนยันการขาย
-                    </PrimaryButton>
-                </div>
-            </div>
-        </Modal>
 
     </AuthenticatedLayout>
 </template>

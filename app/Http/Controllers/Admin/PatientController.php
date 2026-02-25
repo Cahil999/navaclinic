@@ -57,7 +57,6 @@ class PatientController extends Controller
         return Inertia::render('Admin/Patients/Index', [
             'patients' => $patients,
             'filters' => $request->only(['search']),
-            'availablePackages' => \App\Models\ServicePackage::where('is_active', true)->get(),
             'unregisteredBookings' => $unregisteredBookings,
         ]);
     }
