@@ -1,6 +1,7 @@
 <script setup>
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
+import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { useForm, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -60,15 +61,18 @@ const submit = () => {
             </div>
 
             <div v-show="form.is_on_leave" class="transition-all duration-300">
-                <InputLabel for="leave_reason" value="เหตุผลการขอพักงาน/ลา" />
-                <select 
+                <InputLabel for="leave_reason" value="เหตุผลการขอพักงาน/ลา (เลือกหรือพิมพ์เอง)" />
+                <TextInput 
                     id="leave_reason" 
                     v-model="form.leave_reason" 
+                    type="text"
                     class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full bg-white"
-                >
-                    <option value="" disabled>-- กรุณาเลือกเหตุผล --</option>
+                    placeholder="-- ระบุเหตุผล --"
+                    list="doctor_leave_reasons_list"
+                />
+                <datalist id="doctor_leave_reasons_list">
                     <option v-for="reason in leaveReasons" :key="reason.value" :value="reason.value">{{ reason.label }}</option>
-                </select>
+                </datalist>
                 <InputError :message="form.errors.leave_reason" class="mt-2" />
                 <p class="mt-2 text-sm text-amber-600 bg-amber-50 p-2 rounded border border-amber-100 italic">
                     ข้อควรระวัง: หากคุณเลือกพักงาน จะทำให้ผู้ดูแลระบบรับทราบและอาจส่งผลต่อการจัดตารางนัดหมาย

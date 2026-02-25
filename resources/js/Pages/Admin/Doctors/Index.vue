@@ -216,11 +216,18 @@ const deleteDoctor = () => {
                     </div>
 
                     <div class="mb-4" v-if="form.is_on_leave">
-                        <InputLabel for="leave_reason" value="เหตุผลการพักงาน" />
-                        <select id="leave_reason" v-model="form.leave_reason" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full">
-                            <option value="">เลือกเหตุผล</option>
+                        <InputLabel for="leave_reason" value="เหตุผลการพักงาน (เลือกหรือพิมพ์เอง)" />
+                        <TextInput 
+                            id="leave_reason" 
+                            v-model="form.leave_reason" 
+                            type="text" 
+                            class="mt-1 block w-full" 
+                            placeholder="ระบุเหตุผล"
+                            list="leave_reasons_list"
+                        />
+                        <datalist id="leave_reasons_list">
                             <option v-for="reason in leaveReasons" :key="reason.value" :value="reason.value">{{ reason.label }}</option>
-                        </select>
+                        </datalist>
                         <InputError :message="form.errors.leave_reason" class="mt-2" />
                     </div>
 
