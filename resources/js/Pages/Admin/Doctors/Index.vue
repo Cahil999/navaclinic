@@ -61,16 +61,47 @@ const closeModal = () => {
     editingDoctor.value = null;
 };
 
+import Swal from 'sweetalert2';
+
 const saveDoctor = () => {
-    if (editingDoctor.value) {
-        form.patch(route('admin.doctors.update', editingDoctor.value.id), {
-            onSuccess: () => closeModal(),
-        });
-    } else {
-        form.post(route('admin.doctors.store'), {
-            onSuccess: () => closeModal(),
-        });
-    }
+    Swal.fire({
+        title: 'ยืนยันการบันทึก',
+        text: 'คุณแน่ใจหรือไม่ที่ต้องการบันทึกข้อมูลแพทย์นี้?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'ใช่, บันทึกเลย',
+        cancelButtonText: 'ยกเลิก'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            if (editingDoctor.value) {
+                form.patch(route('admin.doctors.update', editingDoctor.value.id), {
+                    onSuccess: () => {
+                        closeModal();
+                        Swal.fire({
+                            title: 'บันทึกเรียบร้อย',
+                            text: 'แก้ไขข้อมูลแพทย์เรียบร้อยแล้ว',
+                            icon: 'success',
+                            confirmButtonText: 'ตกลง'
+                        });
+                    },
+                });
+            } else {
+                form.post(route('admin.doctors.store'), {
+                    onSuccess: () => {
+                        closeModal();
+                        Swal.fire({
+                            title: 'บันทึกเรียบร้อย',
+                            text: 'เพิ่มแพทย์ใหม่เรียบร้อยแล้ว',
+                            icon: 'success',
+                            confirmButtonText: 'ตกลง'
+                        });
+                    },
+                });
+            }
+        }
+    });
 };
 
 const confirmDelete = (doctor) => {

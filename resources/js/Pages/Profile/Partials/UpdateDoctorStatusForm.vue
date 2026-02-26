@@ -25,14 +25,35 @@ const leaveReasons = [
     { value: 'เหตุผลอื่นๆ', label: 'เหตุผลอื่นๆ ลากิจ ลาพักผ่อน' },
 ];
 
+import Swal from 'sweetalert2';
+
 const submit = () => {
-    form.patch(route('profile.doctor.status'), {
-        preserveScroll: true,
-        onSuccess: () => {
-            if (!form.is_on_leave) {
-                form.leave_reason = '';
-            }
-        },
+    Swal.fire({
+        title: 'ยืนยันการบันทึก',
+        text: 'คุณแน่ใจหรือไม่ที่ต้องการบันทึกสถานะการทำงาน?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'ใช่, บันทึกเลย',
+        cancelButtonText: 'ยกเลิก'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.patch(route('profile.doctor.status'), {
+                preserveScroll: true,
+                onSuccess: () => {
+                    if (!form.is_on_leave) {
+                        form.leave_reason = '';
+                    }
+                    Swal.fire({
+                        title: 'บันทึกเรียบร้อย',
+                        text: 'ข้อมูลสถานะของแพทย์ถูกอัปเดตแล้ว',
+                        icon: 'success',
+                        confirmButtonText: 'ตกลง'
+                    });
+                },
+            });
+        }
     });
 };
 </script>
