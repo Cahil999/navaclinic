@@ -16,6 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'staff' => \App\Http\Middleware\EnsureUserIsStaff::class,
         ]);
 
+        $middleware->validateCsrfTokens(except: [
+            'webhook/line',
+        ]);
+
         $middleware->web(append: [
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
