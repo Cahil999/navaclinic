@@ -452,7 +452,8 @@ const selectedDoctorName = computed(() => {
                             ชำระเงินมัดจำ (Deposit Payment)
                         </h4>
                         <p class="text-sm text-red-500 mb-4 ml-8">
-                            หากไม่สามารถชำระเงินมัดจำได้ กรุณาติดต่อ 062-278-1007
+                            หากไม่สามารถชำระเงินมัดจำได้ กรุณาติดต่อ 062-278-1007<br>
+                            <span class="text-xs">(If you are unable to pay the deposit, please contact 062-278-1007)</span>
                         </p>
                         
                         <div class="text-center mb-6">
