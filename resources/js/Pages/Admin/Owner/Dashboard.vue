@@ -779,10 +779,10 @@ const doctorChartOptions = {
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100">
-                                    <tr v-for="(visit, idx) in doctor.visits" :key="idx" class="hover:bg-slate-50 transition-colors">
+                                    <tr v-for="(visit, idx) in doctor.visits" :key="idx" @click="router.get(route('admin.visits.show', visit.id))" class="hover:bg-slate-100 cursor-pointer transition-colors">
                                         <td class="px-6 py-4 whitespace-nowrap">{{ visit.visit_date }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-slate-500">{{ visit.visit_time }}</td>
-                                        <td class="px-6 py-4 font-medium text-slate-900">{{ visit.patient_name }}</td>
+                                        <td class="px-6 py-4 font-medium text-indigo-600 hover:text-indigo-800 underline decoration-indigo-300 underline-offset-2">{{ visit.patient_name }}</td>
                                         <td class="px-6 py-4">{{ visit.duration_minutes }} นาที</td>
                                         <td class="px-6 py-4 text-center">
                                             <span v-if="visit.is_complete" class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full bg-emerald-100 text-emerald-800">ครบถ้วน</span>

@@ -296,6 +296,7 @@ class OwnerDashboardController extends Controller
                     $discAmt = ($type === 'percent' ? ($fee * ($val / 100)) : $val);
 
                     return [
+                        'id' => $visit->id,
                         'patient_name' => $visit->patient ? $visit->patient->name : 'Unknown',
                         'visit_date' => $visit->visit_date->format('d M Y'),
                         'visit_time' => $visit->visit_date->format('H:i'),
