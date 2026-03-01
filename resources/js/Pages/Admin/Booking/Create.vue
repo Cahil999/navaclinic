@@ -48,7 +48,7 @@ const form = useForm({
     doctor_id: '',
     appointment_date: '',
     start_time: '',
-    duration_minutes: 90,
+    duration_minutes: '',
     symptoms: '',
 });
 
@@ -145,7 +145,7 @@ const isSlotSelected = (slotTime) => {
 
     const start = toMinutes(form.start_time);
     const current = toMinutes(slotTime);
-    const end = start + 90; // duration is fixed 90
+    const end = start + form.duration_minutes; 
 
     return current >= start && current < end;
 };
@@ -400,7 +400,25 @@ const hasMedicalHistory = (patient) => {
 
                         <!-- Step 3: Time -->
                         <div v-if="currentStep === 3" class="w-full">
-                            <div v-if="loadingEx" class="flex justify-center py-12">
+                            <!-- Duration Selector -->
+                            <div class="mb-6 flex flex-col items-center">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">เลือกระยะเวลา (Select Duration)</label>
+                                <select 
+                                    v-model="form.duration_minutes"
+                                    @change="form.start_time = ''; fetchSlots()"
+                                    class="w-full max-w-xs rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                >
+                                    <option value="" disabled>--- เลือกระยะเวลา ---</option>
+                                    <option :value="60">1 ชั่วโมง</option>
+                                    <option :value="90">1 ชั่วโมง 30 นาที</option>
+                                    <option :value="120">2 ชั่วโมง</option>
+                                </select>
+                            </div>
+
+                            <div v-if="!form.duration_minutes" class="text-center py-12 text-gray-500 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                                กรุณาเลือกระยะเวลา เพื่อดูรอบเวลาที่หน้าจองได้
+                            </div>
+                            <div v-else-if="loadingEx" class="flex justify-center py-12">
                                 <svg class="animate-spin h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>

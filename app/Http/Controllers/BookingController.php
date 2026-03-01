@@ -22,7 +22,7 @@ class BookingController extends Controller
             'doctor_id' => 'nullable|exists:doctors,id',
             'appointment_date' => 'required|date|after_or_equal:today',
             'start_time' => 'required',
-            'duration_minutes' => 'required|in:30,60,90',
+            'duration_minutes' => 'required|in:30,60,90,120',
             'symptoms' => 'required|string',
             'payment_proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ];
@@ -210,7 +210,7 @@ class BookingController extends Controller
     {
         $request->validate([
             'date' => 'required|date|after_or_equal:today',
-            'duration' => 'required|integer|in:30,60,90',
+            'duration' => 'required|integer|in:30,60,90,120',
         ]);
 
         $date = $request->date;

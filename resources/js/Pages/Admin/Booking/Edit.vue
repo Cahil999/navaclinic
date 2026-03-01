@@ -272,9 +272,9 @@ const selectTime = (slot) => {
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700">ระยะเวลา (นาที)</label>
                                             <select v-model="form.duration_minutes" @change="fetchSlots" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                                <option :value="30">30 นาที</option>
-                                                <option :value="60">60 นาที</option>
-                                                <option :value="90">90 นาที</option>
+                                                <option :value="60">1 ชั่วโมง</option>
+                                                <option :value="90">1 ชั่วโมง 30 นาที</option>
+                                                <option :value="120">2 ชั่วโมง</option>
                                             </select>
                                         </div>
                                         <div>
