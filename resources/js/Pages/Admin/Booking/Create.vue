@@ -412,6 +412,10 @@ const hasMedicalHistory = (patient) => {
                                     <option :value="60">1 ชั่วโมง</option>
                                     <option :value="90">1 ชั่วโมง 30 นาที</option>
                                     <option :value="120">2 ชั่วโมง</option>
+                                    <option :value="150">2 ชั่วโมง 30 นาที</option>
+                                    <option :value="180">3 ชั่วโมง</option>
+                                    <option :value="210">3 ชั่วโมง 30 นาที</option>
+                                    <option :value="240">4 ชั่วโมง</option>
                                 </select>
                             </div>
 

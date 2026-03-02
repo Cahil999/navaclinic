@@ -64,7 +64,7 @@ class BookingController extends Controller
             'doctor_id' => 'nullable|exists:doctors,id',
             'appointment_date' => 'required|date|after_or_equal:today',
             'start_time' => 'required',
-            'duration_minutes' => 'required|in:30,60,90,120',
+            'duration_minutes' => 'required|in:30,60,90,120,150,180,210,240',
             'symptoms' => 'required|string',
             'user_type' => 'required|in:existing,guest',
             // If existing user
@@ -237,7 +237,7 @@ class BookingController extends Controller
             'doctor_id' => 'nullable|exists:doctors,id',
             'appointment_date' => 'required|date',
             'start_time' => 'required',
-            'duration_minutes' => 'required|in:30,60,90,120',
+            'duration_minutes' => 'required|in:30,60,90,120,150,180,210,240',
             'symptoms' => 'required|string',
             'price' => 'nullable|numeric|min:0',
         ]);

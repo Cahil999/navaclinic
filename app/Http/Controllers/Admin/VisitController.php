@@ -234,7 +234,7 @@ class VisitController extends Controller
         $request->validate([
             'doctor_id' => 'required|exists:doctors,id',
             'start_time' => 'required|date_format:H:i',
-            'duration_minutes' => 'required|integer|in:30,60,90,120',
+            'duration_minutes' => 'required|integer|in:30,60,90,120,150,180,210,240',
             'date' => 'required|date',
         ]);
 
