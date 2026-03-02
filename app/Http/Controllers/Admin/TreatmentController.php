@@ -188,10 +188,33 @@ class TreatmentController extends Controller
         $entity = $treatmentRecord->visit ?? $treatmentRecord->booking;
         $isVisit = (bool) $treatmentRecord->visit_id;
 
+        $proceduresSetting = \App\Models\Setting::where('key', 'treatment_procedures')->first();
+        $treatmentProcedures = $proceduresSetting ? $proceduresSetting->value : [
+            'นวดศีรษะ',
+            'นวดคอบ่าไหล่',
+            'นวดหลัง',
+            'นวดแขน',
+            'นวดขา',
+            'นวดฝ่าเท้า',
+            'ประคบร้อน',
+            'ประคบเย็น',
+            'ยืดกล้ามเนื้อ (Stretching)',
+            'ดัดดึงข้อต่อ (Mobilization)',
+            'ติดเทป (Kinesio Taping)',
+            'อัลตราซาวด์ (Ultrasound)',
+            'กระตุ้นไฟฟ้า (TENS)',
+            'เลเซอร์ (Laser Therapy)',
+            'ช็อกเวฟ (Shockwave Therapy)',
+            'ฝังเข็ม (Acupuncture)',
+            'ครอบแก้ว (Cupping)',
+            'กัวซา (Guasa)'
+        ];
+
         return Inertia::render('Admin/Treatment/Details', [
             'treatmentRecord' => $treatmentRecord,
             'entity' => $entity,
             'isVisit' => $isVisit,
+            'treatmentProcedures' => $treatmentProcedures,
         ]);
     }
 

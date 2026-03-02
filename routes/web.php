@@ -279,6 +279,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('/settings/schedule', [\App\Http\Controllers\Admin\SettingController::class, 'updateSchedule'])->name('admin.settings.schedule.update');
         Route::post('/settings/holidays', [\App\Http\Controllers\Admin\SettingController::class, 'storeHoliday'])->name('admin.settings.holidays.store');
         Route::delete('/settings/holidays/{holiday}', [\App\Http\Controllers\Admin\SettingController::class, 'destroyHoliday'])->name('admin.settings.holidays.destroy');
+        Route::post('/settings/autocomplete-options', [\App\Http\Controllers\Admin\SettingController::class, 'updateAutocompleteOptions'])->name('admin.settings.autocomplete-options.update');
 
 
         // Services

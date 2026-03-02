@@ -61,4 +61,19 @@ class SettingController extends Controller
 
         return redirect()->back()->with('success', 'ลบวันหยุดเรียบร้อยแล้ว');
     }
+
+    public function updateAutocompleteOptions(Request $request)
+    {
+        $validated = $request->validate([
+            'key' => 'required|string',
+            'options' => 'required|array',
+        ]);
+
+        \App\Models\Setting::updateOrCreate(
+            ['key' => $validated['key']],
+            ['value' => $validated['options']]
+        );
+
+        return redirect()->back()->with('success', 'ปรับปรุงตัวเลือกสำเร็จ');
+    }
 }
