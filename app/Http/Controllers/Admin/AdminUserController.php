@@ -15,7 +15,7 @@ class AdminUserController extends Controller
     {
         // Get all admins except the main owner
         $admins = User::where('is_admin', true)
-            ->where('email', '!=', 'cahil23377@gmail.com')
+            ->where('is_owner', false)
             ->latest()
             ->get();
 
@@ -64,7 +64,7 @@ class AdminUserController extends Controller
 
     public function destroy(User $admin)
     {
-        if ($admin->email !== 'cahil23377@gmail.com') {
+        if (!$admin->is_owner) {
             $admin->delete();
         }
 

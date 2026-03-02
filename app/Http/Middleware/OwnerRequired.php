@@ -16,7 +16,7 @@ class OwnerRequired
      */
     public function handle(Request $request, Closure $next)
     {
-        if (auth()->check() && auth()->user()->email !== 'cahil23377@gmail.com') {
+        if (auth()->check() && !auth()->user()->is_owner) {
             return redirect()->route('admin.dashboard')->with('error', 'Unauthorized access.');
         }
 

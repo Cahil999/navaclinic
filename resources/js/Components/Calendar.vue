@@ -47,19 +47,73 @@ const formatDate = (date) => {
     return `${year}-${month}-${day}`;
 };
 
+const isPastDate = (date) => {
+    if (!date) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date < today;
+};
+
+const isToday = (date) => {
+    if (!date) return false;
+    const today = new Date();
+    return date.getDate() === today.getDate() && 
+           date.getMonth() === today.getMonth() && 
+           date.getFullYear() === today.getFullYear();
+};
+
 const getStatus = (date) => {
     if (!date) return null;
+    if (isPastDate(date)) return 'past';
     const dateStr = formatDate(date);
-    if (!props.availability) return 'unknown';
-    return props.availability[dateStr]?.status || 'unknown';
+    if (!props.availability) return 'available';
+    return props.availability[dateStr]?.status || 'available';
+};
+
+const findNextAvailableDate = (clickedDate) => {
+    let checkDate = new Date(clickedDate);
+    checkDate.setDate(checkDate.getDate() + 1);
+    
+    // Check up to 30 days ahead
+    for (let i = 0; i < 30; i++) {
+        const nextStatus = getStatus(checkDate);
+        if (nextStatus !== 'past' && nextStatus !== 'closed' && nextStatus !== 'full') {
+            return checkDate;
+        }
+        checkDate.setDate(checkDate.getDate() + 1);
+    }
+    return null;
 };
 
 const selectDate = (date) => {
     if (!date) return;
     const status = getStatus(date);
-    // Allow selection if unknown (assuming available) or explicitly available
-    // Allow selection if unknown (assuming available) or explicitly available
-    if (status === 'full') return;
+    
+    if (status === 'past') {
+        return; // Disabled fully
+    }
+    
+    if (status === 'full' || status === 'closed') {
+        import('sweetalert2').then((module) => {
+            const Swal = module.default;
+            const nextAvail = findNextAvailableDate(date);
+            let text = 'ไม่มีหมอว่างในวันที่คุณเลือก หรือคลินิกปิดทำการ';
+            
+            if (nextAvail) {
+                 const nextStr = nextAvail.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+                 text += `\n\nวันที่ว่างถัดไปคือ: ${nextStr}`;
+            }
+            
+            Swal.fire({
+                icon: 'warning',
+                title: 'ไม่สามารถจองได้',
+                text: text,
+                confirmButtonText: 'ตกลง',
+                confirmButtonColor: '#4F46E5',
+            });
+        });
+        return;
+    }
     
     selectedDate.value = date;
     emit('dateSelected', formatDate(date));
@@ -113,22 +167,36 @@ onMounted(() => {
                         'w-full h-full flex flex-col items-center justify-center rounded-lg cursor-pointer transition-colors relative',
                         formatDate(day) === formatDate(selectedDate) ? 'bg-indigo-600 text-white' : 'hover:bg-gray-100',
                         getStatus(day) === 'full' ? 'opacity-50 cursor-not-allowed bg-gray-100' : '',
-                        getStatus(day) === 'closed' ? 'bg-red-50 text-red-500 cursor-not-allowed' : ''
+                        getStatus(day) === 'closed' ? 'bg-red-50 text-red-500 cursor-not-allowed' : '',
+                        getStatus(day) === 'past' ? 'opacity-30 cursor-not-allowed bg-gray-50' : '',
+                        isToday(day) && formatDate(day) !== formatDate(selectedDate) ? 'border-2 border-indigo-500 font-bold' : ''
                     ]"
                 >
-                    <span class="text-sm">{{ day.getDate() }}</span>
-                    <!-- Removed green dot -->
-                    <span v-if="getStatus(day) === 'full'" class="text-[10px] text-red-500 font-bold">เต็ม</span>
-                    <span v-if="getStatus(day) === 'closed'" class="text-[10px] text-red-500 font-bold">ปิด</span>
+                    <span class="text-sm z-10">{{ day.getDate() }}</span>
+                    <span v-if="getStatus(day) === 'full'" class="text-[10px] text-red-500 font-bold z-10">เต็ม</span>
+                    <span v-if="getStatus(day) === 'closed'" class="text-[10px] text-red-500 font-bold z-10">ปิด</span>
+                    <span v-if="isToday(day) && formatDate(day) !== formatDate(selectedDate)" class="absolute top-1 right-1 w-2 h-2 bg-indigo-500 rounded-full"></span>
                 </div>
             </div>
         </div>
 
         <!-- Legend -->
-        <div class="mt-4 border-t pt-3 flex flex-col sm:flex-row items-center justify-center text-xs text-gray-500">
+        <div class="mt-4 border-t pt-3 flex flex-wrap items-center justify-center gap-4 text-xs text-gray-500">
             <div class="flex items-center">
                 <span class="w-3 h-3 bg-red-50 rounded-sm mr-1 border border-red-200"></span>
                 <span>ร้านปิด (Closed)</span>
+            </div>
+            <div class="flex items-center">
+                <span class="w-3 h-3 bg-gray-100 rounded-sm mr-1 border border-gray-200"></span>
+                <span>คิวเต็ม (Full)</span>
+            </div>
+            <div class="flex items-center">
+                <span class="w-3 h-3 bg-gray-50 rounded-sm mr-1 opacity-30"></span>
+                <span>วันที่ผ่านมา (Past)</span>
+            </div>
+            <div class="flex items-center">
+                <span class="w-2 h-2 bg-indigo-500 rounded-full mr-1"></span>
+                <span>วันนี้ (Today)</span>
             </div>
         </div>
     </div>

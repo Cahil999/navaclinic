@@ -23,6 +23,8 @@ class User extends Authenticatable
         'password',
         'is_admin',
         'is_doctor',
+        'is_owner',
+        'is_client',
         'phone_number',
         'id_card_number',
         'date_of_birth',
@@ -62,6 +64,8 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_admin' => 'boolean',
             'is_doctor' => 'boolean',
+            'is_owner' => 'boolean',
+            'is_client' => 'boolean',
         ];
     }
     public function bookings()

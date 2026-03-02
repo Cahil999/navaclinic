@@ -21,7 +21,7 @@ defineProps({
 });
 
 const user = usePage().props.auth.user;
-const isOwner = user.email === 'cahil23377@gmail.com';
+const isOwner = user.is_owner;
 
 const userRoleNames = computed(() => {
     let roles = [];
