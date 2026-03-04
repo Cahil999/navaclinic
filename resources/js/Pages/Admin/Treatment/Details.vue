@@ -300,10 +300,41 @@ const submit = () => {
 };
 
 const showConfirmationDialog = () => {
+    let appointmentDate = props.isVisit 
+        ? new Date(props.entity.visit_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) 
+        : new Date(props.entity.appointment_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    let summaryHtml = `
+        <div class="text-left mt-4 text-sm bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-inner">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 text-center border-b border-slate-200 pb-2">สรุปข้อมูล Visit</h4>
+            <div class="flex justify-between items-start py-2 border-b border-slate-200/60">
+                <span class="text-slate-500 font-bold shrink-0">อาการ (Dx/CC):</span>
+                <span class="text-indigo-700 text-right font-bold max-w-[65%] line-clamp-2">${form.diagnosis || '-'}</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-slate-200/60">
+                <span class="text-slate-500 font-bold">วันนัด:</span>
+                <span class="text-slate-800 font-bold">${appointmentDate}</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-slate-200/60">
+                <span class="text-slate-500 font-bold">ยอดชำระสุทธิ:</span>
+                <span class="text-emerald-600 font-black text-base">${Number(form.price).toLocaleString()} ฿</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-slate-200/60">
+                <span class="text-slate-500 font-bold">ค่ามือหมอ:</span>
+                <span class="text-slate-800 font-black">${Number(form.doctor_commission || 0).toLocaleString()} ฿</span>
+            </div>
+            <div class="flex justify-between items-center pt-2">
+                <span class="text-slate-500 font-bold">ค่าทิป:</span>
+                <span class="text-amber-600 font-black">${Number(form.tip || 0).toLocaleString()} ฿</span>
+            </div>
+        </div>
+        <p class="mt-4 text-sm text-slate-600 font-medium pb-2">ต้องการดำเนินการอย่างไรต่อ?</p>
+    `;
+
     Swal.fire({
-        title: 'ยืนยันแผนการรักษา',
-        text: 'ต้องการดำเนินการอย่างไรต่อ?',
-        icon: 'question',
+        title: 'ยืนยันจบ Visit',
+        html: summaryHtml,
+        icon: 'info',
         showDenyButton: true,
         showCancelButton: true,
         confirmButtonText: 'บันทึกและกลับ',
