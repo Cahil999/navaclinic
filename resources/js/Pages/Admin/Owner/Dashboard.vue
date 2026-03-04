@@ -84,6 +84,7 @@ const updateDashboard = () => {
         // Preserve doctor filters
         doctor_period: doctorPeriod.value,
         doctor_date: doctorDate.value,
+        show_hidden: props.show_hidden ? 1 : undefined,
     }, {
         preserveState: true,
         preserveScroll: true,
@@ -102,6 +103,7 @@ const updateDoctorStats = () => {
         // Update doctor filters
         doctor_period: doctorPeriod.value,
         doctor_date: doctorDate.value,
+        show_hidden: props.show_hidden ? 1 : undefined,
     }, {
         preserveState: true,
         preserveScroll: true,
@@ -121,6 +123,7 @@ const updateChart = () => {
         // Preserve doctor filters
         doctor_period: doctorPeriod.value,
         doctor_date: doctorDate.value,
+        show_hidden: props.show_hidden ? 1 : undefined,
     }, {
         preserveState: true,
         preserveScroll: true,
