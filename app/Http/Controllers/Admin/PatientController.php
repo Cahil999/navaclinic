@@ -143,9 +143,12 @@ class PatientController extends Controller
         ]);
 
         // Generate HN
-        $datePart = now()->format('dmY');
-        $countToday = User::whereDate('created_at', now()->toDateString())->count() + 1;
-        $hnId = 'HN-' . $datePart . '-' . str_pad($countToday, 4, '0', STR_PAD_LEFT);
+        // Format: HN+YY+XXXX (YY = 2-digit Thai year, XXXX = running number for that year)
+        $thaiYear = (int) date('Y') + 543;
+        $yy = substr((string) $thaiYear, -2);
+
+        $countThisYear = User::whereYear('created_at', date('Y'))->whereNotNull('patient_id')->count() + 1;
+        $hnId = 'HN' . $yy . str_pad($countThisYear, 4, '0', STR_PAD_LEFT);
 
         // Generate dummy email if not provided (required by DB)
         $email = $validated['phone_number']
@@ -226,10 +229,12 @@ class PatientController extends Controller
             // Create new User
             // We'll use phone number as email if email is not available or make a dummy one?
             // Generate Patient ID (HN)
-            // Format: HN-ddmmyyyy-XXXX (e.g., HN-21012026-0001)
-            $datePart = now()->format('dmY');
-            $countToday = User::whereDate('created_at', now()->toDateString())->count() + 1;
-            $hnId = 'HN-' . $datePart . '-' . str_pad($countToday, 4, '0', STR_PAD_LEFT);
+            // Format: HN+YY+XXXX (YY = 2-digit Thai year, XXXX = running number for that year)
+            $thaiYear = (int) date('Y') + 543;
+            $yy = substr((string) $thaiYear, -2);
+
+            $countThisYear = User::whereYear('created_at', date('Y'))->whereNotNull('patient_id')->count() + 1;
+            $hnId = 'HN' . $yy . str_pad($countThisYear, 4, '0', STR_PAD_LEFT);
 
             // Generate dummy email if needed (required by DB)
             $email = $validated['phone_number']
@@ -286,12 +291,15 @@ class PatientController extends Controller
 
         $firstBookingDate = \Carbon\Carbon::parse($firstBooking->created_at);
 
-        $monthlySequence = \App\Models\Booking::whereYear('created_at', $firstBookingDate->year)
-            ->whereMonth('created_at', $firstBookingDate->month)
+        // Format: HN+YY+XXXX (YY = 2-digit Thai year, XXXX = running number for that year)
+        $thaiYear = (int) $firstBookingDate->year + 543;
+        $yy = substr((string) $thaiYear, -2);
+
+        $yearlySequence = \App\Models\Booking::whereYear('created_at', $firstBookingDate->year)
             ->where('id', '<=', $firstBooking->id)
             ->count();
 
-        $hnId = 'HN-' . $firstBookingDate->format('dmY') . '-' . str_pad($monthlySequence, 4, '0', STR_PAD_LEFT);
+        $hnId = 'HN' . $yy . str_pad($yearlySequence, 4, '0', STR_PAD_LEFT);
 
         // Construct a "Fake" patient object
         $guestPatient = [

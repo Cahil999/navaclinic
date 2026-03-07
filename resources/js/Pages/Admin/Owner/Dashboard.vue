@@ -141,6 +141,14 @@ const toggleVisibility = (visitId, event) => {
     }
 };
 
+const printDoctorDetails = () => {
+    document.body.classList.add('printing-doctors');
+    window.print();
+    setTimeout(() => {
+        document.body.classList.remove('printing-doctors');
+    }, 1000);
+};
+
 const formatCurrency = (value) => {
     return new Intl.NumberFormat('th-TH', {
         style: 'currency',
@@ -676,9 +684,17 @@ const doctorChartOptions = {
                 </div>
 
                 <!-- Full Width Doctor Breakdown -->
-                <div class="space-y-6">
-                    <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
-                        <h3 class="text-lg font-bold text-slate-800">รายละเอียดผลงานแพทย์</h3>
+                <div id="doctor-performance-section" class="space-y-6">
+                    <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 print:hidden">
+                        <div class="flex items-center gap-3">
+                            <h3 class="text-lg font-bold text-slate-800">รายละเอียดผลงานแพทย์</h3>
+                            <button @click="printDoctorDetails" class="inline-flex items-center justify-center p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-md transition-colors shadow-sm border border-slate-200" title="พิมพ์รายละเอียดผลงานแพทย์">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                </svg>
+                                <span>พิมพ์</span>
+                            </button>
+                        </div>
                         <div class="flex flex-col md:flex-row items-center gap-2 w-full xl:w-auto">
                             <!-- Doctor Stats Period -->
                              <select v-model="doctorPeriod" @change="updateDoctorStats" class="rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1">
@@ -702,13 +718,19 @@ const doctorChartOptions = {
                     <!-- Doctor Summary Table -->
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-slate-200">
                         <div class="p-6 border-b border-slate-100">
-                             <h4 class="text-lg font-bold text-slate-800 mb-4">สรุปยอดรวมแพทย์ ({{ doctor_stats.length }} ท่าน)</h4>
+                             <div class="flex justify-between items-center mb-4">
+                                 <h4 class="text-lg font-bold text-slate-800">สรุปยอดรวมแพทย์ ({{ doctor_stats.length }} ท่าน)</h4>
+                                 <div class="hidden print:block text-slate-500 text-sm">
+                                     ช่วงเวลา: {{ filters.startDate }} ถึง {{ filters.endDate }}
+                                 </div>
+                             </div>
                              <div class="overflow-x-auto">
                                 <table class="w-full text-sm text-left text-slate-600">
                                     <thead class="text-xs text-slate-700 uppercase bg-slate-50 border-b border-slate-100">
                                         <tr>
                                             <th class="px-6 py-3">อันดับ</th>
                                             <th class="px-6 py-3">แพทย์</th>
+                                            <th class="px-6 py-3 text-center">สถานะงาน</th>
                                             <th class="px-6 py-3 text-right">จำนวนเคส</th>
                                             <th class="px-6 py-3 text-right">รายได้</th>
                                             <th class="px-6 py-3 text-right">ค่ามือแพทย์รวม</th>
@@ -721,6 +743,14 @@ const doctorChartOptions = {
                                         <tr v-for="(doctor, index) in [...doctor_stats].sort((a,b) => (b.total_doctor_fee + b.total_tip) - (a.total_doctor_fee + a.total_tip))" :key="doctor.doctor_id" class="hover:bg-slate-50">
                                             <td class="px-6 py-4">{{ index + 1 }}</td>
                                             <td class="px-6 py-4 font-medium text-slate-900">{{ doctor.doctor_name }}</td>
+                                            <td class="px-6 py-4 text-center">
+                                                <span v-if="doctor.visits.filter(v => !v.is_complete).length > 0" class="inline-flex items-center px-2 py-1 bg-rose-50 text-rose-600 rounded-md text-xs font-bold ring-1 ring-inset ring-rose-500/10 whitespace-nowrap">
+                                                    ยังไม่ครบ ({{ doctor.visits.filter(v => !v.is_complete).length }})
+                                                </span>
+                                                <span v-else class="inline-flex items-center px-2 py-1 bg-emerald-50 text-emerald-600 rounded-md text-xs font-bold ring-1 ring-inset ring-emerald-500/10 whitespace-nowrap">
+                                                    ครบถ้วน
+                                                </span>
+                                            </td>
                                             <td class="px-6 py-4 text-right">{{ doctor.visits.length }}</td>
                                             <td class="px-6 py-4 text-right font-bold text-slate-700">{{ formatCurrency(doctor.total_revenue) }}</td>
                                             <td class="px-6 py-4 text-right font-bold text-emerald-600">{{ formatCurrency(doctor.total_doctor_fee) }}</td>
@@ -728,13 +758,13 @@ const doctorChartOptions = {
                                             <td class="px-6 py-4 text-right font-bold text-indigo-700">{{ formatCurrency(doctor.total_doctor_fee + doctor.total_tip) }}</td>
                                             <td class="px-6 py-4 text-right font-bold text-purple-700">{{ formatCurrency(doctor.total_revenue - (doctor.total_doctor_fee + doctor.total_tip)) }}</td>
                                         </tr>
-                                         <tr v-if="doctor_stats.length === 0">
-                                            <td colspan="8" class="px-6 py-8 text-center text-slate-500 italic">ไม่พบข้อมูลสำหรับช่วงเวลาที่เลือก</td>
+                                     <tr v-if="doctor_stats.length === 0">
+                                            <td colspan="9" class="px-6 py-8 text-center text-slate-500 italic">ไม่พบข้อมูลสำหรับช่วงเวลาที่เลือก</td>
                                         </tr>
                                     </tbody>
                                     <tfoot v-if="doctor_stats.length > 0" class="bg-slate-50 font-bold text-slate-900">
                                         <tr>
-                                            <td colspan="2" class="px-6 py-4 text-right">รวมทั้งหมด</td>
+                                            <td colspan="3" class="px-6 py-4 text-right">รวมทั้งหมด</td>
                                             <td class="px-6 py-4 text-right">{{ doctor_stats.reduce((acc, doc) => acc + doc.visits.length, 0) }}</td>
                                             <td class="px-6 py-4 text-right text-slate-800">{{ formatCurrency(doctor_stats.reduce((acc, doc) => acc + doc.total_revenue, 0)) }}</td>
                                             <td class="px-6 py-4 text-right text-emerald-700">{{ formatCurrency(doctor_stats.reduce((acc, doc) => acc + doc.total_doctor_fee, 0)) }}</td>
@@ -789,7 +819,7 @@ const doctorChartOptions = {
                             </div>
 
                             <!-- Chart showing trends -->
-                            <div class="h-64 w-full mb-6">
+                            <div class="h-64 w-full mb-6 print:hidden">
                                 <Line :data="getDoctorChartData(doctor.visits)" :options="doctorChartOptions" />
                             </div>
                         </div>
@@ -817,8 +847,8 @@ const doctorChartOptions = {
                                         <td class="px-6 py-4 font-medium text-indigo-600 hover:text-indigo-800 underline decoration-indigo-300 underline-offset-2">{{ visit.patient_name }}</td>
                                         <td class="px-6 py-4">{{ visit.duration_minutes }} นาที</td>
                                         <td class="px-6 py-4 text-center">
-                                            <span v-if="visit.is_complete" class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full bg-emerald-100 text-emerald-800">ครบถ้วน</span>
-                                            <span v-else class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full bg-amber-100 text-amber-800" title="ยังไม่ได้กรอก Physical Exam, Diagnosis หรือ Treatment Procedures">รอข้อมูล</span>
+                                            <span v-if="visit.is_complete" class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full bg-emerald-100 text-emerald-800 whitespace-nowrap">ครบถ้วน</span>
+                                            <span v-else class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full bg-amber-100 text-amber-800 whitespace-nowrap" title="ยังไม่ได้กรอก Physical Exam, Diagnosis หรือ Treatment Procedures">รอข้อมูล</span>
                                         </td>
                                         <td class="px-6 py-4 text-right font-medium text-slate-900">{{ formatCurrency(visit.treatment_fee) }}</td>
                                         <td class="px-6 py-4 text-right font-medium text-rose-500">{{ visit.discount > 0 ? formatCurrency(visit.discount) : '-' }}</td>
@@ -846,3 +876,101 @@ const doctorChartOptions = {
         </div>
     </AuthenticatedLayout>
 </template>
+
+<style>
+@media print {
+    @page {
+        margin: 10mm;
+        size: A4 portrait;
+    }
+
+    body {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        background-color: white !important;
+    }
+
+    /* Hide layout sidebars, headers, footers */
+    body.printing-doctors nav, 
+    body.printing-doctors header, 
+    body.printing-doctors footer {
+        display: none !important;
+    }
+
+    /* Hide all other direct children of max-w-7xl EXCEPT the doctor performance section */
+    body.printing-doctors .max-w-7xl > *:not(#doctor-performance-section) {
+        display: none !important;
+    }
+
+    /* Remove padding/margin from wrappers to maximize print space */
+    body.printing-doctors .py-12 {
+        padding: 0 !important;
+    }
+    body.printing-doctors .max-w-7xl {
+        padding: 0 !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+    }
+    body.printing-doctors main, 
+    body.printing-doctors .min-h-screen {
+        padding: 0 !important;
+        margin: 0 !important;
+        min-height: 0 !important;
+        background: white !important;
+    }
+
+    /* Polish the cards for print */
+    body.printing-doctors .bg-white {
+        box-shadow: none !important;
+        border: 1px solid #cbd5e1 !important;
+        margin-bottom: 24px !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    /* Fix table printing and overflow */
+    body.printing-doctors .overflow-x-auto {
+        overflow: visible !important;
+    }
+
+    body.printing-doctors table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        table-layout: fixed !important;
+    }
+
+    body.printing-doctors th, 
+    body.printing-doctors td {
+        padding: 4px 4px !important;
+        font-size: 10px !important;
+        word-break: break-word !important;
+    }
+
+    body.printing-doctors th {
+        background-color: #f8fafc !important;
+        border-bottom: 2px solid #e2e8f0 !important;
+    }
+
+    body.printing-doctors tbody tr {
+        border-bottom: 1px solid #f1f5f9 !important;
+    }
+
+    body.printing-doctors tbody tr:nth-child(even) {
+        background-color: #fcfcfc !important;
+    }
+
+    body.printing-doctors .print\:hidden {
+        display: none !important;
+    }
+    
+    body.printing-doctors .print\:block {
+        display: block !important;
+    }
+
+    /* Better rendering for status badges in print */
+    body.printing-doctors .rounded-full,
+    body.printing-doctors .rounded-md {
+        border: 0.5px solid rgba(0,0,0,0.1) !important;
+    }
+}
+</style>

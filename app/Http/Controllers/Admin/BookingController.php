@@ -175,9 +175,12 @@ class BookingController extends Controller
                     $email = 'guest_' . preg_replace('/[^0-9]/', '', $validated['customer_phone']) . '_' . uniqid() . '@navaclinic.com';
                 }
 
-                $datePart = now()->format('dmY');
-                $countToday = \App\Models\User::whereDate('created_at', now()->toDateString())->count() + 1;
-                $hnId = 'HN-' . $datePart . '-' . str_pad($countToday, 4, '0', STR_PAD_LEFT);
+                // Format: HN+YY+XXXX (YY = 2-digit Thai year, XXXX = running number for that year)
+                $thaiYear = (int) date('Y') + 543;
+                $yy = substr((string) $thaiYear, -2);
+
+                $countThisYear = \App\Models\User::whereYear('created_at', date('Y'))->whereNotNull('patient_id')->count() + 1;
+                $hnId = 'HN' . $yy . str_pad($countThisYear, 4, '0', STR_PAD_LEFT);
 
                 $newUser = \App\Models\User::create([
                     'name' => $validated['customer_name'],
