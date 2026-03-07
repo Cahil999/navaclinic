@@ -26,11 +26,15 @@ class LineWebhookController extends Controller
                     // Linked user
                     if ($text === 'วันนัด') {
                         $this->sendBookings($replyToken, $user);
+                    } elseif ($text === 'จอง' || $text === 'จองคิว') {
+                        $this->replyMessage($replyToken, "สามารถจองคิวได้ที่ลิงก์นี้เลยครับ 👇\n" . url('/booking'));
                     }
                 } else {
                     // Not linked user
                     if ($text === 'วันนัด') {
                         $this->replyMessage($replyToken, 'ยังไม่มีข้อมูลในระบบ กรุณากรอกเบอร์โทรศัพท์เพื่อเชื่อมบัญชีที่มีในระบบ');
+                    } elseif ($text === 'จอง' || $text === 'จองคิว') {
+                        $this->replyMessage($replyToken, "สามารถจองคิวได้ที่ลิงก์นี้เลยครับ 👇\n" . url('/booking'));
                     } else {
                         // Check if text could be a phone number (e.g., 9-10 digits)
                         $phone = preg_replace('/[^0-9]/', '', $text);
@@ -95,7 +99,7 @@ class LineWebhookController extends Controller
             ->get();
 
         if ($bookings->isEmpty()) {
-            $this->replyMessage($replyToken, 'คุณไม่มีวันนัดที่กำลังจะมาถึงครับ');
+            $this->replyMessage($replyToken, "คุณไม่มีวันนัดที่กำลังจะมาถึงครับ\n\nสามารถจองคิวใหม่ได้ที่ลิงก์นี้เลยครับ 👇\n" . url('/booking'));
             return;
         }
 
@@ -223,6 +227,25 @@ class LineWebhookController extends Controller
                             'contents' => $contents
                         ]
                     ]
+                ],
+                'footer' => [
+                    'type' => 'box',
+                    'layout' => 'vertical',
+                    'spacing' => 'sm',
+                    'contents' => [
+                        [
+                            'type' => 'button',
+                            'style' => 'primary',
+                            'height' => 'sm',
+                            'color' => '#0284C7',
+                            'action' => [
+                                'type' => 'uri',
+                                'label' => 'จองคิว',
+                                'uri' => url('/booking')
+                            ]
+                        ]
+                    ],
+                    'flex' => 0
                 ]
             ]
         ];
